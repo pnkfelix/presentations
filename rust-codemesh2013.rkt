@@ -54,6 +54,18 @@
        (item "C and C++ dominate this space")
        (item "Systems programmers care about the last 10-15% of potential performance"))
  
+(slide #:title "Unsafe aspects of C"
+       (item "Dangling pointers")
+       (item "Null pointer dereferences")
+       (item "Buffer overflows, array bounds errors")
+       (item "Format string and argument mismatch")
+       (item "Double frees"))
+
+(slide #:title "Tool: Sound Type Checking"
+       (item "``Well-typed programs don't go wrong.''")
+       'next
+       (item "Revised: Well-typed programs can assist in blame assignment.")
+       )
 
 (define cake-c++-example
   '((includes  "#include <iostream>")
