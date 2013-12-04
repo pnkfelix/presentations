@@ -1,6 +1,7 @@
 #lang racket
 ;#lang slideshow
 (require slideshow)
+(require "rust-codemesh2013-common.rkt")
 
 (string-append "Programming languages are in constant development, "
                "responding to the changing nature of computing "
@@ -12,22 +13,6 @@
 
 (current-main-font "Open Sans")
 
-;; string -> [listof string)
-(define (fragment-at-newlines str)
-  ;; [listof char] [listof char] -> [listof [listof char]]
-  (define (fragment accum chars)
-    (cond ((null? chars) 
-           (cond ((null? accum) '())
-                 (else (list (reverse accum)))))
-          (else 
-           (cond ((char=? (car chars) #\newline)
-                  (cons (reverse accum) (fragment '() (cdr chars))))
-                 (else
-                  (fragment (cons (car chars) accum) (cdr chars)))))))
-  (map list->string (fragment '() (string->list str))))
-                       
-(define (tt/nl string)
-  (apply vl-append (map tt (fragment-at-newlines string))))
 
 ; (slide (t "Hello World"))
 ; (slide (t "fn main() { println!(\"Hello World\"); }"))
