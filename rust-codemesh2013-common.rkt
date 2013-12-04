@@ -1,5 +1,6 @@
 #lang racket
 (require slideshow)
+(provide outline tt/nl)
 
 (define outline
   (let ((sub-para (lambda l (para #:width (* 3/4 (current-para-width)) l))))
