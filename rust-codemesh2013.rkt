@@ -2,6 +2,14 @@
 ;#lang slideshow
 (require slideshow)
 
+(string-append "Programming languages are in constant development, "
+               "responding to the changing nature of computing "
+               "problems and hardware infrastructure. ")
+
+#;(begin 
+  (set! actual-screen-w 800)
+  (set! actual-screen-h 600))
+
 (current-main-font "Open Sans")
 
 ;; string -> [listof string)
@@ -46,6 +54,8 @@
 
 (slide (scale (bitmap "rust_logo-only_RGB.png") 0.3)
        (scale (bitmap "mozilla_wordmark_CS4.png") 0.1))
+
+ ;; TODO: Overview of what Rust offers (one slide), then transition to the "Why"
 
 (slide #:title "Motivation"
        (item "Why Mozilla is investing in a new programming language")
@@ -119,6 +129,8 @@
        (subitem "Often must think more about data representation")
        (subitem "Make choices about memory allocation")
        (item "But in safe blocks of code, compiler checks our assumptions"))
+
+
 
 (outline 'two)
 
@@ -716,6 +728,8 @@ RUSTC_ERROR_MSG
        (t "Concurrency"))
 
 
+;; AHHH XXX FIXME
+
 (define dherman-slide-factor 0.5)
 (slide (scale (bitmap "dherman-slide29.png") dherman-slide-factor))
 (slide (scale (bitmap "dherman-slide30.png") dherman-slide-factor))
@@ -725,6 +739,8 @@ RUSTC_ERROR_MSG
 (slide (scale (bitmap "dherman-slide34.png") dherman-slide-factor))
 (slide (scale (bitmap "dherman-slide35.png") dherman-slide-factor))
 
+
+;; AAHHH XXX FIXME
 
 (slide #:title "Topics not covered"
        (item "regions/lifetimes and their subtyping relationship")
