@@ -10,19 +10,19 @@
   (slide #:title "Expression-oriented"
          (vc-append (* gap-size 2)
                     (item "not statement-oriented (unless you want to be)")
-                    (maybe-ghost (item (t "An expression:") (tt "2 + 3 > 5"))))
-         (maybe-ghost (item  (t "An expression:") (tt "{ let x = 2 + 3; x > 5 }")))
+                    (maybe-ghost (item (t "An expression:") (rust-tt "2 + 3 > 5"))))
+         (maybe-ghost (item  (t "An expression:") (rust-tt "{ let x = 2 + 3; x > 5 }")))
          (maybe-next)
-         (item (vl-append (maybe-ghost (hbl-append (t "A binding of ") (tt "y") (t " followed by an expression:")))
-                          (tt/nl #<<HERE
+         (item (vl-append (maybe-ghost (hbl-append (t "A binding of ") (rust-tt "y") (t " followed by an expression:")))
+                          (rust-tt/nl #<<HERE
 let y = { let x = 2 + 3; x > 5 };
 if y { x + 6 } else { x + 7 }
 HERE
                                  )))
        (maybe-next)
        (item (vl-append (maybe-ghost (t "Function definition and invocation"))
-                        (tt "fn add3(x:int) -> int { x + 3 }")
-                        (maybe-ghost (tt "let y = foo(2) > 5;"))))
+                        (rust-tt "fn add3(x:int) -> int { x + 3 }")
+                        (maybe-ghost (rust-tt "let y = foo(2) > 5;"))))
        ))
 
 (slide-expression-oriented #f)
@@ -30,19 +30,19 @@ HERE
 
 (slide #:title "Expression-oriented"
        (vc-append (item "not statement-oriented (unless you want to be)"))           
-       (item (vl-append (tt/nl #<<HERE
+       (item (vl-append (rust-tt/nl #<<HERE
 let y = { let x = 2 + 3; x > 5 };
 if y { x + 6 } else { x + 7 }
 HERE
                     )))
        
-       (item (vl-append (tt "fn add3(x:int) -> int { x + 3 }")))
+       (item (vl-append (rust-tt "fn add3(x:int) -> int { x + 3 }")))
        'next
-       (item (hbl-append (t "But ") (tt "return") (t " statement is available if you prefer that style")))
+       (item (hbl-append (t "But ") (rust-tt "return") (t " statement is available if you prefer that style")))
        (vl-append
-        (tt "fn add3(x:int) -> int { return x + 3; }")
-        (tt "")
-        (tt/nl #<<HERE
+        (rust-tt "fn add3(x:int) -> int { return x + 3; }")
+        (rust-tt "")
+        (rust-tt/nl #<<HERE
 let y = { let x = 2 + 3; x > 5 };
 if y {
   return x + 6;
@@ -52,8 +52,8 @@ if y {
 HERE
        ))
        #;'next
-       #;(item "Statements are semi-colon terminated;``unit'' type is denoted by " (tt "()"))
-       (comment "treated same as expressions with the uninteresting ``unit'' type:" (tt "()"))
+       #;(item "Statements are semi-colon terminated;``unit'' type is denoted by " (rust-tt "()"))
+       (comment "treated same as expressions with the uninteresting ``unit'' type:" (rust-tt "()"))
        (comment "No whitespace sensitivity for lexing/parsing")
        (comment "If a fn has unit return type, that portion of the type signature can be omitted.")
        )
@@ -64,10 +64,9 @@ HERE
                 " to abstract over syntactic patterns in the code")
        (item "Likewise, Rust has its own syntax extension mechanism")
        'next
-       (item "Macro-invocations in Rust look like " (tt "macroname!(...)"))
-       (subitem "All macro-uses have an exclamation point, "
-                "to ease lexical analysis (for humans and simple-minded programming tools)")
-       (tt/nl #<<HERE
+       (item "Macro-invocations in Rust look like " (rust-tt "macroname!(...)"))
+       (subitem "Eases lexical analysis (for simple-minded ...)")
+       (rust-tt/nl #<<HERE
 println!("Hello World {:d}", some_int);
 assert!(some_int == 17);
 HERE
@@ -79,16 +78,19 @@ HERE
 (slide #:title "Mutability"
        (item "Local state is immutable by default")
        (vl-append
-        (tt/nl #<<HERE
+        (rust-tt/nl #<<HERE
 let x = 5;
 let mut y = 6;
 y = x;     // fine
 HERE
               )
-       (colorize (tt #<<HERE
+
+       (recolorize
+(lambda ()
+ (rust-tt #<<HERE
 x = x + 1; // static error!
 HERE
-                     ) "red"))
+                     )) "red"))
        (comment "mutability-by-accident is huge source of bugs")
        )
 
@@ -100,7 +102,7 @@ HERE
               (vc-append code-b (t " ") label-b)))
 
 (slide #:title "Enumerated variants I"
-       (side-by-side (t "Rust enum") (tt/nl #<<RUST_ENUM
+       (side-by-side (t "Rust enum") (rust-tt/nl #<<RUST_ENUM
 enum Color
 {
     Red,
@@ -121,7 +123,7 @@ C_ENUM
                           )))
 
 (slide #:title "Matching enums"
-       (side-by-side (t "Rust match") (tt/nl #<<RUST_MATCH
+       (side-by-side (t "Rust match") (rust-tt/nl #<<RUST_MATCH
 fn f(c: Color) {
   match c {
     Red   => /* ... */,
@@ -148,7 +150,7 @@ C_SWITCH
        (ghost (item "Rust also checks that cases are exhaustive.")))
 
 (slide #:title "Matching nonsense"
-       (side-by-side (colorize (t "Rust type error") "red") (tt/nl #<<RUST_MATCH
+       (side-by-side (colorize (t "Rust type error") "red") (rust-tt/nl #<<RUST_MATCH
 fn f(c: Color) {
   match c {
     Red   => /* ... */,
@@ -176,7 +178,7 @@ C_SWITCH
        (item "Rust also checks that cases are exhaustive."))
 
 (slide #:title "Enumerated variants II: Algebraic Data"
-       (tt/nl #<<RUST_ENUM
+       (rust-tt/nl #<<RUST_ENUM
 enum Spot {
     One(int)
     Two(int, int)
@@ -185,7 +187,7 @@ RUST_ENUM
 ))
 
 (slide #:title "Destructuring match"
-       (tt/nl #<<RUST_MATCH
+       (rust-tt/nl #<<RUST_MATCH
 fn magnitude(x: Spot) -> int {
     One(n)    => n,
     Two(x, y) => (x*x + y*y).sqrt()
@@ -199,7 +201,7 @@ RUST_MATCH
        (item "Rust forces programmer to initialize the fields before they are read")
        (subitem "(no garbage data allowed from safe code)")
        'next
-       (tt/nl #<<RUST_STRUCT
+       (rust-tt/nl #<<RUST_STRUCT
 struct IntPair { x: int, y: int }
 
 let p34 = IntPair{ x: 3, y: 4 };
@@ -212,10 +214,10 @@ RUST_STRUCT
 
 (slide #:title "Closures"
        (item "Rust offers C-style function-pointers that carry no environment")
-       (item "Rust also offers function closures that capture relevant portions of their environment")
+       (item "and closures capture portions of environment")
        (item "Syntax is inspired by Ruby blocks")
        'next
-       (tt/nl #<<RUST_CLOSURE
+       (rust-tt/nl #<<RUST_CLOSURE
 let p34 = IntPair{ x: 3, y: 4 };
 let x_adjuster =
   |new_x| { IntPair{ x: new_x, ..p34 } };
@@ -233,7 +235,7 @@ RUST_CLOSURE
        (item "They require we first explore Rust's notion of a ``pointer''"))
 
 (slide #:title "Pointers"
-       (tt/nl #<<HERE
+       (rust-tt/nl #<<HERE
 let x: int = 3;
 let y: &int = &x;
 assert!(*y == 3);
@@ -243,7 +245,7 @@ HERE
               ))
 
 (slide #:title "Pointers and Mutability"
-       (tt/nl #<<HERE
+       (rust-tt/nl #<<HERE
 let mut x: int = 5;
 increment(&mut x);
 assert!(x == 6);
@@ -267,7 +269,7 @@ HERE
        )
 
 (slide #:title "Methods"
-       (tt/nl #<<RUST_METHODS_DEF
+       (rust-tt/nl #<<RUST_METHODS_DEF
 struct IntPair { x: int, y: int }
 
 impl IntPair {
@@ -280,7 +282,7 @@ impl IntPair {
 RUST_METHODS_DEF
               )
        'next
-       (tt/nl #<<RUST_METHODS_USE
+       (rust-tt/nl #<<RUST_METHODS_USE
 let mut p_tmp = IntPair{ x: 5, y: 6 };
 let p06 = p_tmp.zeroed_x_copy();
 p_tmp.replace_x(17);
@@ -295,7 +297,7 @@ RUST_METHODS_USE
        (item "aka Type-Parametericity")
        (item "Functions and data types can be abstracted over types, not just values")
        'next
-       (tt/nl #<<RUST_GENERICS
+       (rust-tt/nl #<<RUST_GENERICS
 enum Option<T> {
   Some(T),
   None
@@ -303,7 +305,7 @@ enum Option<T> {
 RUST_GENERICS
               )
        'next
-       (tt/nl
+       (rust-tt/nl
                
               #<<RUST_GENERICS
 fn safe_get<T>(opt: Option<T>, dflt: T) -> T {
