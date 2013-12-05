@@ -165,18 +165,19 @@ HERE
 (define (cake-c++-code-for name)
   (c++-code-for cake-c++-example name))
   
-(define (generalized-code-tt example specs code-for)
-  (letrec ((from-name (lambda (name) (tt/nl (code-for example name))))
+(define (rust-code-tt example specs code-for)
+  (letrec ((from-name (lambda (name) (rust-tt/nl (rust-code-for example name))))
            (from-spec (lambda (spec)
                         (cond ((symbol? spec) (from-name spec))
                               ((eq? 'ghost (car spec)) (ghost (from-spec (cadr spec))))))))
     (apply vl-append gap-size (map from-spec specs))))
 
-(define (c++-code-tt example specs)
-  (generalized-code-tt example specs c++-code-for))
-
-(define (rust-code-tt example specs)
-  (generalized-code-tt example specs rust-code-for))
+(define (c++-code-tt example specs code-for)
+  (letrec ((from-name (lambda (name) (tt/nl (c++-code-for example name))))
+           (from-spec (lambda (spec)
+                        (cond ((symbol? spec) (from-name spec))
+                              ((eq? 'ghost (car spec)) (ghost (from-spec (cadr spec))))))))
+    (apply vl-append gap-size (map from-spec specs))))
 
 (define (c++-code-slide example specs)
   ;(slide #:layout 'top (c++-code-tt example specs))
@@ -232,7 +233,7 @@ HERE
  (list (list
         (hbl-append (t "((you need to opt in to write unsafe code))")))
        (list
-        (hbl-append (t "((you need to opt in to write ") (tt "unsafe") (t " code))")))))
+        (hbl-append (t "((you need to opt in to write ") (rust-tt "unsafe") (t " code))")))))
 
 
 (slide #:name "The Cake example in Rust"
@@ -252,7 +253,7 @@ HERE
 (slide #:name "Cake in Rust: Punchline"
        (item "So, wait, was the port successful?")
        'next
-       (tt/nl #<<RUSTC_ERROR_MSG
+       (rust-tt/nl #<<RUSTC_ERROR_MSG
 % rustc cake.rs
 error: cannot borrow `(*cake).num_slices` as
        immutable because it is also borrowed
