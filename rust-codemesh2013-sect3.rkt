@@ -32,8 +32,7 @@ fn eat_at_least(cake: &mut Cake, threshold: &int) {
     let mut eaten_so_far = 0;
     while (cake.num_slices > 0
            && eaten_so_far < *threshold) {
-        cake.eat_slice();
-        eaten_so_far += 1;
+        cake.eat_slice(); eaten_so_far += 1;
     }
 }
 CAKE_FUNCTIONS
@@ -165,14 +164,14 @@ HERE
 (define (cake-c++-code-for name)
   (c++-code-for cake-c++-example name))
   
-(define (rust-code-tt example specs code-for)
+(define (rust-code-tt example specs)
   (letrec ((from-name (lambda (name) (rust-tt/nl (rust-code-for example name))))
            (from-spec (lambda (spec)
                         (cond ((symbol? spec) (from-name spec))
                               ((eq? 'ghost (car spec)) (ghost (from-spec (cadr spec))))))))
     (apply vl-append gap-size (map from-spec specs))))
 
-(define (c++-code-tt example specs code-for)
+(define (c++-code-tt example specs)
   (letrec ((from-name (lambda (name) (tt/nl (c++-code-for example name))))
            (from-spec (lambda (spec)
                         (cond ((symbol? spec) (from-name spec))
@@ -222,8 +221,9 @@ HERE
        (t "Classic aliasing bug"))
 
 (slide
- (t "The previous example was contrived, but aliasing bugs are real")
- (t "They can lead to crashes, security holes, and just general incorrect behavior")
+ (para "The previous example was contrived,"
+  "but aliasing bugs are real."
+   "Cause crashes, security holes, and other incorrect behavior")
  'next
  (t "We want Rust to make it harder to make silly mistakes.")
  'next
@@ -269,7 +269,9 @@ RUSTC_ERROR_MSG
               ))
 
 (slide #:layout 'top
-       (colorize (rust-code-tt cake-rust-example '(eat-entire-buggy)) "red")
+       (recolorize (lambda ()
+                     (rust-code-tt cake-rust-example '(eat-entire-buggy)))
+                   "red")
        'next
        (t "The compiler is complaining about our attempt to alias here!")
        'next
