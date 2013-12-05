@@ -202,33 +202,32 @@ RUST_MATCH
        (subitem "(no garbage data allowed from safe code)")
        'next
        (rust-tt/nl #<<RUST_STRUCT
-struct IntPair { x: int, y: int }
+struct Pair { x: int, y: int }
 
-let p34 = IntPair{ x: 3, y: 4 };
+let p34 = Pair{ x: 3, y: 4 };
 
-fn zero_x(p: IntPair) -> IntPair {
-  return IntPair{ x: 0, ..p };
+fn zero_x(p: Pair) -> Pair {
+  return Pair{ x: 0, ..p };
 }
 RUST_STRUCT
               ))
 
 (slide #:title "Closures"
        (item "Rust offers C-style function-pointers that carry no environment")
-       (item "and closures capture portions of environment")
+       (item "Also closures, to capture portions of environment")
        (item "Syntax is inspired by Ruby blocks")
        'next
        (rust-tt/nl #<<RUST_CLOSURE
-let p34 = IntPair{ x: 3, y: 4 };
+let p34 = Pair{ x: 3, y: 4 };
 let x_adjuster =
-  |new_x| { IntPair{ x: new_x, ..p34 } };
-
+  |new_x| { Pair{ x: new_x, ..p34 } };
 let p14 = x_adjuster(1);
 let p24 = x_adjuster(2);
-println!("p34.x: {} p14.x: {}", p34.x, p14.x);
+println!("p34: {:?} p14: {:?}", p34, p14);
 RUST_CLOSURE
               )
        'next
-       (vc-append (t "prints") (tt "p34.x: 3 p14.x: 1")))
+       (hbl-append (t " ⇒  ") (tt "p34: Pair{x: 3, y: 4} p14: Pair{x: 1, y: 4}")))
 
 (slide #:title "What about OOP?"
        (item "Rust has methods too, and interfaces")
@@ -270,11 +269,11 @@ HERE
 
 (slide #:title "Methods"
        (rust-tt/nl #<<RUST_METHODS_DEF
-struct IntPair { x: int, y: int }
+struct Pair { x: int, y: int }
 
-impl IntPair {
-  fn zeroed_x_copy(self) -> IntPair {
-    return IntPair { x: 0, ..self }
+impl Pair {
+  fn zeroed_x_copy(self) -> Pair {
+    return Pair { x: 0, ..self }
   }
 
   fn replace_x(&mut self) { self.x = 0; }
@@ -283,7 +282,7 @@ RUST_METHODS_DEF
               )
        'next
        (rust-tt/nl #<<RUST_METHODS_USE
-let mut p_tmp = IntPair{ x: 5, y: 6 };
+let mut p_tmp = Pair{ x: 5, y: 6 };
 let p06 = p_tmp.zeroed_x_copy();
 p_tmp.replace_x(17);
 println!("p_tmp.x: {} p06.x: {}", p_tmp.x, p06.x);
