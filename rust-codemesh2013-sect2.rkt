@@ -190,8 +190,10 @@ RUST_ENUM
 (slide #:title "Destructuring match"
        (rust-tt/nl #<<RUST_MATCH
 fn magnitude(x: Spot) -> int {
-    One(n)    => n,
-    Two(x, y) => (x*x + y*y).sqrt()
+    match x {
+      One(n)    => n,
+      Two(x, y) => (x*x + y*y).sqrt()
+    }
 }
 RUST_MATCH
               ))
@@ -199,8 +201,7 @@ RUST_MATCH
 (slide #:title "Structured data"
        (item "Similar to " (tt "struct") " in C")
        (subitem "lay out fields in memory in order of declaration")
-       (item "Rust forces programmer to initialize the fields before they are read")
-       (subitem "(no garbage data allowed from safe code)")
+       (item "But safe code can't access uninitialized data")
        'next
        (rust-tt/nl #<<RUST_STRUCT
 struct Pair { x: int, y: int }
@@ -215,7 +216,7 @@ RUST_STRUCT
 
 (slide #:title "Closures"
        (item "Rust offers C-style function-pointers that carry no environment")
-       (item "Also closures, to capture portions of environment")
+       (item "Also offers closures, for environment capture")
        (item "Syntax is inspired by Ruby blocks")
        'next
        (rust-tt/nl #<<RUST_CLOSURE
@@ -259,12 +260,12 @@ HERE
 (slide #:title "Ownership and Borrowing"
        (item "Memory allocated by safe Rust code, 3 cases")
        (subitem "stack-allocated local memory")
-       (subitem "owned memory on an ``exchange heap''")
-       (subitem "intra-task shared memory on managed heap")
+       (subitem "owned memory: ``exchange heap''")
+       (subitem "intra-task shared memory: managed heap")
        'next
        (item "code can ``borrow'' references to/into"
              "owned memory; static analysis for safety (no aliasing)")
-       (subitem "Can also borrow references to the GC heap")
+       (subitem "Can also borrow references into \"GC\" heap")
        (subitem "in that case sometimes resort to dynamic enforcement of the borrowing rules")
        )
 
@@ -286,12 +287,12 @@ RUST_METHODS_DEF
 let mut p_tmp = Pair{ x: 5, y: 6 };
 let p06 = p_tmp.zeroed_x_copy();
 p_tmp.replace_x(17);
-println!("p_tmp.x: {} p06.x: {}", p_tmp.x, p06.x);
+println!("p_tmp: {:?} p06: {:?}", p_tmp, p06);
 RUST_METHODS_USE
               )
        'next
        (vc-append (t "Prints")
-                  (tt "p_tmp.x: 17 p06.x: 0")))
+                  (tt "p_tmp: Pair{x: 17, y: 6} p06: Pair{x: 0, y: 6}")))
 
 (slide #:title "Generics"
        (item "aka Type-Parametericity")
@@ -316,3 +317,134 @@ fn safe_get<T>(opt: Option<T>, dflt: T) -> T {
 }
 RUST_GENERICS
               ))
+
+
+(define ex-currency-traits-def
+  #<<RUST_TRAITS_DEF
+struct Dollars { amt: int }
+struct Euros { amt: int }
+trait Currency {
+    fn render(&self) -> ~str;
+    fn to_euros(&self) -> Euros;
+}
+RUST_TRAITS_DEF
+)
+
+(define ex-currency-impl-def
+  #<<RUST_IMPL_DEF
+impl Currency for Dollars {
+    fn render(&self) -> ~str {
+      format!("${}", self.amt)
+    }
+    fn to_euros(&self) -> Euros {
+      let a = ((self.amt as f64) * 0.73);
+      Euros { amt: a as int }
+    }
+}
+
+impl Currency for Euros {
+    fn render(&self) -> ~str {
+      format!("€{}", self.amt)
+    }
+    fn to_euros(&self) -> Euros { *self }
+}
+RUST_IMPL_DEF
+)
+
+(define add-as-euros-def
+  #<<RUST_DEF
+fn add_as_euros<C:Currency>(a: &C, b: &C) -> Euros {
+    let sum = a.to_euros().amt + b.to_euros().amt;
+    Euros{ amt: sum }
+}
+RUST_DEF
+)
+
+(define add-eu-eu-use
+  #<<RUST_DEF
+    let eu100 = Euros { amt: 100 };
+    let eu200 = Euros { amt: 200 };
+    println!("{:?}", add_as_euros(&eu100, &eu200));
+RUST_DEF
+)
+
+(define add-us-us-use
+  #<<RUST_DEF
+    let us100 = Dollars { amt: 100 };
+    let us200 = Dollars { amt: 200 };
+    println!("{:?}", add_as_euros(&us100, &us200));
+RUST_DEF
+)
+
+(define add-us-eu-use-breaks
+  #<<RUST_DEF
+    let us100 = Dollars { amt: 100 };
+    let eu200 = Euros { amt: 200 };
+    println!("{:?}", add_as_euros(&us100, &eu200));
+RUST_DEF
+)
+
+(define add-us-eu-use-error-msg
+  #<<RUSTC_ERR
+error: mismatched types: expected `&Dollars`
+       but found `&Euros` (expected struct Dollars
+       but found struct Euros)
+     println!("{:?}", add_as_euros(&us100, &eu200));
+                                           ^~~~~~
+RUSTC_ERR
+)
+
+(slide #:title "Bounded Polymorphism"
+       (rust-tt/nl ex-currency-traits-def)
+       (rust-tt/nl add-as-euros-def))
+
+(slide #:title "Trait Impls"
+       (rust-tt/nl ex-currency-impl-def))
+
+(slide #:title "Static Resolution"
+       (rust-tt/nl add-as-euros-def)
+       'next
+        (rust-tt/nl add-eu-eu-use)
+        'next
+        (hbl-append (t " ⇒ ") (tt "Euros{amt: 300}")))
+
+(slide #:title "Static Resolution"
+       (rust-tt/nl add-as-euros-def)
+       (rust-tt/nl add-us-us-use)
+       'next
+       (hbl-append (t " ⇒ ") (tt "Euros{amt: 219}")))
+
+(let ((bot (hbl-append (t " ⇒ ") (tt "Euros{amt: 219}"))))
+  (slide #:title "Static Resolution (!)"
+         (rust-tt/nl add-as-euros-def)
+         'next
+         (rust-tt/nl add-us-eu-use-breaks)
+         'next
+         'alts
+         (list
+          (list (hbl-append (t " ⇒ ") (ghost (tt "Euros{amt: 219}"))))
+          (list (pin-over (ghost bot)
+                          (- (pict-width bot)) 0
+                          (tt/nl add-us-eu-use-error-msg))))))
+
+(slide #:title "Dynamic Dispatch"
+       (rust-tt/nl #<<RUST_DISPATCH
+fn add_as_euros<C:Currency>(a: &C, b: &C) -> Euros {
+    let sum = a.to_euros().amt + b.to_euros().amt;
+    Euros{ amt: sum }
+}
+
+fn accumeuros(a: &Currency, b: &Currency) -> Euros {
+    let sum = a.to_euros().amt + b.to_euros().amt;
+    Euros{ amt: sum }
+}
+
+let us100 = Dollars { amt: 100 };
+let eu200 = Euros { amt: 200 };
+println!("{:?}", accumeuros(&us100 as &Currency,
+                            &eu200 as &Currency));
+RUST_DISPATCH
+
+)
+       'next
+       (hbl-append (t " ⇒ ") (tt "Euros{amt: 273}")))
