@@ -52,20 +52,47 @@
 ;; - pattern matching and algebraic data types
 ;; - polymorphism
 
+(let* ((c++-color    "dark green")
+       (erlang-color "maroon")
+       (sml-color    "blue")
+       (mixed-color  "purple")
+       (c++    (colorize (t "c++")    c++-color))
+       (erlang (colorize (t "erlang") erlang-color))
+       (sml    (colorize (t "sml")    sml-color)))
+
+  (slide #:name "Rust is post-grad C++"
+         (vr-append (para  "``rust is like" c++ "grew up and went to grad school,"
+                           "shares an office with" erlang
+                           ", and is dating" sml "''")
+                    (text "-rpearl, #rust"
+                          (cons 'italic (current-main-font))
+                          (current-font-size)))
+         'next
+         (colorize (para "stack allocation;"
+                         "memory layout;"
+                         "monomorphisation of generics")
+                   c++-color)
+         (colorize (para "safe task-based concurrency, failure") erlang-color)
+         (colorize (para "type safety;"
+                         (colorize (t "destructuring bind;") mixed-color)
+                         "type classes")
+                   sml-color)
+         ))
 ;; A Web Browser is a multi-tasking operating system (e.g. page/tab is a task!)
 
 
 (slide #:title "Motivation"
-       (item "Why Mozilla is investing in a new programming language")
+       ;(item "Why Mozilla is investing in a new programming language")
+       (item "Why invest in a new programming language")
        'next
        (item "Web browsers are complex programs")
-       (item "It is expensive to innovate and compete while implementing atop standard systems languages")
+       (item "Expensive to innovate and compete while implementing atop standard systems languages")
        'next
-       (item "So for our experimental next-generation browser, Servo ...")
-       (subitem "http://github.com/mozilla/servo")
+       (item "So to implement next-gen browser, Servo ...")
+       (subitem #:bullet (t "⇒") (tt "http://github.com/mozilla/servo"))
        'next
-       (item "... our research team is using a new programming language: Rust")
-       (subitem "http://rust-lang.org"))
+       (item "... Mozilla is using (& implementing) Rust")
+       (subitem #:bullet (t "⇒") (tt "http://rust-lang.org")))
 
 (outline 'one)
 
@@ -89,18 +116,24 @@
 (require slideshow/balloon)
 (slide #:title "Tool: Sound Type Checking"
        
-       (item (let ((orig (t "''Well-typed programs don't go wrong.''")))
-               (pin-balloon (wrap-balloon (t "Milner, 1978") 'sw 0 0) orig (pict-width orig) 0)))
+       (item (let ((orig (t "''Well-typed programs can't go wrong.''")))
+               (pin-balloon (wrap-balloon (text "Milner, 1978" null 16)
+                                          'sw 0 0) orig (pict-width orig) 0)))
        (comment "Robin Milner, ''A theory of type polymorphism in programming'' 1978")
        'next
        (item "More generally: identify classes of errors ...")
        (subitem "... then use type system to remove them")
        (subitem "(or at least isolate them)")
-       (item "Eases reasoning about programs; provides more confidence in their correctness.")
+       (item "Eases reasoning; adds confidence")
        'next
-       (item "Revised: Well-typed programs can assist in blame assignment.")
-       (subitem "(unsafe code remains a potential way to ``go wrong'')")
-       (subitem "and even safe code can fail; but only in ways one can reason about and recover from")
+       (item (let ((orig (t "Well-typed programs help assign blame.")))
+               (pin-balloon (wrap-balloon (apply vl-append
+                                                 (map (lambda (t) (text t null 16))
+                                                      '("Tobin-Hochstadt 2006," "Wadler 2009")))
+                                          'sw 0 0)
+                            orig (pict-width orig) 0)))
+       (subitem "(unsafe code remains as way to ``go wrong'')")
+       (subitem "and even safe code can fail (but only in controlled fashion)")
        )
 
 (slide #:title "Simple source ⇔ compiled code relationship"
@@ -123,7 +156,9 @@
 ;; XXX FIXME read the article, be able to explain this
 
 (slide #:title "Zero-cost abstractions"
-       (comment "Cite Robert O'Callahan if possible")
+       (comment "Cite Robert O'Callahan if possible:"
+                (tt "http://www.j.mp/abstraction-penalties")
+                "e.g. inlining as way to make procedural abstraction zero-cost")
        (item "Goal: do not pay at runtime for a feature unused by program")
        (item "There is still a non-zero cognitive cost")
        (subitem "Often must think more about data representation")
