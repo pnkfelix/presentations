@@ -49,13 +49,13 @@ fn eg_us_eu() {
 }
 
 #[cfg(not(us_eu))]
-fn main() {
+fn main_currency() {
     eg_us_us();
     eg_eu_eu();
     eg_us_eu();
 }
 #[cfg(us_eu)]
-fn main() {
+fn main_currency() {
     eg_us_eu();
 }
 
@@ -82,18 +82,17 @@ fn foo() -> int { 3 }
 fn bar() -> int { 4 }
 fn quux() -> int { 5 }
 
-fn main_old() {
-    struct IntPair { x: int, y: int }
+fn main() {
 
-    let p34 = IntPair{ x: 3, y: 4 };
+    let p34 = Pair{ x: 3, y: 4 };
 
-    fn zero_x(p: IntPair) -> IntPair { IntPair{ x: 0, ..p } }
+    fn zero_x(p: Pair) -> Pair { Pair{ x: 0, ..p } }
 
     println!("p34: {:?} zeroed p34: {:?}", p34, zero_x(p34));
 
-let p34 = IntPair{ x: 3, y: 4 };
+let p34 = Pair{ x: 3, y: 4 };
 let x_adjuster =
-  |new_x| { IntPair{ x: new_x, ..p34 } };
+  |new_x| { Pair{ x: new_x, ..p34 } };
 
 let p14 = x_adjuster(1);
 let _p24 = x_adjuster(2);
@@ -106,11 +105,11 @@ println!("p34.x: {} p14.x: {}", p34.x, p14.x);
 }
 
 fn rest() {
-    struct IntPair { x: int, y: int }
+    struct Pair { x: int, y: int }
 
-    impl IntPair {
-        fn zeroed_x_copy(self) -> IntPair {
-            return IntPair { x: 0, ..self }
+    impl Pair {
+        fn zeroed_x_copy(self) -> Pair {
+            return Pair { x: 0, ..self }
         }
 
         fn replace_x(&mut self, new_x: int) {
@@ -118,8 +117,8 @@ fn rest() {
         }
     }
 
-    let mut p_tmp = IntPair{ x: 5, y: 6 };
+    let mut p_tmp = Pair{ x: 5, y: 6 };
     let p06 = p_tmp.zeroed_x_copy();
     p_tmp.replace_x(17);
-    println!("p_tmp.x: {} p06.x: {}", p_tmp.x, p06.x);
+    println!("p_tmp: {:?} p06: {:?}", p_tmp, p06);
 }
