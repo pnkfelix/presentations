@@ -201,7 +201,7 @@ RUST_MATCH
 (slide #:title "Structured data"
        (item "Similar to " (tt "struct") " in C")
        (subitem "lay out fields in memory in order of declaration")
-       (item "But safe code can't access uninitialized data")
+       (item "Liveness analysis ensures initialization")
        'next
        (rust-tt/nl #<<RUST_STRUCT
 struct Pair { x: int, y: int }

@@ -79,3 +79,5 @@
   (slide
    (rust-tt "... chan.send(o); /* o is now locally invalid */")
    (pin-arrow-line 10 global odot2 cc-find obj1 ct-find)))
+
+(slide (t "(telephone demo)"))
