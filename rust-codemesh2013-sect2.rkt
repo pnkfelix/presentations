@@ -60,15 +60,16 @@ HERE
 
 (slide #:title "Syntax extensions"
        (item "C has a preprocessor")
-       (subitem "can define ``macros'' via " (tt "#define")
+       #;(subitem "can define ``macros'' via " (tt "#define")
                 " to abstract over syntactic patterns in the code")
-       (item "Likewise, Rust has its own syntax extension mechanism")
+       (item "Likewise, Rust has syntax extensions")
        'next
        (item "Macro-invocations in Rust look like " (rust-tt "macroname!(...)"))
        (subitem "Eases lexical analysis (for simple-minded ...)")
        (rust-tt/nl #<<HERE
 println!("Hello World {:d}", some_int);
 assert!(some_int == 17);
+fail!("Unexpected: {:?}", structure);
 HERE
               )
        'next
@@ -258,13 +259,13 @@ HERE
 (slide #:title "Ownership and Borrowing"
        (item "Memory allocated by safe Rust code, 3 cases")
        (subitem "stack-allocated local memory")
-       (subitem "uniquely-owned memory on an ``exchange heap''")
-       (subitem "intra-task shared memory on a managed (GC) heap")
+       (subitem "owned memory on an ``exchange heap''")
+       (subitem "intra-task shared memory on managed heap")
        'next
-       (item "The type system allows code to ``borrow'' references to (and into)"
-             "owned memory, and tracks that none of its static safety rules are violated")
-       (subitem "You can also borrow references to the GC heap")
-       (subitem "but in that case Rust sometimes resorts to dynamic enforcement of the borrowing rules")
+       (item "code can ``borrow'' references to/into"
+             "owned memory; static analysis for safety (no aliasing)")
+       (subitem "Can also borrow references to the GC heap")
+       (subitem "in that case sometimes resort to dynamic enforcement of the borrowing rules")
        )
 
 (slide #:title "Methods"
