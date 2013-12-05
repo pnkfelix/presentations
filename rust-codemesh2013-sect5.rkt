@@ -2,17 +2,16 @@
 (require slideshow)
 (require "rust-codemesh2013-common.rkt")
 
-;; AAHHH XXX FIXME
-
 (slide #:title "Topics not covered"
        (item "regions/lifetimes and their subtyping relationship")
-       (item "traits as existentials (object-oriented dispatch)")
+       ; (item "traits as existentials (object-oriented dispatch)")
        (item "borrow-checking static analysis rules")
        (item "freezing/thawing data structures")
-       (item "task-local storage")
-       (item "linked-failure")
+       ; (item "task-local storage")
+       ; (item "linked-failure")
        (item "one-shot closures: " (tt "proc"))
-       (item "syntax extensions"))
+       ;(item "syntax extensions")
+)
 
 (slide #:name "Our community"
        (para "The Rust team: "
