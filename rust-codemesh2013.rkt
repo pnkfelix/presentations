@@ -15,9 +15,6 @@
   (set! actual-screen-w 800)
   (set! actual-screen-h 600))
 
-(current-main-font "Open Sans")
-
-
 ; (slide (t "Hello World"))
 ; (slide (t "fn main() { println!(\"Hello World\"); }"))
 ; (slide (t/nl "fn main() {\n    println!(\"Hello World\");\n}"))

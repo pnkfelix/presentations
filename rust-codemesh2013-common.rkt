@@ -2,6 +2,8 @@
 (require slideshow)
 (provide outline tt/nl)
 
+(current-main-font "Open Sans")
+
 (define outline
   (let ((sub-para (lambda l (para #:width (* 3/4 (current-para-width)) l))))
     (make-outline
