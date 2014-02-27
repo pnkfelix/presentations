@@ -1,6 +1,6 @@
 #lang racket
 (require slideshow)
-(require "rust-codemesh2013-common.rkt")
+(require "rust-meetup2014-common.rkt")
 
 (outline 'two)
 
@@ -188,7 +188,13 @@ RUST_ENUM
 ))
 
 (slide #:title "Destructuring match"
+
        (rust-tt/nl #<<RUST_MATCH
+enum Spot {
+    One(int)
+    Two(int, int)
+}
+
 fn magnitude(x: Spot) -> int {
     match x {
       One(n)    => n,
@@ -212,7 +218,9 @@ fn zero_x(p: Pair) -> Pair {
   return Pair{ x: 0, ..p };
 }
 RUST_STRUCT
-              ))
+              )
+       (item (tt "Pair{ fld: value, ..p}") "makes copy of" (tt "p") "with changes")
+       )
 
 (slide #:title "Closures"
        (item "Rust offers C-style function-pointers that carry no environment")
@@ -259,14 +267,17 @@ HERE
 
 (slide #:title "Ownership and Borrowing"
        (item "Memory allocated by safe Rust code, 3 cases")
-       (subitem "stack-allocated local memory")
-       (subitem "owned memory: ``exchange heap''")
-       (subitem "intra-task shared memory: managed heap")
+       (subitem "stack-allocated local memory:" (tt "T"))
+       (subitem "owned memory: ``exchange heap'':" (tt "~T"))
+       (subitem "intra-task sharing: managed library types:"
+                (tt "Gc<T>") "," (tt "Rc<T>"))
        'next
        (item "code can ``borrow'' references to/into"
              "owned memory; static analysis for safety (no aliasing)")
-       (subitem "Can also borrow references into \"GC\" heap")
-       (subitem "in that case sometimes resort to dynamic enforcement of the borrowing rules")
+       (subitem (tt "&T") "or" (tt "&'a T"))
+       #;(subitem "Can also borrow references into \"GC\" heap")
+       #;(subitem "in that case, "
+                "sometimes resort to dynamic enforcement of the borrowing rules")
        )
 
 (slide #:title "Methods"
@@ -370,15 +381,15 @@ RUST_DEF
 
 (define add-us-us-use
   #<<RUST_DEF
-    let us100 = Dollars { amt: 100 };
-    let us200 = Dollars { amt: 200 };
+    let us100 = Dollars { amt: 100 }; // (=  € 73)
+    let us200 = Dollars { amt: 200 }; // (= € 146)
     println!("{:?}", add_as_euros(&us100, &us200));
 RUST_DEF
 )
 
 (define add-us-eu-use-breaks
   #<<RUST_DEF
-    let us100 = Dollars { amt: 100 };
+    let us100 = Dollars { amt: 100 }; // (= € 73)
     let eu200 = Euros { amt: 200 };
     println!("{:?}", add_as_euros(&us100, &eu200));
 RUST_DEF
@@ -394,7 +405,7 @@ error: mismatched types: expected `&Dollars`
 RUSTC_ERR
 )
 
-(slide #:title "Bounded Polymorphism"
+(slide #:title "(Trait-)Bounded Polymorphism"
        (rust-tt/nl ex-currency-traits-def)
        (rust-tt/nl add-as-euros-def))
 

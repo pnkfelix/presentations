@@ -1,6 +1,6 @@
 #lang racket
 (require slideshow)
-(require "rust-codemesh2013-common.rkt")
+(require "rust-meetup2014-common.rkt")
 
 (slide #:title "Topics not covered"
        (item "regions/lifetimes and their subtyping relationship")
@@ -15,10 +15,11 @@
 
 (slide #:name "Our community"
        (para "The Rust team: "
-             "Brian Anderson, " 
+             "Brian Anderson, "
+             "Nick Cameron, "
              "Alex Chrichton, "
              "Felix Klock (me), "
-             "Niko Matsakis, "           
+             "Niko Matsakis, "
              "Patrick Walton")
        (para "Interns/Alumni: "
              "Graydon Hoare, "

@@ -1,7 +1,7 @@
 #lang racket
 ;(current-command-line-arguments '#("-s" "800" "600"))
 (require slideshow)
-(require "rust-codemesh2013-common.rkt")
+(require "rust-meetup2014-common.rkt")
 (require (only-in racket/draw make-color))
 
 (define (haiku line1 line2 line3 text-style text-size author author-style author-size)
@@ -28,7 +28,8 @@
        (thw (pict-width the-haiku))
        (thh (pict-height the-haiku)))
 
-  (slide rust-logo 
+  (slide rust-logo
+         (t "http://rust-lang.org/")
          (pin-over moz-logo (* 2/3 rw) (- thh) the-haiku)))
 
  ;; TODO: Overview of what Rust offers (one slide), then transition to the "Why"
@@ -64,7 +65,7 @@
          (vr-append (para  "``rust is like" c++ "grew up and went to grad school,"
                            "shares an office with" erlang
                            ", and is dating" sml "''")
-                    (text "-rpearl, #rust"
+                    (text "-various, #rust"
                           (cons 'italic (current-main-font))
                           (current-font-size)))
          'next
@@ -96,10 +97,11 @@
 
 (outline 'one)
 
-(slide #:title "Language Design"
+(slide #:title "The Rust Project"
        (item "Goal: bridge performance gap between safe and unsafe languages")
        (item "Design choices largely fell out of that requirement")
-       (item "Rust compiler, stdlib, and tools are all MIT/Apache dual license."))
+       (item "Rust compiler, stdlib, and tools are all MIT/Apache dual license.")
+       (item "(also, very active community)"))
 
 (slide #:title "Systems Programming"
        (item "Resource-constrained enviroments, direct control over hardware")
@@ -113,54 +115,13 @@
        (item "Format string and argument mismatch")
        (item "Double frees"))
 
-(require slideshow/balloon)
-(slide #:title "Tool: Sound Type Checking"
-       
-       (item (let ((orig (t "''Well-typed programs can't go wrong.''")))
-               (pin-balloon (wrap-balloon (text "Milner, 1978" null 16)
-                                          'sw 0 0) orig (pict-width orig) 0)))
-       (comment "Robin Milner, ''A theory of type polymorphism in programming'' 1978")
+(slide #:title "Rust Objectives"
+       (item "Sound Type checking")
+       (subitem "Eschew runtime overhead in safe abstractions")
        'next
-       (item "More generally: identify classes of errors ...")
-       (subitem "... then use type system to remove them")
-       (subitem "(or at least isolate them)")
-       (item "Eases reasoning; adds confidence")
+       (item "Can opt-in to unsafe code")
+       (subitem "''Well-typed programs help assign blame.''")
+       (subitem "plus, even safe code can fail (but in controlled fashion)")
        'next
-       (item (let ((orig (t "Well-typed programs help assign blame.")))
-               (pin-balloon (wrap-balloon (apply vl-append
-                                                 (map (lambda (t) (text t null 16))
-                                                      '("Tobin-Hochstadt 2006," "Wadler 2009")))
-                                          'sw 0 0)
-                            orig (pict-width orig) 0)))
-       (subitem "(unsafe code remains as way to ``go wrong'')")
-       (subitem "and even safe code can fail (but only in controlled fashion)")
+       (item "Simple source ⇔ compiled code relationship")
        )
-
-(slide #:title "Simple source ⇔ compiled code relationship"
-       (item "This is a reason C persists to this day")
-       (item "Programmer can build mental model of machine state")
-       (comment "especially with respect to memory")
-       (item "Programmer can also control low-level details (e.g. memory layout)")
-       (item "Goal: Rust should preserve this relationship ...")
-       'next
-       (subitem "... while" (bt "retaining") "memory safety ...")
-       (comment "One definition of memory safety: programs can only dereference"
-                "pointers to previously allocated memory that has not yet been"
-                "freed.")
-       'next
-       (subitem "... without runtime cost.")
-       (comment "In languages like Java and Haskell, safe abstractions have runtime costs:"
-                "boxing everything; garbage-collecting everything")
-       )
-
-;; XXX FIXME read the article, be able to explain this
-
-(slide #:title "Zero-cost abstractions"
-       (comment "Cite Robert O'Callahan if possible:"
-                (tt "http://www.j.mp/abstraction-penalties")
-                "e.g. inlining as way to make procedural abstraction zero-cost")
-       (item "Goal: do not pay at runtime for a feature unused by program")
-       (item "There is still a non-zero cognitive cost")
-       (subitem "Often must think more about data representation")
-       (subitem "Make choices about memory allocation")
-       (item "But in safe blocks of code, compiler checks our assumptions"))

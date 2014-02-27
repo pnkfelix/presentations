@@ -1,7 +1,7 @@
 #lang racket
 (require slideshow)
 (require slideshow/balloon)
-(require "rust-codemesh2013-common.rkt")
+(require "rust-meetup2014-common.rkt")
 
 (slide #:name "Concurrency"
        (t "Concurrency"))
@@ -80,4 +80,4 @@
    (rust-tt "... chan.send(o); /* o is now locally invalid */")
    (pin-arrow-line 10 global odot2 cc-find obj1 ct-find)))
 
-(slide (t "(telephone demo)"))
+(slide (t "(totally different: circles demo)"))

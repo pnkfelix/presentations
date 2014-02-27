@@ -1,6 +1,6 @@
 #lang racket
 (require slideshow)
-(require "rust-codemesh2013-common.rkt")
+(require "rust-meetup2014-common.rkt")
 
 (define cake-rust-example
   '((cake-data #<<CAKE_DATA
