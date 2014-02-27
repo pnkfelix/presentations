@@ -1,11 +1,11 @@
 #lang racket
 (require slideshow)
-(require "rust-codemesh2013-common.rkt")
-(require "rust-codemesh2013-sect1.rkt")
-(require "rust-codemesh2013-sect2.rkt")
-(require "rust-codemesh2013-sect3.rkt")
-(require "rust-codemesh2013-sect4.rkt")
-(require "rust-codemesh2013-sect5.rkt")
+(require "rust-meetup2014-common.rkt")
+(require "rust-meetup2014-sect1.rkt")
+(require "rust-meetup2014-sect2.rkt")
+(require "rust-meetup2014-sect3.rkt")
+(require "rust-meetup2014-sect4.rkt")
+(require "rust-meetup2014-sect5.rkt")
 
 (string-append "Programming languages are in constant development, "
                "responding to the changing nature of computing "
