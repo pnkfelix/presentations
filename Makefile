@@ -1,6 +1,7 @@
 RUSTC ?= rustc
 
-default: build-all-dictionary test-dictionary-v1 run-bd-96-concrete-wrapper
+default: run-slides
+# default: build-all-dictionary test-dictionary-v1 run-bd-96-concrete-wrapper
 
 test-%: %.test
 	./$< --test
