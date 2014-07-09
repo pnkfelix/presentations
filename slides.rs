@@ -4,6 +4,25 @@
 use std::fmt::Show;
 
 fn main() {
+fn add3(x:int) -> int { x + 3 }
+enum E { A(fn (int) -> int), B(int) }
+let mut a = A(add3); let mut b = B(17);
+let p1 = &mut a;     let p2 = &mut b;
+foo(p1, p1);
+
+fn foo(p1: &mut E, p2: &mut E) {
+  match p1 {
+      &B(..) => fail!("cannot happen"),
+      &A(ref adder) => {
+          *p2 = B(0xdeadc0de);
+          println!("{}", (*adder)(14));
+      }
+  }
+}
+
+}
+
+fn main_old5() {
 struct Dollars { amt: int }
 struct Euros { amt: int }
 trait Currency {
