@@ -3,79 +3,113 @@
 (require slideshow)
 (require "rust-common.rkt")
 
-(slide #:title "Motivation"
-       ;(item "Why Mozilla is investing in a new programming language")
-       (item "Why invest in a new programming language")
-       'next
-       (item "Web browsers are complex programs")
-       (item "Expensive to innovate and compete while implementing atop standard systems languages")
-       'next
-       (item "So to implement next-gen browser, Servo ...")
-       (subitem #:bullet (t "⇒") (tt "http://github.com/mozilla/servo"))
-       'next
-       (item "... Mozilla is using (& implementing) Rust")
-       (subitem #:bullet (t "⇒") (tt "http://rust-lang.org")))
-
-(outline 'one)
-
-(slide #:title "Language Design"
-       (item "Goal: bridge performance gap between safe and unsafe languages")
-       (item "Design choices largely fell out of that requirement")
-       (item "Rust compiler, stdlib, and tools are all MIT/Apache dual license."))
-
-(slide #:title "Systems Programming"
-       (item "Resource-constrained enviroments, direct control over hardware")
-       (item "C and C++ dominate this space")
-       (item "Systems programmers care about the last 10-15% of potential performance"))
- 
-(slide #:title "Unsafe aspects of C"
-       (item "Dangling pointers")
-       (item "Null pointer dereferences")
-       (item "Buffer overflows, array bounds errors")
-       (item "Format string and argument mismatch")
-       (item "Double frees"))
+(require (only-in browser/external send-url))
 
 (require slideshow/balloon)
-(slide #:title "Tool: Sound Type Checking"
 
-       (item (let ((orig (t "''Well-typed programs can't go wrong.''")))
-               (pin-balloon (wrap-balloon (text "Milner, 1978" null 16)
-                                          'sw 0 0) orig (pict-width orig) 0)))
-       (comment "Robin Milner, ''A theory of type polymorphism in programming'' 1978")
-       'next
-       (item "More generally: identify classes of errors ...")
-       (subitem "... then use type system to remove them")
-       (subitem "(or at least isolate them)")
-       (item "Eases reasoning; adds confidence")
-       'next
-       (item (let ((orig (t "Well-typed programs help assign blame.")))
-               (pin-balloon (wrap-balloon (apply vl-append
-                                                 (map (lambda (t) (text t null 16))
-                                                      '("Tobin-Hochstadt 2006," "Wadler 2009")))
-                                          'sw 0 0)
-                            orig (pict-width orig) 0)))
-       (subitem "(" (tt "unsafe") "code can still ``go wrong'')")
-       (subitem "and even safe code can" (tt "fail")
-                                        ;"(but only in controlled fashion)")
+(define quiz-code
+  #<<RUST_SIZEOF
+#[deriving(Show)] struct S1 { x: i32 }
+#[deriving(Show)] struct S2 { y: i32 }
+
+$$IMPLS$$
+
+fn main() {
+  use std::mem::size_of;
+  println!("S1 {:u} bytes, S2 {:u} bytes",
+           size_of::<S1>(), size_of::<S2>());
+  assert_eq!(size_of::<S1>(), size_of::<S2>());
+}
+RUST_SIZEOF
+  )
+
+(define playpen-url
+  (case-lambda
+    ((show-url url)
+     (clickback (let ((pp (colorize (tt "playpen ") "orange")))
+                  (if show-url
+                      (hb-append pp
+                                 (tt "(")
+                                 (colorize (tt show-url) "blue")
+                                 (tt ")"))
+                      pp))
+                (λ () (send-url url))))
+    ((url)
+     (playpen-url url url))))
+
+(define (encode-playpen-url code-string)
+  (let* ((prefix "http://play.rust-lang.org/?code=")
+         (encoded (foldl (lambda (replace s)
+                           (string-replace s (car replace) (cadr replace)))
+                         code-string
+                         '(("%" "%25") ;; must be 1st (avoid double-replace)
+                           ("$" "%24")
+                           ("&" "%26")
+                           
+                           ("+" "%2B")
+                           ("," "%2C")
+                           ("/" "%2F")
+                           (":" "%3A")
+                           (";" "%3B")
+                           ("=" "%3D")
+                           ("?" "%3F")
+                           ("@" "%40")
+                           ("\"" "%22")
+                           ("|" "%7C")
+                           ("\\" "%5C")
+                           ("^" "%5E")
+                           ("~" "%7E")
+                           ("`" "%60")
+                           
+                           ("{" "%7B")
+                           ("}" "%7D")
+                           ("<" "%3C")
+                           (">" "%3E")
+                           ("[" "%5B")
+                           ("]" "%5D")
+                           ("#" "%23")
+                          
+                           )))
+         (u (string-append prefix encoded)))
+    ;; (display u)
+    ;; (newline)
+    u))
+
+(define (slide-code/url title code-string)
+  (slide #:title title
+         #:layout 'top
+         (playpen-url #f (encode-playpen-url code-string))
+         (rust-tt/nl code-string)))
+  
+;(send-url (encode-playpen-url "fn main() { println!(\"Hello world\"); }"))
+
+#;
+(begin
+(slide-code/url "A Quiz"
+                (string-replace quiz-code "$$IMPLS$$" #<<TEMPLATE
+/* 
+ *
+ * (various impls elided)
+ *
+ */
+TEMPLATE
+                                   ))
+
+(slide-code/url "The Joke"
+                (string-replace quiz-code "$$IMPLS$$" #<<DROP_CODE
+impl Drop for S2 {
+  fn drop(&mut self) {
+    println!("Hi for {}", self);
+  }
+}
+DROP_CODE
+                                   ))
+)
+
+(slide-code/url "Why"
+                #<<DYN_DROP_SEMANTICS
+fn main() {
+  println!("Hello world");
+}
+DYN_DROP_SEMANTICS
                 )
-       )
-
-(slide #:title "Simple source ⇔ compiled code relationship"
-       (item "A reason C persists to this day")
-       (item "Programmer can mentally model machine state")
-       (comment "especially with respect to memory")
-       'next
-       (subitem "can also control low-level details (e.g. memory layout)")
-       'next
-       (item "Goal for Rust: preserve this relationship ...")
-       'next
-       (subitem "... while" (bt "retaining") "memory safety ...")
-       (comment "One definition of memory safety: programs can only dereference"
-                "pointers to previously allocated memory that has not yet been"
-                "freed.")
-       'next
-       (subitem "... without runtime cost.")
-       (comment "In languages like Java/Haskell/ML, safe abstractions have runtime costs:"
-                "boxing everything; garbage-collecting everything")
-       (subitem "Do not box everything; do not GC-manage everything.")
-       )
