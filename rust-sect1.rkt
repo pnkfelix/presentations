@@ -316,9 +316,9 @@ LINT_DEMO
 
 NO_MESSAGE
                   #<<RUSTC_WARNING
-    warning: `p.x` initialized here, but not on // COLOR:orange
-    other paths. (Use Option, call `drop()`, or // COLOR:orange
-    reinitialize elsewhere.)                    // COLOR:orange
+    warning: `p.x` initialized here, but        // COLOR:orange
+    not on other paths. (Use Option, call       // COLOR:orange
+    `drop()`, or reinitialize `p.x` elsewhere.) // COLOR:orange
     #[warn(unmarked_early_drop)] on by default  // COLOR:orange
 RUSTC_WARNING
                   )))
