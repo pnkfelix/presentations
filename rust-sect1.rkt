@@ -222,13 +222,13 @@ DYN_DROP_SEMANTICS
 
 (slide-code "The Fix: Static Drop Semantics"
             #<<STATIC_DROP_SEMANTICS
-fn foo(b: || -> bool) {  // DROP OBLIGATIONS
-  let f3 = Df { ... };   // { f3 }
-  let f4 = Df { ... };   // { f3,f4 }
-  let f5 = Df { ... };   // { f3,f4,f5 }
-  let p = Pair{ x: f4, 
-                y: f5 }; // { f3,     , p }
-  let _f10 = Df { ... }; // { f3,     , p,   _f10 }
+fn foo(b: || -> bool) {// DROP OBLIGATIONS
+  let f3 = Df {...};   // { f3 }
+  let f4 = Df {...};   // { f3,f4 }
+  let f5 = Df {...};   // { f3,f4,f5 }
+  let p = Pair{
+     x: f4, y: f5 };   // { f3,     , p }
+  let _f10 = Df {...}; // { f3,     , p,   _f10 }
   if b() {
                          // { f3,     , p,   _f10 }
     take_and_pass(p.x);
@@ -236,7 +236,7 @@ fn foo(b: || -> bool) {  // DROP OBLIGATIONS
   } else {
                          // { f3,     , p,   _f10 }
   }
-  // drop mismatch here (p versus p.y)
+                    // drop mismatch (p versus p.y) // COLOR:red
 }
 STATIC_DROP_SEMANTICS
             )
