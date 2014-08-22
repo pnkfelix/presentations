@@ -36,5 +36,19 @@
        (thw (pict-width the-haiku))
        (thh (pict-height the-haiku)))
 
-  (slide rust-logo
-         (pin-over moz-logo (* 2/3 rw) (- thh) the-haiku)))
+  (slide 'alts
+         (append (map (lambda (theta)
+                        (list (rotate rust-logo theta)
+                              (pin-over moz-logo (* 2/3 rw) (- thh) the-haiku))     )
+                      (list 0
+                            (* 1 (/ pi 16))
+                            (* 3 (/ pi 16))
+                            ))
+                 (list 
+                  (list 
+                   (titlet "Dropping the Drop Flag")
+                   (t " ")
+                   (t " ")
+                   (rotate rust-logo (* 7 (/ pi 16)))
+                   
+                 )))))
