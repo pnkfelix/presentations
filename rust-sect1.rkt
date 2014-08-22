@@ -328,16 +328,16 @@ RUSTC_WARNING
 #[lang="noisy_drop"] trait NoisyDrop { }       
 #[lang="quiet_drop"] trait QuietDrop { }
 
-              // Drops default to quiet
+              // Drops default to quiet...
 impl Drop for Df { ... }
               // ...until marked noisy.
 impl NoisyDrop for Df {}
 
               // Noisiness bubbles out...
 struct S { d: Df }
-struct Q { s: S }
 
               // ... until marked quiet again.
+struct Q { s: S }
 impl QuietDrop for Q {}
 
 #[warn(early_loud_drop)]
