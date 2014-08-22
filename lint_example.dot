@@ -1,0 +1,68 @@
+digraph node_470 {
+    N0[label="needs_drop: {}\n\nentry\n\nneeds_drop: {b}"];
+    N1[label="needs_drop: {}\n\nexit\n\nneeds_drop: {}"];
+    N2[label="needs_drop: {b}\n\nexpr \"f3\" (id=483)\n\nneeds_drop: {b}"];
+    N3[label="needs_drop: {b}\n\nexpr Df{name: \"f3\",} (id=482)\n\nneeds_drop: {b}"];
+    N4[label="needs_drop: {b}\n\nlocal f3 (id=481)\n\nneeds_drop: {b, f3}"];
+    N5[label="needs_drop: {b, f3}\n\nexpr \"f4\" (id=489)\n\nneeds_drop: {b, f3}"];
+    N6[label="needs_drop: {b, f3}\n\nexpr Df{name: \"f4\",} (id=488)\n\nneeds_drop: {b, f3}"];
+    N7[label="needs_drop: {b, f3}\n\nlocal f4 (id=487)\n\nneeds_drop: {b, f3, f4}"];
+    N8[label="needs_drop: {b, f3, f4}\n\nexpr \"f5\" (id=495)\n\nneeds_drop: {b, f3, f4}"];
+    N9[label="needs_drop: {b, f3, f4}\n\nexpr Df{name: \"f5\",} (id=494)\n\nneeds_drop: {b, f3, f4}"];
+    N10[label="needs_drop: {b, f3, f4}\n\nlocal f5 (id=493)\n\nneeds_drop: {b, f3, f4, f5}"];
+    N11[label="needs_drop: {b, f3, f4, f5}\n\nexpr f4 (id=501)\n\nneeds_drop: {b, f3, f5}"];
+    N12[label="needs_drop: {b, f3, f5}\n\nexpr f5 (id=502)\n\nneeds_drop: {b, f3}"];
+    N13[label="needs_drop: {b, f3}\n\nexpr Pair{x: f4, y: f5,} (id=500)\n\nneeds_drop: {b, f3}"];
+    N14[label="needs_drop: {b, f3}\n\nlocal p (id=499)\n\nneeds_drop: {b, f3, p.x, p.y}"];
+    N15[label="needs_drop: {b, f3, p.x, p.y}\n\nexpr \"fA\" (id=508)\n\nneeds_drop: {b, f3, p.x, p.y}"];
+    N16[label="needs_drop: {b, f3, p.x, p.y}\n\nexpr Df{name: \"fA\",} (id=507)\n\nneeds_drop: {b, f3, p.x, p.y}"];
+    N17[label="needs_drop: {b, f3, p.x, p.y}\n\nlocal _f10 (id=506)\n\nneeds_drop: {b, f3, _f10, p.x, p.y}"];
+    N18[label="needs_drop: {b, f3, _f10, p.x, p.y}\n\nexpr b (id=512)\n\nneeds_drop: {b, f3, _f10, p.x, p.y}"];
+    N19[label="needs_drop: {b, f3, _f10, p.x, p.y}\n\nexpr b() (id=511)\n\nneeds_drop: {b, f3, _f10, p.x, p.y}"];
+    N20[label="needs_drop: {b, f3, _f10, p.x, p.y}\n\nexpr take_and_pass (id=516)\n\nneeds_drop: {b, f3, _f10, p.x, p.y}"];
+    N21[label="needs_drop: {b, f3, _f10, p.x, p.y}\n\nexpr p (id=518)\n\nneeds_drop: {b, f3, _f10, p.x, p.y}"];
+    N22[label="needs_drop: {b, f3, _f10, p.x, p.y}\n\nexpr p.x (id=517)\n\nneeds_drop: {b, f3, _f10, p.y}"];
+    N23[label="needs_drop: {b, f3, _f10, p.y}\n\nexpr take_and_pass(p.x) (id=515)\n\nneeds_drop: {b, f3, _f10, p.y}"];
+    N24[label="needs_drop: {b, f3, _f10, p.y}\n\nblock { take_and_pass(p.x); } (id=513)\n\nneeds_drop: {b, f3, _f10, p.y}"];
+    N25[label="needs_drop: {b, f3, _f10, p.x, p.y}\n\nblock { } (id=520)\n\nneeds_drop: {b, f3, _f10, p.x, p.y}"];
+    N26[label=<
+needs_drop: {b, f3, _f10, p.x, p.y}<br/>&nbsp;<br/>
+expr { } (id=519)<br/>&nbsp;<br/>
+needs_drop: {b, f3, _f10, <font color="red">p.x</font>, p.y}
+>];
+    N27[label="needs_drop: {b, f3, _f10, p.y}\n\nexpr if b() { take_and_pass(p.x); } else { } (id=510)\n\nneeds_drop: {b, f3, _f10, p.y}"];
+    N28[label="needs_drop: {b, f3, _f10, p.y}\n\nexpr other_code (id=523)\n\nneeds_drop: {b, f3, _f10, p.y}"];
+    N29[label="needs_drop: {b, f3, _f10, p.y}\n\nexpr other_code() (id=522)\n\nneeds_drop: {b, f3, _f10, p.y}"];
+    N30[label="needs_drop: {b, f3, _f10, p.y}\n\nblock {\l    let f3 = Df{name: \"f3\",};\l    let f4 = Df{name: \"f4\",};\l    let f5 = Df{name: \"f5\",};\l    let p = Pair{x: f4, y: f5,};\l    let _f10 = Df{name: \"fA\",};\l    if b() { take_and_pass(p.x); } else { }\l    other_code();\l} (id=477)\l\n\nneeds_drop: {}"];
+    N0 -> N2[label=""];
+    N2 -> N3[label=""];
+    N3 -> N4[label=""];
+    N4 -> N5[label=""];
+    N5 -> N6[label=""];
+    N6 -> N7[label=""];
+    N7 -> N8[label=""];
+    N8 -> N9[label=""];
+    N9 -> N10[label=""];
+    N10 -> N11[label=""];
+    N11 -> N12[label=""];
+    N12 -> N13[label=""];
+    N13 -> N14[label=""];
+    N14 -> N15[label=""];
+    N15 -> N16[label=""];
+    N16 -> N17[label=""];
+    N17 -> N18[label=""];
+    N18 -> N19[label=""];
+    N19 -> N20[label=""];
+    N20 -> N21[label=""];
+    N21 -> N22[label=""];
+    N22 -> N23[label=""];
+    N23 -> N24[label=""];
+    N19 -> N25[label=""];
+    N25 -> N26[label=""];
+    N24 -> N27[label="", color="red"];
+    N26 -> N27[label="", color="red"];
+    N27 -> N28[label=""];
+    N28 -> N29[label=""];
+    N29 -> N30[label=""];
+    N30 -> N1[label=""];
+}

@@ -41,14 +41,20 @@
                  (loop (cons (substring string s e) prev) (cdr p) e))))))))
 
 (define (make-lang-tt lang-keywords)
-  (lambda (string)
+  (lambda (line)
     (define (one tok)
       (cond ((member tok lang-keywords)                      (colorize (tt tok) "dark green"))
             ((regexp-match #rx"^[a-zA-Z][a-zA-Z0-9]*!$" tok) (colorize (tt tok) "maroon"))
             ((regexp-match #rx"^[0-9][0-9_]*$" tok)          (colorize (tt tok) "blue"))
             (else                                            (tt tok))))
-    (concat hbl-append
-            (map one (regexp-split-but-keep #rx"[,.&<=>{};: ]|\\(|\\)" string)))))
+    (let* ((recolor
+            (cond ((regexp-match #rx"// COLOR:([^ ]*)" line) => cadr)
+                  (else #f)))
+           (line (regexp-replace* #rx"// COLOR:([^ ]*)" line ""))
+           (words (map one (regexp-split-but-keep #rx"[,.&<=>{};: ]|\\(|\\)" line)))
+           (line (concat hbl-append words))
+           (line (if recolor (colorize line recolor) line)))
+      line)))
 
 
 (define rust-tt (make-lang-tt rust-keywords))
