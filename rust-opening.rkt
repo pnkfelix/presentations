@@ -46,7 +46,8 @@
                             ))
                  (list 
                   (list 
-                   (titlet "Dropping the Drop Flag")
+                   (parameterize ((current-font-size (* 2 (current-font-size))))
+                     (t "Dropping the Drop Flag"))
                    (t " ")
                    (t " ")
                    (rotate rust-logo (* 7 (/ pi 16)))
