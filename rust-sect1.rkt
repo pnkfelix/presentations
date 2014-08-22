@@ -88,6 +88,12 @@ RUST_SIZEOF
              (input (regexp-replace* #rx"\n([^\n]*// *SLIDE HIDE)" input "")))
         input)))
 
+(define (slide-code/tiny-url tiny-url title code-string)
+  (slide #:title title
+         #:layout 'top
+         (playpen-url tiny-url tiny-url)
+         (rust-tt/nl (extract-code-to-present code-string))))
+
 (define (slide-code/url title code-string)
   (slide #:title title
          #:layout 'top
@@ -103,7 +109,7 @@ RUST_SIZEOF
 ;(send-url (encode-playpen-url "fn main() { println!(\"Hello world\"); }"))
 
 (begin
-(slide-code/url "Pop Quiz"
+(slide-code/tiny-url "http://is.gd/qC1f0X" "Pop Quiz"
                 (quiz-code  #<<TEMPLATE
 /* 
  *
@@ -113,7 +119,7 @@ RUST_SIZEOF
 TEMPLATE
                                    ))
 
-(slide-code/url "The Joke"
+(slide-code/tiny-url "http://is.gd/WmLy9g" "The Joke"
                 (quiz-code #<<DROP_CODE
 impl Drop for S2 {
   fn drop(&mut self) {
@@ -124,7 +130,7 @@ DROP_CODE
                                    ))
 
 
-(slide-code/url "Why"
+(slide-code/tiny-url "http://is.gd/ZfqgpI" "Why"
                 #<<DYN_DROP_SEMANTICS
 #![feature(macro_rules)]
 #![allow(unused_variable)]
@@ -346,4 +352,5 @@ EXAMPLE_OF_MARKED_DROP
             )
 
 (slide
- (t "Thanks for listening"))
+ (parameterize ((current-font-size (* 2 (current-font-size))))
+   (t "Thanks for listening")))
