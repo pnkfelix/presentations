@@ -1,5 +1,6 @@
 #lang racket
 (require slideshow)
+(require "slides-common.rkt")
 (require "rust-common.rkt")
 
 (define (adjust-find-recentering some-find pict)
@@ -148,9 +149,6 @@ RUST
  rendering-of-rust-lonely-tuple
  )
 
-(define (big-t s)
-  (text s (current-main-font) 48))
-
 (slide #:name "Implications of move semantics"
        'alts
        (list (list (big-t "Implications"))))
@@ -259,83 +257,3 @@ fn add_b_twice<T>(p: Pair<int,T>,
 }
 RUST
 ))
-
-(slide #:name "Why all the fuss about aliasing?"
-       'alts
-       (list (list (big-t "Why all the fuss about aliasing?"))
-             (list (big-t "It is for type soundness"))))
-
-(slide #:title "mutable aliasing ⇒ soundness holes"
- (rust-tt/nl #<<RUST
-fn add3(x:int) -> int { x + 3 }
-enum E { A(fn (int) -> int), B(int) }
-let mut a = A(add3); let mut b = B(17);
-let p1 = &mut a;     let p2 = &mut b;
-foo(p1, p2);
-
-fn foo(p1: &mut E, p2: &mut E) {
-  match p1 {
-      &B(..) => fail!("cannot happen"),
-      &A(ref adder) => {
-          *p2 = B(0xdeadc0de);
-          println!("{}", (*adder)(14));
-      }
-  }
-}
-RUST
-)
- 'next
- (item "(punchline: above is fine;" (tt "rustc") "accepts it)")
- )
-
-(slide #:title "mutable aliasing ⇒ soundness holes"
- (rust-tt/nl #<<RUST
-fn add3(x:int) -> int { x + 3 }
-enum E { A(fn (int) -> int), B(int) }
-let mut a = A(add3); let mut b = B(17);
-let p1 = &mut a;     let p2 = &mut b;
-foo(p1, p2);
-
-fn foo(p1: &mut E, p2: &mut E) {
-  match p1 {
-      &B(..) => fail!("cannot happen"),
-      &A(ref adder) => {
-          *p1 = B(0xdeadc0de);
-          println!("{}", (*adder)(14));
-      }
-  }
-}
-RUST
-)
- 'next
- (item "(punchline: above is badness;" (tt "rustc") "rejects it)")
- )
-
-(slide #:title "mutable aliasing ⇒ soundness holes"
- (rust-tt/nl #<<RUST
-fn add3(x:int) -> int { x + 3 }
-enum E { A(fn (int) -> int), B(int) }
-let mut a = A(add3); let mut b = B(17);
-let p1 = &mut a;     let p2 = &mut b;
-foo(p1, p1);
-
-fn foo(p1: &mut E, p2: &mut E) {
-  match p1 {
-      &B(..) => fail!("cannot happen"),
-      &A(ref adder) => {
-          *p2 = B(0xdeadc0de);
-          println!("{}", (*adder)(14));
-      }
-  }
-}
-RUST
-)
- 'next
- (item "(punchline: above is badness;" (tt "rustc") "rejects it)")
- )
-
-
-(slide #:name "Why all the fuss about move semantics revisited?"
-       'alts
-       (list (list (big-t "Why all the fuss about move semantics?"))
-             (list (big-t "Allows us to reason about aliasing"))))
