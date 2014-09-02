@@ -34,10 +34,10 @@
          (template #<<RUST
 fn main() {
     // SLIDE START
-    fn add3(x:int) -> int { x + 3 }
     enum E { A(fn (int) -> int), B(int) }
-    let mut a = A(add3); let mut b = B(17);
-    let p1 = &mut a;     let p2 = &mut b;
+    fn add3(x:int) -> int { x + 3 }
+    let mut a = A(add3);        let mut b = B(17);
+    let p1 = &mut a;            let p2 = &mut b;
     $$CALL_SITE$$ $$COLOR_CALL$$
 
     fn foo(p1: &mut E, p2: &mut E) {
@@ -46,9 +46,7 @@ fn main() {
             &A(ref adder) => {
                 $$ASSIGN_TO$$ = B(0xdeadc0de); $$COLOR_ASSIGN$$
                 println!("{}", (*adder)(14));
-            }
-        }
-    }
+    } } }
     // SLIDE FINIS
 }
 RUST
@@ -60,10 +58,11 @@ RUST
     template))
 
 (call-with-url-and-code
- (aliasing-example "foo(p1, p2);" "/* watch: */ *p2")
+ (aliasing-example "foo(p1, p2);" "/* WATCH: */ *p2")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
-          ;; url
+          #:layout 'top
+          url
           (frame code)
           'next
           (item "(punchline: above is fine;" (tt "rustc") "accepts it)")
@@ -73,7 +72,8 @@ RUST
  (aliasing-example "foo(p1, p2);" "/* was p2 */ *p1")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
-          ;; url
+          #:layout 'top
+          url
           (frame code)
           )))
 
@@ -81,7 +81,8 @@ RUST
  (aliasing-example "foo(p1, p2);" '("/* was p2 */ *p1" "// COLOR:red"))
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
-          ;; url
+          #:layout 'top
+          url
           (frame code)
           'next
           (item "(punchline: above is badness;" (tt "rustc") "rejects it)")
@@ -91,7 +92,8 @@ RUST
  (aliasing-example "foo(p1, p2);" "/* watch? */ *p2")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
-          ;; url
+          #:layout 'top
+          url
           (frame code)
           (item "(reminder: above is fine;" (tt "rustc") "accepts it)")
           )))
@@ -100,15 +102,17 @@ RUST
  (aliasing-example "foo(p1, p1);" "/* watch? */ *p2")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
-          ;; url
+          #:layout 'top
+          url
           (frame code)
           )))
 
 (call-with-url-and-code
- (aliasing-example '("foo(p1, p1);" "// COLOR:red") "/* watch? */ *p2")
+ (aliasing-example '("foo(p1, p1);" "// <~~ AHHHHH // COLOR:red") "/* watch? */ *p2")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
-          ;; url
+          #:layout 'top
+          url
           (frame code)
           'next
           (item "(punchline: above is badness;" (tt "rustc") "rejects it)")

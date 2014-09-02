@@ -53,8 +53,8 @@
 
                            )))
          (u (string-append prefix encoded)))
-    ;; (display u)
-    ;; (newline)
+    ; (print u)
+    ; (newline)
     u))
 
 (define (extract-code-to-present code-string)
