@@ -24,13 +24,13 @@
        (list (list (big-t "Why all the fuss about aliasing?"))
              (list (big-t "It is for type soundness"))))
 
-(define (aliasing-example call-site-color assign-to-color)
+(define (aliasing-example call-site-color assignment-color)
   (define (val&color-val vc) (if (pair? vc) (car vc) vc))
   (define (val&color-color vc) (if (pair? vc) (cadr vc) ""))
   (let* ((call-site (val&color-val call-site-color))
-         (assign-to (val&color-val assign-to-color))
+         (assignment (val&color-val assignment-color))
          (color-call (val&color-color call-site-color))
-         (color-assign (val&color-color assign-to-color))
+         (color-assign (val&color-color assignment-color))
          (template #<<RUST
 fn main() {
     // SLIDE START
@@ -44,21 +44,21 @@ fn main() {
         match p1 {
             &B(..) => fail!("cannot happen"),
             &A(ref adder) => {
-                $$ASSIGN_TO$$ = B(0xdeadc0de); $$COLOR_ASSIGN$$
+                $$ASSIGN$$ $$COLOR_ASSIGN$$
                 println!("{}", (*adder)(14));
     } } }
     // SLIDE FINIS
 }
 RUST
 )
-         (template (string-replace template "$$ASSIGN_TO$$" assign-to))
+         (template (string-replace template "$$ASSIGN$$" assignment))
          (template (string-replace template "$$CALL_SITE$$" call-site))
          (template (string-replace template "$$COLOR_ASSIGN$$" color-assign))
          (template (string-replace template "$$COLOR_CALL$$" color-call)))
     template))
 
 (call-with-url-and-code
- (aliasing-example "foo(p1, p2);" "/* WATCH: */ *p2")
+ (aliasing-example "foo(p1, p2);" "/* WATCH: */ *p2 = B(0xBadC0de);")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
           #:layout 'top
@@ -69,7 +69,7 @@ RUST
           )))
 
 (call-with-url-and-code
- (aliasing-example "foo(p1, p2);" "/* was p2 */ *p1")
+ (aliasing-example "foo(p1, p2);" "/* was p2 */ *p1 = B(0xBadC0de);")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
           #:layout 'top
@@ -78,7 +78,7 @@ RUST
           )))
 
 (call-with-url-and-code
- (aliasing-example "foo(p1, p2);" '("/* was p2 */ *p1" "// COLOR:red"))
+ (aliasing-example "foo(p1, p2);" '("/* was p2 */ *p1 = B(0xBadC0de);" "// COLOR:red"))
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
           #:layout 'top
@@ -89,7 +89,27 @@ RUST
           )))
 
 (call-with-url-and-code
- (aliasing-example "foo(p1, p2);" "/* watch? */ *p2")
+ (aliasing-example "foo(p1, p2);" "unsafe { *(p1 as *mut E)=B(7); }")
+ (lambda (url code)
+   (slide #:title "mutable aliasing ⇒ soundness holes"
+          #:layout 'top
+          url
+          (frame code)
+          )))
+
+(call-with-url-and-code
+ (aliasing-example "foo(p1, p2);" "unsafe { *(p1 as *mut E)=B(7); } // COLOR:red")
+ (lambda (url code)
+   (slide #:title "mutable aliasing ⇒ soundness holes"
+          #:layout 'top
+          url
+          (frame code)
+          'next
+          (item "Emphasis:" (rust-tt "unsafe") "means \"can crash.\"")
+          )))
+
+(call-with-url-and-code
+ (aliasing-example "foo(p1, p2);" "/* watch? */ *p2 = B(0xBadC0de);")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
           #:layout 'top
@@ -99,7 +119,7 @@ RUST
           )))
 
 (call-with-url-and-code
- (aliasing-example "foo(p1, p1);" "/* watch? */ *p2")
+ (aliasing-example "foo(p1, p1);" "/* watch? */ *p2 = B(0xBadC0de);")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
           #:layout 'top
@@ -108,7 +128,8 @@ RUST
           )))
 
 (call-with-url-and-code
- (aliasing-example '("foo(p1, p1);" "// <~~ AHHHHH // COLOR:red") "/* watch? */ *p2")
+ (aliasing-example '("foo(p1, p1);" "// <~~ AHHHHH // COLOR:red")
+                   "/* watch? */ *p2 = B(0xBadC0de);")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
           #:layout 'top
