@@ -5,12 +5,7 @@
 
 (slide #:title "Motivation"
        ;(item "Why Mozilla is investing in a new programming language")
-       (item "Why invest in a new programming language")
-       'next
-       (item "Web browsers are complex programs")
-       (item "Expensive to innovate and compete while implementing atop standard systems languages")
-       'next
-       (item "So to implement next-gen browser, Servo ...")
+       (item "To implement next-gen browser, Servo ...")
        (subitem #:bullet (t "⇒") (tt "http://github.com/mozilla/servo"))
        'next
        (item "... Mozilla is using (& implementing) Rust")
@@ -18,6 +13,7 @@
 
 (outline 'one)
 
+#;
 (slide #:title "Language Design"
        (item "Goal: bridge performance gap between safe and unsafe languages")
        (item "Design choices largely fell out of that requirement")
@@ -27,7 +23,8 @@
        (item "Resource-constrained enviroments, direct control over hardware")
        (item "C and C++ dominate this space")
        (item "Systems programmers care about the last 10-15% of potential performance"))
- 
+
+#;
 (slide #:title "Unsafe aspects of C"
        (item "Dangling pointers")
        (item "Null pointer dereferences")
@@ -64,11 +61,9 @@
        (item "A reason C persists to this day")
        (item "Programmer can mentally model machine state")
        (comment "especially with respect to memory")
-       'next
        (subitem "can also control low-level details (e.g. memory layout)")
        'next
        (item "Goal for Rust: preserve this relationship ...")
-       'next
        (subitem "... while" (bt "retaining") "memory safety ...")
        (comment "One definition of memory safety: programs can only dereference"
                 "pointers to previously allocated memory that has not yet been"

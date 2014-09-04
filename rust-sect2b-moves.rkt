@@ -2,6 +2,9 @@
 (require slideshow)
 (require "slides-common.rkt")
 (require "rust-common.rkt")
+(require unstable/gui/slideshow)
+(require "playpen.rkt")
+(require "slide-rust-code.rkt")
 
 (define (adjust-find-recentering some-find pict)
   (lambda (p pp)
@@ -127,36 +130,41 @@ OCAML
   rendering-of-ocaml-lonely-tuples
   )
 
-(slide
- #:title "The same puzzle in Rust"
- (vl-append
-  (t "Rust:")
-  (rust-tt/nl #<<RUST
-use std::mem::size_of;
-enum Lonely<A> { One(A), Two(A, A) }
-let size =
-    size_of::<Lonely<(int,int,int,int,int)>>();
-let word_size = size_of::<int>();
-println!("words: {}", size / word_size);
+(call-with-url-and-code
+#<<RUST
+fn main() {
+    // SLIDE BEGIN
+    use std::mem::size_of;
+    enum Lonely<A> { One(A), Two(A, A) }
+    let size =
+        size_of::<Lonely<(int,int,int,int,int)>>();
+    let word_size = size_of::<int>();
+    println!("words: {}", size / word_size);
+    // SLIDE FINIS
+}
 RUST
-))
- 'next
- (item "Prints " (tt "words: 11"))
- (item "Here is how Rust represents a " (tt "Two"))
- rendering-of-rust-lonely-tuples
- 'next
- (item "Here is how Rust represents a " (tt "One"))
- rendering-of-rust-lonely-tuple
- )
+ (lambda (url code)
+  (slide
+   #:title "The same puzzle in Rust"
+   url
+   (frame code)
+   'next
+   (item "Prints " (tt "words: 11"))
+   (item "Here is how Rust represents a " (tt "Two"))
+   rendering-of-rust-lonely-tuples
+   'next
+   (item "Here is how Rust represents a " (tt "One"))
+   rendering-of-rust-lonely-tuple
+   )))
 
 (slide #:name "Implications of move semantics"
        'alts
        (list (list (big-t "Implications"))))
 
-(slide
- #:title "To Move or To Copy?"
- (item "This does not compile")
-(rust-tt/nl #<<RUST
+(call-with-url-and-code
+ #<<RUST
+use std::fmt::Show;
+// SLIDE BEGIN
 fn twice<T:Show>(x: T, f: fn (T) -> T) -> T {
     let w = f(x);
     println!("temp w: {}", w);
@@ -164,10 +172,20 @@ fn twice<T:Show>(x: T, f: fn (T) -> T) -> T {
     println!("temp y: {}", y);
     let z = f(y); return z;
 }
+// SLIDE FINIS
+fn main() {
+  fn times3(x:i32) -> i32 { x * 3 }
+  let answer = twice(2, times3);
+  println!("answer: {}", answer);
+}
 RUST
-)
-'next
-(rust-tt/nl #<<RUST
+(lambda (url code)
+  (slide
+   #:title "To Move or To Copy?"
+   (para "This does not compile (" url ")")
+   (frame code)
+   'next
+   (rust-tt/nl #<<RUST
 error: use of moved value: `x`
 let y = f(x);
           ^
@@ -176,7 +194,62 @@ note: `x` moved here because it has non-copyable
 let w = f(x);
           ^
 RUST
-))
+))))
+
+(define rust-snippet
+#<<RUST
+let y = { let x = 2 + 3; x > 5 };
+if y { x + 6 } else { x + 7 }
+RUST
+)
+
+(slide #:title "What sleight of hand is this?"
+       (item "\"You said 'move semantics'; looks like linear or affine types.\"")
+       (item "Did we not see a bunch of examples earlier like:"
+             (rust-tt/nl rust-snippet))
+       'next
+       (item "Obviously" (rust-tt "x") "is not being used linearly" (bold "there"))
+       (item "Magic?"))
+
+(slide #:title "Clarke's third law"
+       'alts
+       (list (list (item "It's not magic; it's the type system"))
+             (list (item "It's not magic;" (strike (t "it's the type system"))
+                         "it's the type + trait system")
+                   'next
+                   (item "The" (tt "Copy") "bound expresses that a type is freely copyable")
+                   (subitem "and it is checked by the compiler")
+                   'next
+                   (item "Many built-in types implement" (tt "Copy") "...")
+                   (item "... but a type parameter with no given bounds does not."))))
+
+(call-with-url-and-code
+  #<<RUST
+use std::fmt::Show;
+// SLIDE BEGIN
+fn twice<T:Show+Copy>(x: T, f: fn (T) -> T) -> T {
+            // ^~~~~ new code here // COLOR:red
+    let w = f(x);
+    println!("temp w: {}", w);
+    let y = f(x);
+    println!("temp y: {}", y);
+    let z = f(y); return z;
+}
+// SLIDE FINIS
+fn main() {
+  fn times3(x:i32) -> i32 { x * 3 }
+  let answer = twice(2, times3);
+  println!("answer: {}", answer);
+}
+RUST
+(lambda (url code)
+  (slide
+   #:title "To Move or To Copy? (II)"
+   (para "This version works (" url ")")
+   (frame code)
+   'next
+   (para "but that's not the point.")
+   (item "(Cannot generally just add" (tt "Copy") "bounds)"))))
 
 (slide #:name "Why all the fuss about move semantics?"
        'alts
@@ -186,47 +259,62 @@ RUST
 
 (slide
  #:title "Rust: Values and References"
- (item "Life outside of ref-cells")
- (item "There are three core types" (tt "T") "to think about.")
+ (para "Life outside of ref-cells")
+ (para "There are three core types" (tt "T") "to think about.")
  (item (tt "     T") "  non-reference")
  (comment "e.g. ints, tuples, struct instances, ...")
  (item (tt "    &T") "  shared reference")
- (item (tt "&mut T") "  mutable unaliased reference")
+ (item (rust-tt "&mut T") "  mutable unaliased reference")
  'next
- (item (tt "    *T") "  too (unsafe pointers); not this talk")
+ (para "okay there is" (tt "*T") "  too, aka " (rust-tt "unsafe") "pointers")
+ 'next
+ (subitem "(and library smart pointers like" (tt "Box<T>") "or"
+  (tt "Rc<T>") ", but those are not" (bold "core") ")")
  )
 
+(slide-code/url "&T : shared reference"
+ #<<RUST
+fn main() {
+    // SLIDE BEGIN
+    let x: int = 3;
+    let y: &int = &x;
+    assert!(*y == 3);
+    // assert!(y == 3); /* Does not type-check */
 
-(slide
- #:title "&T : shared reference"
- (rust-tt/nl #<<RUST
-let x: int = 3;
-let y: &int = &x;
-assert!(*y == 3);
-// assert!(y == 3); /* Does not type-check */
-
-struct Pair<A,B> { a: A, b: B }
-let p = Pair { a: 4, b: "hi" };
-let y: &int = &p.a;
-assert!(*y == 4);
-RUST
-))
-
-(slide #:title "&mut T :  mutable unaliased reference"
- (rust-tt/nl #<<RUST
-let mut x: int = 5;
-increment(&mut x);
-assert!(x == 6);
-
-fn increment(r: &mut int) {
-    *r = *r + 1;
+    struct Pair<A,B> { a: A, b: B }
+    let p = Pair { a: 4, b: "hi" };
+    let y: &int = &p.a;
+    let (z1, z2) = (y, y); // &T impl's Copy for any T.
+    assert!(*y == 4);
+    // SLIDE FINIS
 }
 RUST
-))
+ ) 
 
-(slide
- #:title "pattern matching and refs: Why"
- (rust-tt/nl #<<RUST
+(slide-code/url "&mut T :  mutable unaliased reference"
+ #<<RUST
+fn main() {
+    // SLIDE BEGIN
+    let mut x: int = 5;
+    {
+        let y = &mut x;
+        increment(y);
+    }
+    assert!(x == 6);
+
+    fn increment(r: &mut int) {
+        *r = *r + 1;
+    }
+
+    let y = &mut x;
+    // let (z1, z2) = (y, y); /* Does not type-check */
+    // SLIDE FINIS
+}
+RUST
+)
+
+(slide-code/url "pattern matching and refs: Why"
+ #<<RUST
 struct Pair<A,B> { a: A, b: B }
 fn add_b_twice<T>(p: Pair<int,T>,
                   f: fn (&T) -> int) -> int {
@@ -238,12 +326,13 @@ fn add_b_twice<T>(p: Pair<int,T>,
     }
   }
 }
+// SLIDE FINIS
+fn main() {} 
 RUST
-))
+)
 
-(slide
- #:title "pattern matching and refs: How"
- (rust-tt/nl #<<RUST
+(slide-code/url "pattern matching and refs: How"
+ #<<RUST
 struct Pair<A,B> { a: A, b: B }
 fn add_b_twice<T>(p: Pair<int,T>,
                   f: fn (&T) -> int) -> int {
@@ -255,5 +344,12 @@ fn add_b_twice<T>(p: Pair<int,T>,
     }
   }
 }
+// SLIDE FINIS
+fn main() {
+    fn extract(b: &Box<int>) -> int { **b }
+    let p = Pair { a: 3, b: box 4 };
+    let answer = add_b_twice(p, extract);
+    println!("answer: {}", answer);
+}
 RUST
-))
+)

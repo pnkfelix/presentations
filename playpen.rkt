@@ -62,8 +62,8 @@
       code-string
       (let* ((input code-string)
              (indent-and-input
-              (cond ((regexp-match #rx"\n( *)// *SLIDE START[^\n]*\n(.*)" input) =>
-                     (lambda (elems) (list (cadr elems) (caddr elems))))
+              (cond ((regexp-match #rx"\n( *)// *SLIDE (START|BEGIN)[^\n]*\n(.*)" input) =>
+                     (lambda (elems) (list (cadr elems) (cadddr elems))))
                     (else (list "" input))))
              (indent (car indent-and-input))
              (input (cadr indent-and-input))
@@ -87,19 +87,3 @@
      ((tiny-url code-string f)
       (handler code-string f (playpen-url tiny-url tiny-url))))))
 
-#;
-(define (slide-code/tiny-url tiny-url title code-string)
-  (call-with-url-and-code tiny-url code-string
-                          (lambda (pu code)
-                            (slide #:title title #:layout 'top pu code))))
-
-#;
-(define (slide-code/url title code-string)
-  (call-with-url-and-code code-string
-                          (lambda (pu code)
-                            (slide #:title title #:layout 'top pu code))))
-#;
-(define (slide-code title code-string)
-  (call-with-url-and-code code-string
-                          (lambda (pu code)
-                            (slide #:title title #:layout 'top code))))

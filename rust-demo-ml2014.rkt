@@ -4,13 +4,12 @@
 (require "rust-opening.rkt")
 (require "rust-sect1.rkt")
 (require "rust-sect2.rkt")
+(require "rust-sect3.rkt")
 
 (slide #:title "Topics not covered"
        (item "regions/lifetimes and their subtyping relationship")
        (item "traits as existentials (object-oriented dispatch)")
        (item "borrow-checking static analysis rules")
-       ; (item "freezing/thawing data structures")
-       (item "task-local storage")
        (item "Rust and closures")
        (item "syntax extensions")
 )
