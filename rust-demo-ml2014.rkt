@@ -7,11 +7,10 @@
 (require "rust-sect3.rkt")
 
 (slide #:title "Topics not covered"
-       (item "regions/lifetimes and their subtyping relationship")
+       (item "subtype relation of" (tt "&'a T") "and" (tt "&'b T") "induced by" (tt "'b:'a"))
        (item "traits as existentials (object-oriented dispatch)")
        (item "borrow-checking static analysis rules")
        (item "Rust and closures")
-       (item "syntax extensions")
 )
 
 (slide #:title "Join the Fun!"

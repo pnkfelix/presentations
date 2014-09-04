@@ -106,8 +106,8 @@ fn main() {
     // SLIDE START
     enum E { A(int), B(int) }
     let a = Cell::new(A(16)); let b = Cell::new(B(17));
-    let p1 = &a;              let _p2 = &b;
-    foo(p1, p1);
+    let c1 = &a;              let _c2 = &b;
+    foo(c1, c1);
 
     fn foo(p1: &Cell<E>, p2: &Cell<E>) {
         p2.set(B(0xBaC0de));

@@ -340,6 +340,7 @@ fn add_b_twice<T>(p: Pair<int,T>,
     Pair{ a, ref b } => {
         //   ^ now `p.b` is left in place, and
         // `b` is bound to a `&T` instead of a `T`.
+        // (even happens when `p` is Copy!)
         a + f(b) + f(&p.b)
     }
   }
