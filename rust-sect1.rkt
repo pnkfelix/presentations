@@ -2,6 +2,7 @@
 
 (require slideshow)
 (require "rust-common.rkt")
+(require "playpen.rkt")
 
 (slide #:title "Motivation"
        ;(item "Why Mozilla is investing in a new programming language")
@@ -9,7 +10,9 @@
        (subitem #:bullet (t "⇒") (tt "http://github.com/mozilla/servo"))
        'next
        (item "... Mozilla is using (& implementing) Rust")
-       (subitem #:bullet (t "⇒") (tt "http://rust-lang.org")))
+       (subitem #:bullet (t "⇒") (url-box "http://rust-lang.org"
+                                          "blue"
+                                          "http://rust-lang.org")))
 
 (outline 'one)
 

@@ -3,7 +3,12 @@
 (require (only-in browser/external send-url))
 (require "rust-common.rkt")
 (provide call-with-url-and-code)
+(provide url-box)
 ;(provide slide-code slide-code/url slide-code/tiny-url)
+
+(define (url-box text color url)
+  (clickback (colorize (tt text) color)
+             (λ () (send-url url))))
 
 (define playpen-url
   (case-lambda
