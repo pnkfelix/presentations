@@ -104,6 +104,14 @@ RUST
        (subitem "Compiler does not check your claim!")
        (subitem "Dynamically checked; task failure if you broke rules."))
 
+;; This:
+;;
+;;    http://is.gd/pieVl6
+;;
+;; is a more honest recreation of the original.  but I think I
+;; couldn't fit it on the slide.  And then I goofed during the
+;; presentation and made a misstatement about the relationship
+;; of `Copy` and top-level `fn` items.
 
 (slide-code/tiny-url/punchline
  "http://is.gd/bfXxT0"
