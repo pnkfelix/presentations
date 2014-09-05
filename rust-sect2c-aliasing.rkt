@@ -43,7 +43,7 @@ RUST
          (template (string-replace template "$$COLOR_CALL$$" color-call)))
     template))
 
-(call-with-url-and-code
+(call-with-url-and-code "http://is.gd/jPR99P"
  (aliasing-example "foo(m1, m2);" "/* WATCH: */ *p2 = B(0xBadC0de);")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
@@ -54,7 +54,7 @@ RUST
           (item "(punchline: above is fine;" (tt "rustc") "accepts it)")
           )))
 
-(call-with-url-and-code
+(call-with-url-and-code "http://is.gd/8WqUji"
  (aliasing-example "foo(m1, m2);" "/* was p2 */ *p1 = B(0xBadC0de);")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
@@ -63,7 +63,7 @@ RUST
           (frame code)
           )))
 
-(call-with-url-and-code
+(call-with-url-and-code "http://is.gd/CAO0LG"
  (aliasing-example "foo(m1, m2);" '("/* was p2 */ *p1 = B(0xBadC0de);" "// COLOR:red"))
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
@@ -74,7 +74,7 @@ RUST
           (item "(punchline: above is badness;" (tt "rustc") "rejects it)")
           )))
 
-(call-with-url-and-code
+(call-with-url-and-code "http://is.gd/ql9yce"
  (aliasing-example "foo(m1, m2);" "unsafe { *(p1 as *mut E)=B(7); }")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
@@ -83,7 +83,7 @@ RUST
           (frame code)
           )))
 
-(call-with-url-and-code
+(call-with-url-and-code "http://is.gd/TxPLzy"
  (aliasing-example "foo(m1, m2);" "unsafe { *(p1 as *mut E)=B(7); } // COLOR:red")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
@@ -94,7 +94,7 @@ RUST
           (item "Emphasis:" (rust-tt "unsafe") "means \"can crash.\"")
           )))
 
-(call-with-url-and-code
+(call-with-url-and-code "http://is.gd/Kbyb9z"
  (aliasing-example "foo(m1, m2);" "/* watch? */ *p2 = B(0xBadC0de);")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
@@ -104,7 +104,7 @@ RUST
           (item "(reminder: above is fine;" (tt "rustc") "accepts it)")
           )))
 
-(call-with-url-and-code
+(call-with-url-and-code "http://is.gd/RoHtew"
  (aliasing-example "foo(m1, m1);" "/* watch? */ *p2 = B(0xBadC0de);")
  (lambda (url code)
    (slide #:title "mutable aliasing ⇒ soundness holes"
@@ -114,7 +114,7 @@ RUST
           (item "what changed, nothing in" (tt "foo") "..."))
           ))
 
-(call-with-url-and-code
+(call-with-url-and-code "http://is.gd/4MQeii"
  (aliasing-example '("foo(m1, m1);" "// <~~ AHHHHH // COLOR:red")
                    "/* watch? */ *p2 = B(0xBadC0de);")
  (lambda (url code)

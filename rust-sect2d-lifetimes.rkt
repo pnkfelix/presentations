@@ -34,6 +34,7 @@
              "(and perhaps longer)"))
 
 (call-with-url-and-code
+"http://is.gd/xCt1tX"
  #<<RUST
 fn main() {
     // SLIDE BEGIN

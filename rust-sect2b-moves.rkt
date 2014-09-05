@@ -131,6 +131,7 @@ OCAML
   )
 
 (call-with-url-and-code
+"http://is.gd/pzY6p9"
 #<<RUST
 fn main() {
     // SLIDE BEGIN
@@ -162,7 +163,8 @@ RUST
        (list (list (big-t "Implications"))))
 
 (call-with-url-and-code
- #<<RUST
+"http://is.gd/kYJQzk"
+#<<RUST
 use std::fmt::Show;
 // SLIDE BEGIN
 fn twice<T:Show>(x: T, f: fn (T) -> T) -> T {
@@ -182,7 +184,7 @@ RUST
 (lambda (url code)
   (slide
    #:title "To Move or To Copy?"
-   (para "This does not compile (" url ")")
+   (para "can't build: " url)
    (frame code)
    'next
    (rust-tt/nl #<<RUST
@@ -224,6 +226,7 @@ RUST
                    (item "... but a type parameter with no given bounds does not."))))
 
 (call-with-url-and-code
+"http://is.gd/fOEE4C"
   #<<RUST
 use std::fmt::Show;
 // SLIDE BEGIN
@@ -245,7 +248,7 @@ RUST
 (lambda (url code)
   (slide
    #:title "To Move or To Copy? (II)"
-   (para "This version works (" url ")")
+   (para "\"Works\": " url)
    (frame code)
    'next
    (para "but that's not the point.")
@@ -272,7 +275,7 @@ RUST
   (tt "Rc<T>") ", but those are not" (bold "core") ")")
  )
 
-(slide-code/url "&T : shared reference"
+(slide-code/tiny-url "http://is.gd/aJ1TZx" "&T : shared reference"
  #<<RUST
 fn main() {
     // SLIDE BEGIN
@@ -291,7 +294,7 @@ fn main() {
 RUST
  ) 
 
-(slide-code/url "&mut T :  mutable unaliased reference"
+(slide-code/tiny-url "http://is.gd/sqVUIa" "&mut T :  mutable unaliased reference"
  #<<RUST
 fn main() {
     // SLIDE BEGIN
@@ -313,7 +316,7 @@ fn main() {
 RUST
 )
 
-(slide-code/url "pattern matching and refs: Why"
+(slide-code/tiny-url "http://is.gd/O05OXc" "pattern matching and refs: Why"
  #<<RUST
 struct Pair<A,B> { a: A, b: B }
 fn add_b_twice<T>(p: Pair<int,T>,
@@ -330,9 +333,8 @@ fn add_b_twice<T>(p: Pair<int,T>,
 fn main() {} 
 RUST
 )
-
-(slide-code/url "pattern matching and refs: How"
- #<<RUST
+(slide-code/tiny-url "http://is.gd/Npbf17" "pattern matching and refs: How"
+#<<RUST
 struct Pair<A,B> { a: A, b: B }
 fn add_b_twice<T>(p: Pair<int,T>,
                   f: fn (&T) -> int) -> int {

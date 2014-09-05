@@ -42,6 +42,7 @@ RUST
 ))
 
 (call-with-url-and-code
+"http://is.gd/FgtM0y"
 #<<RUST
 fn main() {
     // SLIDE BEGIN
@@ -71,6 +72,7 @@ OCAML
          ))))
 
 (call-with-url-and-code
+"http://is.gd/gd2tDG"
 #<<RUST
 fn main() {
     // SLIDE BEGIN
@@ -104,7 +106,9 @@ OCAML
    url
 )))))
 
-(slide-code/url "Rust: Bounded Polymorphism (No functors)"
+(slide-code/tiny-url
+ "http://is.gd/J7hH2a"
+ "Rust: Bounded Polymorphism (No functors)"
                 #<<RUST
 enum Lonely<A> { One(A), Two(A, A) }
 trait Plus { fn plus(self, rhs: Self) -> Self; }

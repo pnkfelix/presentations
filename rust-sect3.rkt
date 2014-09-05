@@ -45,12 +45,15 @@ RUST
             (template (string-replace template "$$LINE_1$$" line-1)))
       template))
 
-(slide-code/url "Inherited mutability" (inherited-mutability-example
+(slide-code/tiny-url
+"http://is.gd/ZUj4Jg"
+"Inherited mutability" (inherited-mutability-example
                                         "struct T<'l> { p: &'l S,\n                    q: &'l mut S }"
                                         "let u;\nu = T { p: &b, q: &mut c };"
                                         "u.p.x = 7;"))
 
-(slide-code/url/punchline
+(slide-code/tiny-url/punchline
+ "http://is.gd/Yb0Zg2"
  "Inherited mutability"
  (inherited-mutability-example "struct T<'l> { p: &'l S,\n                    q: &'l mut S }"
 
@@ -58,20 +61,23 @@ RUST
                                "u.p.x = 7; // COLOR:red")
  (para "you can't mutate" (tt "u.p.x") "this way;" (tt "u") "is not marked" (tt "mut")))
 
-(slide-code/url
+(slide-code/tiny-url
+ "http://is.gd/qqlCfu"
  "Inherited mutability"
  (inherited-mutability-example "struct T<'l> { p: &'l S,\n                    q: &'l mut S }"
                                "let mut u;\nu = T { p: &b, q: &mut c };"
                                "u.p.x = 7;"))
 
-(slide-code/url/punchline
+(slide-code/tiny-url/punchline
+ "http://is.gd/lCtD1D"
  "Inherited mutability"
  (inherited-mutability-example "struct T<'l> { p: &'l S, // COLOR:red\n                    q: &'l mut S }"
                                "let mut u;\nu = T { p: &b, q: &mut c };"
                                "u.p.x = 7; // COLOR:red")
  (para "you can't mutate" (tt "u.p.x") "this way;" (tt "u.p") "is not" (tt "&mut")))
 
-(slide-code/url/punchline
+(slide-code/tiny-url/punchline
+ "http://is.gd/BlhZ4O"
  "Inherited mutability"
  (inherited-mutability-example "struct T<'l> { p: &'l S,\n                    q: &'l mut S }"
                                "let mut u;\nu = T { p: &b, q: &mut c };"
@@ -99,7 +105,9 @@ RUST
        (subitem "Dynamically checked; task failure if you broke rules."))
 
 
-(slide-code/url/punchline "Demo of Cell<T>"
+(slide-code/tiny-url/punchline
+ "http://is.gd/bfXxT0"
+ "Demo of Cell<T>"
  #<<RUST
 use std::cell::Cell;
 fn main() {
