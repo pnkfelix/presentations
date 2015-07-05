@@ -1,6 +1,7 @@
 [submodule "reveal.js"]
 	path = reveal.js
-	url = git@github.com:hakimel/reveal.js.git
+#	url = git@github.com:hakimel/reveal.js.git
+	url = git@github.com:pnkfelix/reveal.js.git
 [submodule "moz-reveal"]
 	path = moz-reveal
 	url = git@github.com:mozilla/Reveal-Mozilla-Theme.git
