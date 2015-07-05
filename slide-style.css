@@ -1,0 +1,41 @@
+.reveal .filename { font-size: 50%; line-height: 0; float: right }
+
+/* .reveal h1 { font-family: sans-serif; } */
+.reveal h1 { font-size: 3.77em; }
+.reveal h2 { font-size: 2.11em; }
+.reveal h3 { font-size: 1.55em; }
+.reveal .level2 h1 { font-size: 2.11em; }
+.reveal { line-height: initial; }
+
+.reveal .heads_up { position: absolute; right: 0; top: 20ex; z-index: 10; }
+
+/* .reveal pre code { color: #000000; background-color: white; } */
+
+/* .reveal code { font-family: Menlo,monospace; font-size: 100%; line-height: initial; } */
+
+.left_align > div { text-align: left; }
+
+div.no_border img {
+    box-shadow: initial;
+    border: initial;
+    background: initial;
+}
+
+div.logo img {
+    width: 50%;
+    height: auto;
+}
+
+div.screen_grab img {
+    width: 50%;
+    height: auto;
+}
+
+.reveal .slides>section,
+.reveal .slides>section>section {
+    padding: 0;
+}
+
+.no_center {
+    min-height: initial !important;
+}
