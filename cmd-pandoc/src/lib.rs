@@ -289,7 +289,7 @@ pub fn run_pandoc(src_dir: &str, target_name: &str, opts: &[PandocOption]) -> Re
     let mut src_paths = Vec::new();
     for entry in try!(read_dir(src_dir_path)) {
         let entry = try!(entry);
-        if is_mod_md(&entry) { continue; }
+        if is_skipped_md(&entry) { continue; }
         if let Some("md") = entry.path().extension().and_then(|p|p.to_str()) {
             src_paths.push(entry.path());
         }
@@ -332,12 +332,11 @@ pub fn run_pandoc(src_dir: &str, target_name: &str, opts: &[PandocOption]) -> Re
     Ok(())
 }
 
-fn is_mod_md(entry: &fs::DirEntry) -> bool {
+fn is_skipped_md(entry: &fs::DirEntry) -> bool {
     {
-        if let Some("mod.md") = entry.path().file_name().and_then(|p|p.to_str()) {
-            true
-        } else {
-            false
+        match entry.path().file_name().and_then(|p|p.to_str()) {
+            Some("mod.md") | Some("lib.md") => true,
+            _ => false,
         }
     }
 }
