@@ -131,7 +131,7 @@ fn foo(v: &Vec<i32>) -> i32 {
 
 ## Memory safety
 
-Example: catches [iterator invalidation bugs](http://is.gd/ShihgA)
+Example: catches [iterator invalidation bugs](http://is.gd/ShihgA) (aka `ConcurrentModificationException` - at compile-time)
 
 ``` {.rust .compile_error}
 fn this_wont_compile(v: &mut Vec<i32>) -> i32 {
@@ -273,6 +273,8 @@ where appropriate
 ### But
 
 Prefers static assurances *when feasible*
+
+(we are pragmatists)
 
 </div>
 
@@ -687,6 +689,8 @@ In this case, the borrow marked "A" needs to last longer!
 The value of `r1` is being copied into `r2` on the
 line marked "B", so the borrow marked "A" needs to
 include the scope of both `'r1` and `'r2`.
+
+Regarding that "someday" comment: http://is.gd/rRPVe2
 </div>
 
 ## imm-borrows: can be copied freely { data-transition="fade-out" }
@@ -772,9 +776,11 @@ fn modify_vec(v: &mut Vec<i32>) {
 v1: [1, 2, 3, 4]
 ```
 
-## What does `&mut`{.rust} mean (crucial) { .center data-transition="zoom-out" }
+## What does `&mut`{.rust} mean (crucial) { .center data-transition="zoom-out" .left_align }
 
 For many (but not all) types, safe mutation *requires* exclusive access
+
+. . .
 
 Any operation requiring exclusive access should either:
 
