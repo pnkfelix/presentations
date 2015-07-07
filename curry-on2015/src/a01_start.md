@@ -92,7 +92,7 @@ fn sum_pos(v: &Vec<i32>) -> i32 {
 [loop demo]: http://is.gd/weGnJ0
 <!-- https://play.rust-lang.org/?gist=23a69161dd4421e2925f -->
 
-## Abstraction without overhead { data-transition="fade-in" }
+## Abstraction without overhead { data-transition="fade" }
 
 Generated x86_64 machine code for `fn sum_pos`{.rust}:
 
@@ -115,11 +115,23 @@ Generated x86_64 machine code for `fn sum_pos`{.rust}:
 	retq
 ```
 
-(when compiled in "release mode")
+## Abstraction without overhead { data-transition="fade-in slide-out" }
+
+Or, if the first was not high-level enough:
+
+``` {.rust}
+fn foo(v: &Vec<i32>) -> i32 {
+    v.iter().filter(|i| **i > 0).map(|i| *i).sum()
+}
+```
+
+(This [second loop demo] compiles down to the *same* tight code!)
+
+[second loop demo]: http://is.gd/RPVIjt
 
 ## Memory safety
 
-Example: catches iterator invalidation bugs
+Example: catches [iterator invalidation bugs](http://is.gd/ShihgA)
 
 ``` {.rust .compile_error}
 fn this_wont_compile(v: &mut Vec<i32>) -> i32 {
@@ -177,7 +189,7 @@ fn par_max(data: &[u8]) -> u8 {
 }
 ```
 
-(caveat: above is using unstable `thread::scoped` API)
+(caveat: [above](http://is.gd/zOH5aL) is using unstable `thread::scoped` API)
 
 <!--
 ```rust
@@ -286,7 +298,7 @@ Prefers static assurances *when feasible*
 (encode safety constraints between references)
 </div>
 
-## Move Semantics
+## [Move Semantics](http://is.gd/IZyTXN)
 
 Create (and modify) owned:
 ```rust
@@ -328,7 +340,7 @@ Structured data uses move semantics by default
  * Compiler checks attempts to opt-in to `Copy` "interface"
      * ("interface", aka "trait bound" in Rust)
 
-## Moved data errors
+## [Moved data errors](http://is.gd/aYKrYd)
 
 ``` {.rust .compile_error}
 #[test]
@@ -354,7 +366,7 @@ note: `moving_value` moved here because it has type
 ```
 
 
-## Moves insufficient on their own
+## [Moves insufficient on their own](http://is.gd/qwc0iq)
 
 Imagine programming without reuse
 
@@ -392,7 +404,7 @@ note: `vec` moved here because it has type
 
 # Learning to Share {.center}
 
-## Borrowing {.center}
+## [Borrowing](http://is.gd/ez9JrK) {.center}
 
 *Lend* references to values
 
@@ -459,7 +471,7 @@ Rust uses similar model (but at compile-time) for borrows
 
 # Concrete Examples of Types {.center}
 
-## readin', writin', and transfer'n
+## [readin', writin', and transfer'n](http://is.gd/QRmpaH)
 
 ```rust
 fn read(v: &Vec<String>) -> String {
@@ -489,7 +501,7 @@ fn consume(v: Vec<String>) -> String {
 }
 ```
 
-## Calls to the three variants
+## [Calls to the three variants](http://is.gd/QRmpaH)
 
 ```{.rust}
 fn read(v: &Vec<String>) -> String { ... }
@@ -512,7 +524,7 @@ fn demo() {
 
 # More on Scopes {.center}
 
-## Borrowing (immutably) { data-transition="fade-out" }
+## [Borrowing (immutably)](http://is.gd/oeTVPs) { data-transition="fade-out" }
 
 ```rust
 #[test]
@@ -535,7 +547,7 @@ fn foo<'a>(v: &'a Vec<i32>) { println!("v[1]: {}", v[1]); }
 
 `&v1` and `&v2` are *borrowing* `v1` and `v2`.
 
-## Scopes and Lifetimes { data-transition="fade-in" }
+## [Scopes and Lifetimes](http://is.gd/7uHned) { data-transition="fade-in" }
 
 ```rust
 #[test]
@@ -558,7 +570,7 @@ fn foo<'a>(v: &'a Vec<i32>) { println!("v[1]: {}", v[1]); }
 
 Each borrow selects "appropriate" lifetime `'a`.
 
-## Borrow Checking Prevents Errors { data-transition="fade-out" }
+## [Borrow Checking Prevents Errors](http://is.gd/bRKjWu) { data-transition="fade-out" }
 
 ``` {.rust .compile_error}
 fn borrow_checking_prevents_errors() {
@@ -588,7 +600,7 @@ note: borrow of `v1` occurs here
               ^~
 ```
 
-## Lifetimes and Lexical Scope { data-transition="fade-in" }
+## [Lifetimes and Lexical Scope](http://is.gd/IA6Vlj) { data-transition="fade-in" }
 
 ``` {.rust .compile_error}
 fn borrow_checking_may_seem_simple_minded() {
@@ -618,7 +630,7 @@ note: borrow of `v1` occurs here
 
 (artifact of lexical-scope based implementation)
 
-## Built on lexical scopes, but non-trivial { data-transition="slide-in fade-out" }
+## [Built on lexical scopes, but non-trivial](http://is.gd/aJR3jP) { data-transition="slide-in fade-out" }
 
 ```rust
 #[test]
@@ -647,7 +659,7 @@ long enough for the call to `foo(r1)`; after that point,
 the borrow is never needed.
 </div>
 
-## Built on lexical scopes, but non-trivial { data-transition="fade-in slide-out" }
+## [Built on lexical scopes, but non-trivial](http://is.gd/Kse2Gz) { data-transition="fade-in slide-out" }
 
 ```rust
 #[test]
@@ -681,7 +693,7 @@ include the scope of both `'r1` and `'r2`.
 
 (super super useful to be able to share readable data!)
 
-## imm-borrows: can be copied freely { data-transition="fade-in fade-out" }
+## [imm-borrows: can be copied freely](http://is.gd/MioaBw) { data-transition="fade-in fade-out" }
 
 Implications:
 
@@ -709,7 +721,7 @@ error: cannot borrow immutable borrowed content `*v` as mutable
     ^
 ```
 
-## imm-borrows: can be copied freely { data-transition="fade-in slide-out" }
+## [imm-borrows: can be copied freely](http://is.gd/MioaBw) { data-transition="fade-in slide-out" }
 
 Implications:
 
@@ -740,7 +752,7 @@ WHAT
 ##  my precious imperative algorithms! {.center}
 
 
-## `&mut`{.rust} borrows {.center}
+## [`&mut`{.rust} borrows](http://is.gd/FWAPCw) {.center}
 
 
 ```rust
@@ -770,7 +782,7 @@ Any operation requiring exclusive access should either:
 
   * take an `&mut`{.rust}-reference
 
-## Exclusive Access versus Ownership
+## [Exclusive Access versus Ownership](http://is.gd/J5YMKs)
 
 ```rust
 fn take_by_value(v: Vec<i32>) { let mut v = v; v.push(4);  }
@@ -807,7 +819,7 @@ ownership ⇒ power + responsibility (for dropping)
 
 # `&mut`{.rust} safety enforcement {.center}
 
-## Data has at most one `&mut`{.rust} borrow { data-transition="slide-in fade-out" }
+## [Data has at most one `&mut`{.rust} borrow](http://is.gd/Z72hwM) { data-transition="slide-in fade-out" }
 
 ```rust
 fn take2<'a>(v1: &'a mut Vec<i32>, v2: &'a Vec<i32>) { }
@@ -836,7 +848,7 @@ note: previous borrow of `v1` occurs here; the mutable borrow
 
 ```
 
-## Cannot alias `&mut`{.rust}-borrowed data { data-transition="fade" }
+## [Cannot alias `&mut`{.rust}-borrowed data](http://is.gd/MRxBeK) { data-transition="fade" }
 
 ```{.rust}
 fn take2<'a>(v1: &'a mut Vec<i32>, v2: &'a Vec<i32>) { }
@@ -864,7 +876,7 @@ note: previous borrow of `v1` occurs here; the mutable borrow
                ^~
 ```
 
-## `&mut T`{.rust} is non-copy { data-transition="fade-in slide-out" }
+## [`&mut T`{.rust} is non-copy](http://is.gd/vBPs15) { data-transition="fade-in slide-out" }
 
 ```{.rust}
 fn take2<'a>(v1: &'a mut Vec<i32>, v2: &'a Vec<i32>) { }
@@ -894,7 +906,7 @@ note: `b` moved here because it has type
 
 # Wither `a.method()`{.rust} ? {.center}
 
-## Rust has methods too
+## [Rust has methods too](http://is.gd/2r7DRl)
 
 ```rust
 struct Point { x: i32, y: i32 }
@@ -997,7 +1009,8 @@ fn demo_reading_protocol() {
 
 . . .
 
-Some magic: method invocations automatically
+Some magic: [method invocations](http://is.gd/n8CaTJ)
+automatically
 do borrows *and* derefs as necessary on the receiver
 ("auto-ref").
 
@@ -1031,7 +1044,7 @@ fn demo_subroutine(name: String) {
 
 All of above deref to `&T`
 
-## `Deref` works here too {.center}
+## [`Deref` works here too](http://is.gd/J9RKXK) {.center}
 
 ```rust
 #[test]
@@ -1071,7 +1084,7 @@ an owned value or a borrowed reference.)
 
 # Lifetime Bindings {.center}
 
-## Lifetime Bindings 1 {.center}
+## [Lifetime Bindings 1](http://is.gd/YUeL9J) {.center}
 
 We saw this kind of thing before:
 
@@ -1086,7 +1099,7 @@ fn explicit_lifetime_binding_1() {
 }
 ```
 
-## Lifetime Bindings 2  { data-transition="fade-out" }
+## [Lifetime Bindings 2](http://is.gd/VUhzbN)  { data-transition="fade-out" }
 
 You can bind distinct lifetimes:
 
@@ -1106,7 +1119,7 @@ fn explicit_lifetime_binding_2() {
 }
 ```
 
-## Lifetime Bindings 3  { data-transition="fade" }
+## [Lifetime Bindings 3](http://is.gd/I22UHF)  { data-transition="fade" }
 
 Encode constraints by reusing same lifetime:
 
@@ -1126,7 +1139,7 @@ fn explicit_lifetime_binding_3() {
 }
 ```
 
-## Lifetime Bindings 4  { data-transition="fade-in" }
+## [Lifetime Bindings 4](http://is.gd/5wOydB)  { data-transition="fade-in" }
 
 Encode constraints by reusing same lifetime:
 
@@ -1146,7 +1159,7 @@ fn explicit_lifetime_binding_4() {
 }
 ```
 
-## Lifetime Bindings 5  { data-transition="fade-in" }
+## [Lifetime Bindings 5](http://is.gd/JX2zpy)  { data-transition="fade-in" }
 
 Compiler catches missing necessary constraints:
 
@@ -1170,7 +1183,7 @@ help: consider using an explicit lifetime parameter as shown:
     fn print<'a, 'b>(ptrs: &'a mut Vec<&'b i32>, ptr: &'b i32)
 ```
 
-## Borrowed return values 1 { data-transition="fade-out" }
+## [Borrowed return values 1](http://is.gd/gKhfy0) { data-transition="fade-out" }
 
 ```rust
 fn first_n_last<'a>(ints: &'a Vec<i32>) -> (&'a i32, &'a i32) {
@@ -1199,7 +1212,7 @@ fn demo_borrowed_return_values() {
 (compiler ensures borrow `&v`{.rust} lasts long enough to satisfy
  reads of `first` and `fourth`)
 
-## Borrowed return values 2  { data-transition="fade-in" }
+## [Borrowed return values 2](http://is.gd/DzWgSs)  { data-transition="fade-in" }
 
 ``` {.rust .compile_error}
 fn first_n_last<'a>(ints: Vec<i32>) -> (&'a i32, &'a i32) {
@@ -1229,7 +1242,7 @@ caller chooses `'a`{.rust}; `fn` body must work for any such choice
 
 ## All the `'a`{.rust}, `'b`{.rust}, ... are ugly {.center}
 
-## Lifetime Elision 1 { data-transition="fade-out" }
+## [Lifetime Elision 1](http://is.gd/72HT0U) { data-transition="fade-out" }
 
 ```rust
 #[test]
@@ -1248,7 +1261,7 @@ fn lifetime_elision_1() {
 }
 ```
 
-## Lifetime Elision 2 { data-transition="fade" }
+## [Lifetime Elision 2](http://is.gd/UvyycH) { data-transition="fade" }
 
 ```rust
 #[test]
@@ -1267,7 +1280,7 @@ fn lifetime_elision_2() {
 }
 ```
 
-## Lifetime Elision 3 { data-transition="fade-in" }
+## [Lifetime Elision 3](http://is.gd/Rm4qIc) { data-transition="fade-in" }
 
 ```rust
 #[test]
@@ -1288,7 +1301,7 @@ fn lifetime_elision_3() {
 
 # Generic items {.center}
 
-## Generic items 1 { data-transition="fade-out" }
+## [Generic items 1](http://is.gd/Rd0aYF) { data-transition="fade-out" }
 
 ```rust
 #[test]
@@ -1305,7 +1318,7 @@ fn generic_items_1() {
 
 This obviously generalizes beyond `i32`!
 
-## Generic items 2 { data-transition="fade-in" }
+## [Generic items 2](http://is.gd/ehrrSy) { data-transition="fade-in" }
 
 ```rust
 #[test]
@@ -1322,7 +1335,7 @@ fn generic_items_2() {
 
 This is going so smoothly; lets try printing `v_1` again!
 
-## Generic items 3
+## [Generic items 3](http://is.gd/bINY38)
 
 ``` { .rust .compile_error }
 #[test]
@@ -1348,7 +1361,7 @@ error: trait `core::fmt::Display` not implemented for the type `T`
 
 # Trait-bounded polymorphism {.center}
 
-## Trait-bounded polymorphism {.center}
+## [Trait-bounded polymorphism](http://is.gd/Xy9l7N) {.center}
 
 ```rust
 trait Dimensioned {
@@ -1363,7 +1376,7 @@ fn stacked_height<S>(v: &[S]) -> u32 where S: Dimensioned {
 }
 ```
 
-## Trait Impls {.center}
+## [Trait Impls](http://is.gd/Xy9l7N) {.center}
 
 ```rust
 struct Rect { w: u32, h: u32 }
@@ -1380,7 +1393,7 @@ impl Dimensioned for Circle {
 }
 ```
 
-## Traits in Action {.center}
+## [Traits in Action](http://is.gd/Xy9l7N) {.center}
 
 ```rust
 impl Rect {
@@ -1401,7 +1414,7 @@ fn trait_bounded_polymorphism() {
 
 # Generics do not suffice {.center}
 
-## Generics do not suffice {.center}
+## [Generics do not suffice](http://is.gd/S5fXjQ) {.center}
 
 ``` {.rust .compile_error}
 #[test]
@@ -1419,7 +1432,7 @@ error: mismatched types:
                                    ^~~~~~~~~~~~~~~~~~~~~~
 ```
 
-## Uniformity of `T` in `Vec<T>` is why {.center}
+## [Uniformity of `T` in `Vec<T>` is why](http://is.gd/fA53YK) {.center}
 
 ``` {.rust .compile_error}
 struct Rect { w: u32, h: u32 }
@@ -1440,7 +1453,7 @@ fn parametric_fail() {
 
 ### Object-Oriented Programming! {.fragment}
 
-## Traits as Objects 1
+## [Traits as Objects 1](http://is.gd/akO1vd)
 
 ```rust
 fn stacked_obj_refs(v: &[&Dimensioned]) -> u32 {
@@ -1458,7 +1471,7 @@ fn demo_objs_1() {
 }
 ```
 
-## Traits as Objects 2
+## [Traits as Objects 2](http://is.gd/BbBlOz)
 
 ```rust
 fn stacked_obj_boxes(v: &[Box<Dimensioned>]) -> u32 {
@@ -1523,7 +1536,7 @@ var ten = do_twice(add4, 2);
 
   * opt. arg. and return types (inferred when omitted)
 
-## Closures 3 {.center}
+## [Closures 3](http://is.gd/Kc3f8v) {.center}
 
 ```rust
 #[test]
@@ -1548,6 +1561,12 @@ fn demo_closure() {
 
 # Interior Mutability {.center}
 
-## Interior Mutability: `Cell` and `RefCell`
+## Interior Mutability: `Cell` and `RefCell` structs {.center}
+
+TODO
+
+# Destructors {.center}
+
+## The `Drop` trait {.center}
 
 TODO
