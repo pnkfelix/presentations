@@ -12,11 +12,11 @@ fn main() {
     pandoc::run_pandoc(".", "../curry-on2015",
                        &[O::Standalone,
                          O::To(F::revealjs),
-                         O::Var("theme=mozilla-sandstone", None),
+                         O::Var("theme", Some("mozilla-sandstone")),
                          O::Var("center", Some("false")),
                          O::Css("slide-style.css"),
                          O::Css("code-style.css"),
-                         O::Css("fonts.css"),
+                         // O::Css("fonts.css"),
 
                          // Setting this explicitly will hopefully avoid the whole
                          // document going beserk if I happen to follow an H1 by content

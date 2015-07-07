@@ -1,3 +1,5 @@
+<!--
+
 ## Ligatures?
 
 ```rust
@@ -11,3 +13,5 @@ fn foo(x: (u32, u32)) -> u32 {
 ```
 
 What `about => here`{.rust}
+
+-->
