@@ -1,5 +1,109 @@
 # Concurrency { .center }
 
+## Concurrency
+
+Rust's killer feature:
+
+### Data-race freedom
+
+built atop same foundation as memory safety
+
+## Here's what one concurrency API looks like
+
+## `thread::spawn`
+
+```rust
+pub fn main() {
+    use std::thread;
+    let al = "long lost pal";
+    thread::spawn(move || {
+
+        println!("i can be your {}", al);
+    });
+
+    println!("why am i soft in the middle");
+    // Note: might exit before spawned thread gets chance to print
+}
+```
+
+## channels for message passing
+
+```rust
+#[test] fn demo_channel() {
+    fn fib(x: i64) -> (i64, i64) { // returns `(x, fib(x))`
+        if x <= 1 { (x,1) } else { (x, fib(x-1).1 + fib(x-2).1) }
+    }
+    use std::thread;
+    use std::sync::mpsc::channel;
+    let (tx, rx) = channel(); // tx: "transmit", rx: "receive"
+    let al = "al";
+    thread::spawn(move || {
+        tx.send(fib(10));
+        println!("you can call me {}", al);
+    });
+    let f_15 = fib(15).1;
+    println!("why am i short of attention");
+    let f_10 = rx.recv().unwrap().1; // (this blocks to await data)
+    assert_eq!((f_10, f_15), (89, 987));
+}
+```
+
+#### channels are abstraction, data-race free {.fragment}
+
+## No data races: What about our precious mutation?
+
+## No data races 1: "direct" assign { data-transition="fade-out" }
+
+``` {.rust}
+#[test] fn demo_catch_direct() {
+    fn fib(x: i64) -> (i64, i64) { // returns `(x, fib(x))`
+        if x <= 1 { (x,1) } else { (x, fib(x-1).1 + fib(x-2).1) }
+    }
+    use std::thread;
+    let al = "al";
+    let mut f_10_recv = (0, 0);
+
+    thread::spawn(move || {
+        f_10_recv = fib(10);
+        println!("you can call me {}", al);
+    });
+    let f_15 = fib(15).1;
+    while f_10_recv.0 == 0 { }  // <-- many alarm bells
+    let f_10 = f_10_recv.1;
+    println!("why am i short of attention");
+    assert_eq!((f_10, f_15), (89, 987));
+}
+```
+
+#### compiles; does not work (no actual communication; implicit copying) {.fragment }
+
+## No data races 2: mut-ref  { data-transition="fade-in" }
+
+``` {.rust .compile_error}
+#[test] fn demo_catch_mutref() {
+    fn fib(x: i64) -> (i64, i64) { // returns `(x, fib(x))`
+        if x <= 1 { (x,1) } else { (x, fib(x-1).1 + fib(x-2).1) }
+    }
+    use std::thread;
+    let al = "al";
+    let mut f_10_recv = (0, 0);
+    let ptr_recv = &mut f_10_recv; // <-- Okay, say what we meant
+    thread::spawn(move || {
+        *ptr_recv = fib(10);
+        println!("you can call me {}", al);
+    });
+    let f_15 = fib(15).1;
+    while f_10_recv.0 == 0 { }  // <-- many alarm bells
+    let f_10 = f_10_recv.1;
+    println!("why am i short of attention");
+    assert_eq!((f_10, f_15), (89, 987));
+}
+```
+
+#### does not compile: `spawn` can't share ref to stack-local {.fragment}
+
+# Concurrency as a library concern {.center}
+
 ## Libraries can provide new APIs { .center }
 
 ### New system interfaces
@@ -112,6 +216,110 @@ closure that is not allowed carry such.)
 We can encode both constraints in Rust
 
  * Ensures clients obey the relevant protocol!
+
+# Demo of (unstable, unsound) fork join API {.center}
+
+## `thread::scoped`
+
+```rust
+fn seq_max(partial_data: &[u8]) -> u8 {
+    *partial_data.iter().max().unwrap()
+}
+
+fn par_max(data: &[u8]) -> u8 {
+    if data.len() <= 4 { return seq_max(data); }
+    let len_4 = data.len() / 4; // DATA = [A..B..C..D..]
+    let (q1, rest) = data.split_at(len_4); // (A.. \ B..C..D..)
+    let (q2, rest) = rest.split_at(len_4); //  (B.. \ C..D..)
+    let (q3, q4)   = rest.split_at(len_4); //   (C.. \ D..)
+    let t1 = ::std::thread::scoped(|| seq_max(q1)); // fork A..
+    let t2 = ::std::thread::scoped(|| seq_max(q2)); // fork B..
+    let t3 = ::std::thread::scoped(|| seq_max(q3)); // fork C..
+    let v4 = seq_max(q4); //                        compute D..
+    let (v1, v2, v3) = (t1.join(), t2.join(), t3.join()); // join!
+    return seq_max(&[v1, v2, v3, v4]);
+}
+```
+
+## `thread::scoped` shows a new trick
+
+  * `thread::spawn` disallowed passing refs to stack-local data
+
+  * Allowing that is the whole point of `thread::scoped`
+
+    * (caveat: `thread::scoped` API is unstable, and undergoing revision due
+      to subtle soundness issue)
+
+## Benchmarking `par_max` 1
+
+```rust
+extern crate test; use std::iter;
+const LIL: usize = 20 * 1024;
+const BIG: usize = LIL * 1024;
+
+fn make_data(count: usize) -> Vec<u8> {
+    let mut data: Vec<u8> = iter::repeat(10).take(count).collect();
+    data.push(200); data.push(3); return data;
+}
+
+#[bench] fn bench_big_seq(b: &mut test::Bencher) {
+    let data = make_data(BIG);
+    b.iter(|| assert_eq!(seq_max(&data), 200));
+}
+#[bench] fn bench_big_par(b: &mut test::Bencher) {
+    let data = make_data(BIG);
+    b.iter(|| assert_eq!(par_max(&data), 200));
+}
+```
+
+```
+bench_big_par ... bench:   3,763,711 ns/iter (+/- 1,140,321)
+bench_big_seq ... bench:  21,633,799 ns/iter (+/- 2,522,262)
+```
+
+## Benchmarking `par_max` 2
+
+```{.rust}
+const LIL: usize = 20 * 1024;
+const BIG: usize = LIL * 1024;
+```
+
+```
+bench_big_par ... bench:   3,763,711 ns/iter (+/- 1,140,321)
+bench_big_seq ... bench:  21,633,799 ns/iter (+/- 2,522,262)
+```
+
+```rust
+#[bench] fn bench_lil_seq(b: &mut test::Bencher) {
+    let data = make_data(LIL);
+    b.iter(|| assert_eq!(seq_max(&data), 200));
+}
+#[bench] fn bench_lil_par(b: &mut test::Bencher) {
+    let data = make_data(LIL);
+    b.iter(|| assert_eq!(par_max(&data), 200));
+}
+```
+
+```
+bench_lil_par ... bench:      59,274 ns/iter (+/- 7,756)
+bench_lil_seq ... bench:      15,432 ns/iter (+/- 1,961)
+```
+
+(`fn par_max` could tune threshold for seq. path)
+
+## What was that about preventing data races?
+
+## `Send`, `Sync`
+
+  * If `T: Send`, then passing (e.g. moving) a `T` to another thread is safe.
+
+  * If `T: Sync`, then copying a `&T` to another thread is safe.
+
+  * (For Rust, "safe" includes "no data races exposed.")
+
+<!-- FIXME: elaborate, add e.g. counter-examples
+Or maybe just drop this slide entirely.
+-->
 
 # Concurrency: How? {.center}
 

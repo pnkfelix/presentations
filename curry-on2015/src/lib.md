@@ -12,7 +12,15 @@ but every other `.md` file is included in the pandoc output.
 So, I will use this space for meta-text with notes on how this code
 and the corresponding slides are structured.
 
-First we start with any `extern crate` declarations that I happen
+
+Ugh, I once again resorted to including the `thread::scoped`
+code, "just in case"
+
+```rust
+#![feature(scoped, test)]
+```
+
+Here are any `extern crate` declarations that I happen
 to be referencing in the presentation.
 
 ```rust
