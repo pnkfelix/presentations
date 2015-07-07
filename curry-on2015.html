@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Felix Klock (@pnkfelix), Mozilla" />
+  <title>Rust: A Type System You Didn't Know You Wanted</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css"/>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/mozilla-sandstone.css" id="theme">
+  <link rel="stylesheet" href="slide-style.css"/>
+  <link rel="stylesheet" href="code-style.css"/>
+  <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+  <script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = 'reveal.js/css/print/pdf.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+    <h1 class="title">Rust: A Type System You Didn't Know You Wanted</h1>
+    <h2 class="author">Felix Klock (<code>@pnkfelix</code>), Mozilla</h2>
+    <h3 class="date">(Space goes to next slide; Arrows navigate; Esc gives overview.)</h3>
+</section>
+
+<section><section id="rust-what-why-how" class="titleslide slide level1 center center_align"><h1>Rust: What? Why? (How?)</h1></section><section id="rust-what" class="slide level2 left_align">
+<h1>Rust: What</h1>
+<ul>
+<li><p>New systems programming language</p>
+<ul>
+<li><p>fast; FFI interface; data layout control</p></li>
+<li><p>compete (and interface with) with C/C++</p></li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li><p>Mix in the classic hits of PL</p>
+<ul>
+<li>user-defined iterators, RAII, objects with vtable method dispatch, generics / F-bounded polymorphism, algebraic data types, affine types, et cetera</li>
+</ul></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li><p>Safety</p>
+<ul>
+<li><p>Memory-safe, data-race free</p></li>
+<li><p><a href="http://blog.rust-lang.org/2015/04/10/Fearless-Concurrency.html">Fearless concurrency</a></p></li>
+</ul></li>
+</ul>
+</div>
+</section><section id="rust-where" class="slide level2 left_align center">
+<h1>Rust: Where</h1>
+<p>Language and API docs</p>
+<ul>
+<li><p>All linked from top of <a href="http://www.rust-lang.org/" class="uri">http://www.rust-lang.org/</a></p></li>
+<li><p>Starting points</p>
+<p>The Book: <a href="https://doc.rust-lang.org/stable/book/" class="uri">https://doc.rust-lang.org/stable/book/</a></p>
+<p>Standard API: <a href="https://doc.rust-lang.org/stable/std/" class="uri">https://doc.rust-lang.org/stable/std/</a></p></li>
+<li><p>Playpen: <a href="http://play.rust-lang.org/" class="uri">http://play.rust-lang.org/</a></p></li>
+</ul>
+</section><section id="playpen-encore" class="slide level2 center center_align">
+<h1>Playpen (encore)</h1>
+<h3 id="httpplay.rust-lang.org"><a href="http://play.rust-lang.org/" class="uri">http://play.rust-lang.org/</a></h3>
+</section></section>
+<section><section id="motivational-demos" class="titleslide slide level1 center"><h1>Motivational Demos</h1></section><section id="a-taste" class="slide level2">
+<h1>A taste</h1>
+<ul>
+<li>Three fast <em>&quot;amuse bouches&quot;</em>
+<ul>
+<li>not the main course</li>
+<li>(not even an appetizer)</li>
+</ul></li>
+</ul>
+</section><section id="abstraction-without-overhead" class="slide level2" data-transition="fade-out">
+<h1>Abstraction without overhead</h1>
+<p>The below <a href="http://is.gd/weGnJ0">loop demo</a> compiles down to tight code:</p>
+<!--
+```rust
+#[allow(dead_code)]
+fn main1() {
+    let v1: Vec<i32> = (-100..10).collect();
+    let s1 = sum_pos(&v1);
+    let v2: Vec<i32> = (-100..1000).collect();
+    let s2 = sum_pos(&v2);
+    println!("v1.len: {} s1: {} v2.len: {} s2: {}", v1.len(), s1, v2.len(), s2);
+}
+
+#[allow(dead_code)]
+#[inline(never)]
+```
+-->
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="co">// sums all the positive values in `v`</span>
+<span class="kw">fn</span> sum_pos(v: &amp;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) -&gt; <span class="dt">i32</span> {
+    <span class="kw">let</span> <span class="kw">mut</span> sum = <span class="dv">0</span>;
+    <span class="kw">for</span> i <span class="kw">in</span> v.iter().filter(|i| **i &gt; <span class="dv">0</span>) {
+        sum += *i;
+    }
+    sum
+}</code></pre></div>
+<!-- https://play.rust-lang.org/?gist=23a69161dd4421e2925f -->
+</section><section id="abstraction-without-overhead-1" class="slide level2" data-transition="fade">
+<h1>Abstraction without overhead</h1>
+<p>Generated x86_64 machine code for <code class="sourceCode rust"><span class="kw">fn</span> sum_pos</code>:</p>
+<div class="sourceCode"><pre class="sourceCode nasm"><code class="sourceCode nasm">    leaq    (<span class="ot">%rdi,%rsi,4), %rcx</span>
+    xorl    <span class="ot">%eax, %eax</span>
+    <span class="kw">jmp</span> .LBB5_1
+<span class="fu">.LBB5_3:</span>
+    addl    <span class="ot">%edx, %eax</span>
+    .<span class="kw">align</span>  <span class="dv">16</span><span class="bn">, 0x90</span>
+<span class="fu">.LBB5_1:</span>
+    cmpq    <span class="ot">%rdi, %rcx</span>
+    <span class="kw">je</span>  .LBB5_4
+    movl    (<span class="ot">%rdi), %edx</span>
+    addq<span class="bn">    $4, </span><span class="ot">%rdi</span>
+    testl   <span class="ot">%edx, %edx</span>
+    <span class="kw">jle</span> .LBB5_1
+    <span class="kw">jmp</span> .LBB5_3
+<span class="fu">.LBB5_4:</span>
+    retq</code></pre></div>
+</section><section id="abstraction-without-overhead-2" class="slide level2" data-transition="fade-in slide-out">
+<h1>Abstraction without overhead</h1>
+<p>Or, if the first was not high-level enough:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> foo(v: &amp;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) -&gt; <span class="dt">i32</span> {
+    v.iter().filter(|i| **i &gt; <span class="dv">0</span>).map(|i| *i).sum()
+}</code></pre></div>
+<p>(This <a href="http://is.gd/RPVIjt">second loop demo</a> compiles down to the <em>same</em> tight code!)</p>
+</section><section id="memory-safety" class="slide level2">
+<h1>Memory safety</h1>
+<p>Example: catches <a href="http://is.gd/ShihgA">iterator invalidation bugs</a> (aka <code>ConcurrentModificationException</code> - at compile-time)</p>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> this_wont_compile(v: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) -&gt; <span class="dt">i32</span> {
+    <span class="kw">let</span> <span class="kw">mut</span> sum = <span class="dv">0</span>;
+    <span class="kw">for</span> &amp;i <span class="kw">in</span> v.iter() {
+        sum += i;
+        <span class="kw">if</span> i &gt; <span class="dv">0</span> { v.push(<span class="dv">0</span>); }
+        <span class="co">//         ~~~~~~~~~ invalid! (might realloc</span>
+        <span class="co">//                   the backing storage for `v`)</span>
+    }
+    sum
+}</code></pre></div>
+<pre class="fragment"><code>error: cannot borrow `*v` as mutable because it is also borrowed
+       as immutable
+        if i &gt; 0 { v.push(0); }
+                   ^
+note: previous borrow of `*v` occurs here; the immutable borrow
+      prevents subsequent moves or mutable borrows of `*v` until
+      the borrow ends
+    for &amp;i in v.iter() {
+              ^</code></pre>
+</section><section id="slick-fearless-concurrency" class="slide level2">
+<h1>Slick, Fearless Concurrency</h1>
+<p>See also <a href="http://blog.rust-lang.org/2015/04/10/Fearless-Concurrency.html">Fearless Concurrency</a> blog post.</p>
+<!--
+```rust
+fn seq_max(partial_data: &[u8]) -> u8 {
+    *partial_data.iter().max().unwrap()
+}
+```
+-->
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">use</span> std::thread;
+<span class="kw">fn</span> par_max(data: &amp;[<span class="dt">u8</span>]) -&gt; <span class="dt">u8</span> {
+    <span class="kw">if</span> data.len() &lt;= <span class="dv">4</span> { <span class="kw">return</span> seq_max(data); }
+    <span class="kw">let</span> len_4 = data.len() / <span class="dv">4</span>; <span class="co">// DATA = [A .., B .., C .., D..]</span>
+    <span class="kw">let</span> (q1, rest) = data.split_at(len_4);    <span class="co">// (A.. \ B..C..D..)</span>
+    <span class="kw">let</span> (q2, rest) = rest.split_at(len_4);    <span class="co">//  (B.. \ C..D..)</span>
+    <span class="kw">let</span> (q3, q4)   = rest.split_at(len_4);    <span class="co">//   (C.. \ D..)</span>
+    <span class="kw">let</span> t1 = thread::scoped(|| seq_max(q1));  <span class="co">// fork A..</span>
+    <span class="kw">let</span> t2 = thread::scoped(|| seq_max(q2));  <span class="co">// fork B..</span>
+    <span class="kw">let</span> t3 = thread::scoped(|| seq_max(q3));  <span class="co">// fork C..</span>
+    <span class="kw">let</span> v4 = seq_max(q4);                     <span class="co">// compute D..</span>
+    <span class="kw">let</span> (v1, v2, v3) = (t1.join(), t2.join(), t3.join()); <span class="co">// join!</span>
+    <span class="kw">return</span> seq_max(&amp;[v1, v2, v3, v4]);
+}</code></pre></div>
+<p>(caveat: <a href="http://is.gd/zOH5aL">above</a> is using unstable <code>thread::scoped</code> API)</p>
+<!--
+```rust
+#[test]
+fn hi() {
+    let mut v = vec![2, 1, 10, 9, 8, 7, 6, 5, 4, 3];
+    let m = par_max(&v);
+    assert_eq!(m, 10);
+}
+```
+-->
+</section></section>
+<section><section id="rust-why" class="titleslide slide level1 center"><h1>Rust: Why?</h1></section><section id="rust-why-1" class="slide level2 left_align center">
+<h1>Rust: Why?</h1>
+<ul>
+<li>Why is Mozilla investing in this?</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><p>To compete</p>
+<p>C/C++ impedes ability to compete in the browser market</p></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li><p>Fast experimentation (and deployment)</p>
+<p>⇒ Competitive Advantage</p></li>
+</ul>
+</div>
+</section><section id="servo" class="slide level2 center left_align">
+<h1>Servo</h1>
+<div class="fragment">
+<p>browser implementation research platform</p>
+</div>
+<div class="fragment">
+<p>written in Rust</p>
+</div>
+<div class="fragment">
+<h3 id="experiments">Experiments</h3>
+<ul>
+<li><p>parallel paint</p></li>
+<li><p>parallel layout</p></li>
+<li><p>parallel css selector matching</p></li>
+</ul>
+</div>
+</section><section id="rust-a-note-on-goals" class="slide level2">
+<h1>Rust: A note on goals</h1>
+<div class="fragment">
+<p>What is &quot;soundness&quot;?</p>
+</div>
+<div class="fragment">
+<p>Segfault is not okay</p>
+</div>
+<div class="fragment">
+<p>But: &quot;clean&quot; shutdown (e.g. on internal error) <em>is</em> okay</p>
+</div>
+<div class="fragment">
+<p>Rust has <code class="sourceCode rust"><span class="pp">panic!</span></code>, and atop it <code class="sourceCode rust"><span class="pp">assert!</span></code> etc</p>
+<p>(A panic unwinds the stack, cleaning up resources)</p>
+<h3 id="so">So</h3>
+</div>
+<p>Rust uses dynamic checks (and resorts to <code class="sourceCode rust"><span class="pp">panic!</span></code>) where appropriate</p>
+<div class="fragment">
+<h3 id="but">But</h3>
+<p>Prefers static assurances <em>when feasible</em></p>
+<p>(we are pragmatists)</p>
+</div>
+</section></section>
+<section><section id="rust-how" class="titleslide slide level1 center_align center"><h1>Rust: How?</h1></section><section id="rust-how-the-big-ideas" class="slide level2 center_align center">
+<h1>Rust: How? (The Big Ideas)</h1>
+<h3 id="ownership-move-semantics">Ownership + Move Semantics</h3>
+<div class="fragment">
+<p>(explicit resource control)</p>
+</div>
+<h3 id="borrowing">Borrowing</h3>
+<div class="fragment">
+<p>(brings back reference semantics)</p>
+</div>
+<h3 id="lifetimes">Lifetimes</h3>
+<div class="fragment">
+<p>(encode safety constraints between references)</p>
+</div>
+</section><section id="move-semantics" class="slide level2">
+<h1><a href="http://is.gd/IZyTXN">Move Semantics</a></h1>
+<p>Create (and modify) owned:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> create_owned() {
+    <span class="kw">let</span> <span class="kw">mut</span> vec = <span class="dt">Vec</span>::new();         <span class="co">//  + (`vec` created ...</span>
+    vec.push(<span class="dv">2000</span>);                   <span class="co">//  |  ... and</span>
+    vec.push( <span class="dv">400</span>);                   <span class="co">//  |       also</span>
+    vec.push(  <span class="dv">60</span>);                   <span class="co">//  |        mutated ...</span>
+    <span class="pp">println!</span>(<span class="st">&quot;vec: {:?}&quot;</span>, vec);       <span class="co">//  |</span>
+    <span class="kw">let</span> the_sum = sum(vec);           <span class="co">//  o ... and moved)</span>
+    <span class="co">// (starting here, access to `vec` is static error)</span>
+    <span class="pp">println!</span>(<span class="st">&quot;the_sum: {}&quot;</span>, the_sum);
+}</code></pre></div>
+<p>At scope end, clean up initialized (+ unmoved) variables</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> sum(v: <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) -&gt; <span class="dt">i32</span> {          <span class="co">//  o</span>
+   <span class="kw">let</span> <span class="kw">mut</span> accum = <span class="dv">0</span>;                 <span class="co">//  |</span>
+   <span class="kw">for</span> i <span class="kw">in</span> v.iter() { accum += *i; } <span class="co">//  |</span>
+   accum <span class="co">// (p.s. where is `return`?) //  |</span>
+}                                     <span class="co">//  * (`v` destroyed/freed)</span></code></pre></div>
+</section><section id="freely-copied-values-versus-moved-objects" class="slide level2">
+<h1>Freely Copied Values versus Moved Objects</h1>
+<p>Integers, characters, etc use copy semantics</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> x: <span class="dt">i32</span> = calculate();
+<span class="kw">let</span> y = x;
+<span class="co">// can still use `x` here</span></code></pre></div>
+<p>Structured data uses move semantics by default</p>
+<ul>
+<li>Compiler checks attempts to opt-in to <code>Copy</code> &quot;interface&quot;
+<ul>
+<li>(&quot;interface&quot;, aka &quot;trait bound&quot; in Rust)</li>
+</ul></li>
+</ul>
+</section><section id="moved-data-errors" class="slide level2">
+<h1><a href="http://is.gd/aYKrYd">Moved data errors</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_owned_vs_copied() {
+    <span class="kw">let</span> moving_value = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    <span class="kw">let</span> copied_value = <span class="dv">17</span>;
+    <span class="kw">let</span> tuple = (moving_value, copied_value);
+
+    <span class="pp">println!</span>(<span class="st">&quot;copied_value: {:?}&quot;</span>, copied_value);
+    <span class="pp">println!</span>(<span class="st">&quot;moving_value: {:?}&quot;</span>, moving_value);
+}</code></pre></div>
+<pre class="error_message fragment"><code>error: use of moved value: `moving_value` [E0382]
+    println!(&quot;moving_value: {:?}&quot;, moving_value);
+                                   ^~~~~~~~~~~~
+
+note: `moving_value` moved here because it has type
+      `collections::vec::Vec&lt;i32&gt;`, which is non-copyable
+    let tuple = (moving_value, copied_value);
+                 ^~~~~~~~~~~~</code></pre>
+</section><section id="moves-insufficient-on-their-own" class="slide level2">
+<h1><a href="http://is.gd/qwc0iq">Moves insufficient on their own</a></h1>
+<p>Imagine programming without reuse</p>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> moves_insufficient() {
+    <span class="kw">let</span> vec = expensive_vector_computation();
+
+    <span class="kw">let</span> result1 = some_vec_calculation(vec); <span class="co">// &lt;-- `vec` moved here</span>
+
+    <span class="kw">let</span> result2 = other_calculation(vec); <span class="co">// oops, `vec` is *gone*</span>
+
+    combine(result1, result2);
+
+}</code></pre></div>
+<!--
+```rust
+fn expensive_vector_computation() -> Vec<i32> { vec![] }
+fn some_vec_calculation<T>(t: T) { }
+fn other_calculation<T>(t: T) { }
+fn combine(x: (), y: ()) { }
+```
+-->
+<pre class="fragment error_message"><code>error: use of moved value: `vec` [E0382]
+    let result2 = other_calculation(vec); // oops
+                                    ^~~
+note: `vec` moved here because it has type
+      `collections::vec::Vec&lt;i32&gt;`, which is non-copyable
+    let result1 = some_vec_calculation(vec); // &lt;-- `vec` moved here
+                                       ^~~</code></pre>
+</section></section>
+<section><section id="learning-to-share" class="titleslide slide level1 center"><h1>Learning to Share</h1></section><section id="borrowing-1" class="slide level2 center">
+<h1><a href="http://is.gd/ez9JrK">Borrowing</a></h1>
+<p><em>Lend</em> references to values</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> hooray_for_borrows() {
+    <span class="kw">let</span> vec = expensive_vector_computation();
+
+    <span class="kw">let</span> result1 = some_vec_calculation(&amp;vec); <span class="co">// &lt;-- lend out `vec`</span>
+
+    <span class="kw">let</span> result2 = other_calculation(&amp;vec); <span class="co">// &lt;-- lend again, no prob</span>
+
+    combine(result1, result2);
+
+} <span class="co">// (`vec` is destroyed/freed aka &quot;dropped&quot; here)</span></code></pre></div>
+<pre class="fragment"><code>                                    &amp;vec
+                                    ~~~~
+                                      |
+                              a borrow expression</code></pre>
+</section><section id="mo-features-mo-problems" class="slide level2 center">
+<h1>Mo' features, mo' problems</h1>
+<ul>
+<li><p>Why are safety violations generally hard to detect?</p></li>
+<li><p>It is due to <em>aliasing</em></p></li>
+<li><p>Borrows <em>reintroduce</em> aliasing</p></li>
+</ul>
+<h3 id="q-how-to-ensure-safety-in-presence-of-aliasing" class="fragment">Q: How to ensure safety in presence of aliasing?</h3>
+<h3 id="a-restrict-the-aliasing" class="fragment">A: Restrict the aliasing</h3>
+</section><section id="restricted-aliasing" class="slide level2 center">
+<h1>Restricted aliasing</h1>
+<p>Analogy: RW-lock</p>
+<ul>
+<li><p>Many readers at once, <em>or</em> one writer with exclusive access</p></li>
+<li><p>Read-only operations do not require exclusive access</p></li>
+<li><p>Exclusive access requires there are no other readers</p></li>
+</ul>
+<p>Rust uses similar model (but at compile-time) for borrows</p>
+</section><section id="the-family-of-types" class="slide level2">
+<h1>The Family of Types</h1>
+<ul>
+<li><p><code>T</code>: base type. Moves, unless bounded by <code>Copy</code> trait</p></li>
+<li><p><code>&amp;T</code>: shared ref, &quot;read-only&quot; access; copyable</p>
+<ul>
+<li><p>programmer (+ compiler) must assumed aliased</p></li>
+<li><p>(i.e. &quot;many readers&quot;)</p></li>
+</ul></li>
+<li><p><code>&amp;mut T</code>: &quot;mutable&quot; ref, exclusive access; non-copy</p>
+<ul>
+<li><p>assured unaliased</p></li>
+<li><p>(i.e. &quot;at most one writer&quot;)</p></li>
+</ul></li>
+</ul>
+</section></section>
+<section><section id="concrete-examples-of-types" class="titleslide slide level1 center"><h1>Concrete Examples of Types</h1></section><section id="readin-writin-and-transfern" class="slide level2">
+<h1><a href="http://is.gd/QRmpaH">readin', writin', and transfer'n</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> read(v: &amp;<span class="dt">Vec</span>&lt;<span class="dt">String</span>&gt;) -&gt; <span class="dt">String</span> {
+    <span class="kw">let</span> first: &amp;<span class="dt">String</span> = &amp;v[<span class="dv">0</span>]; <span class="co">// borrow ref to first elem</span>
+    <span class="pp">println!</span>(<span class="st">&quot;v[0]: {}&quot;</span>, first);
+    <span class="kw">return</span> first.clone();
+}</code></pre></div>
+<div class="fragment">
+<!-- TODO: show in future slide how returning &str breaks down) -->
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> modify(v: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;<span class="dt">String</span>&gt;, name: &amp;<span class="dt">str</span>) {
+    <span class="kw">let</span> freshly_created = <span class="pp">format!</span>(<span class="st">&quot;Hello {}&quot;</span>, name);
+    v.push(freshly_created);
+}</code></pre></div>
+</div>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> consume(v: <span class="dt">Vec</span>&lt;<span class="dt">String</span>&gt;) -&gt; <span class="dt">String</span> {
+    <span class="kw">for</span> s <span class="kw">in</span> v { <span class="kw">return</span> s; }
+    <span class="pp">panic!</span>(<span class="st">&quot;v was empty?!?&quot;</span>);
+}</code></pre></div>
+</div>
+</section><section id="calls-to-the-three-variants" class="slide level2">
+<h1><a href="http://is.gd/QRmpaH">Calls to the three variants</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> read(v: &amp;<span class="dt">Vec</span>&lt;<span class="dt">String</span>&gt;) -&gt; <span class="dt">String</span> { ... }
+<span class="kw">fn</span> modify(v: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;<span class="dt">String</span>&gt;, name: &amp;<span class="dt">str</span>) { ... }
+<span class="kw">fn</span> consume(v: <span class="dt">Vec</span>&lt;<span class="dt">String</span>&gt;) -&gt; <span class="dt">String</span> { ... }</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> user_input() -&gt; <span class="dt">String</span> { <span class="pp">format!</span>(<span class="st">&quot;World&quot;</span>) }
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo() {
+    <span class="kw">let</span> <span class="kw">mut</span> v: <span class="dt">Vec</span>&lt;<span class="dt">String</span>&gt; = <span class="pp">vec!</span>[user_input()];
+    <span class="kw">let</span> first = read(&amp;v).clone();
+    modify(&amp;<span class="kw">mut</span> v, &amp;first);
+    consume(v);
+}</code></pre></div>
+</section></section>
+<section><section id="more-on-scopes" class="titleslide slide level1 center"><h1>More on Scopes</h1></section><section id="borrowing-immutably" class="slide level2" data-transition="fade-out">
+<h1><a href="http://is.gd/oeTVPs">Borrowing (immutably)</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> show_some_borrows() {
+
+    <span class="kw">let</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    <span class="kw">let</span> v2 = <span class="pp">vec!</span>[<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>];
+
+    <span class="kw">let</span> r1 = &amp;v1;
+    <span class="kw">let</span> r2 = &amp;v2;
+    foo(r1);
+    foo(r2);
+
+}</code></pre></div>
+<!-- -->
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> foo&lt;<span class="ot">&#39;a</span>&gt;(v: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { <span class="pp">println!</span>(<span class="st">&quot;v[1]: {}&quot;</span>, v[<span class="dv">1</span>]); }</code></pre></div>
+<p><code>&amp;v1</code> and <code>&amp;v2</code> are <em>borrowing</em> <code>v1</code> and <code>v2</code>.</p>
+</section><section id="scopes-and-lifetimes" class="slide level2" data-transition="fade-in">
+<h1><a href="http://is.gd/7uHned">Scopes and Lifetimes</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> show_some_lifetimes() {
+
+    <span class="kw">let</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]; <span class="co">//                 +</span>
+    <span class="kw">let</span> v2 = <span class="pp">vec!</span>[<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]; <span class="co">//            +    |</span>
+                            <span class="co">//            |    |</span>
+    <span class="kw">let</span> r1 = &amp;v1;           <span class="co">//       +    |    |</span>
+    <span class="kw">let</span> r2 = &amp;v2;           <span class="co">//  +    |    |    |</span>
+    foo(r1);                <span class="co">//  |    |    |    |</span>
+    foo(r2);                <span class="co">// &#39;r2  &#39;r1  &#39;v2  &#39;v1</span>
+                            <span class="co">//  |    |    |    |</span>
+}                           <span class="co">//  *    *    *    *</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> foo&lt;<span class="ot">&#39;a</span>&gt;(v: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { <span class="pp">println!</span>(<span class="st">&quot;v[1]: {}&quot;</span>, v[<span class="dv">1</span>]); }</code></pre></div>
+<p>Each borrow selects &quot;appropriate&quot; lifetime <code>'a</code>.</p>
+</section><section id="borrow-checking-prevents-errors" class="slide level2" data-transition="fade-out">
+<h1><a href="http://is.gd/bRKjWu">Borrow Checking Prevents Errors</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> borrow_checking_prevents_errors() {
+
+    <span class="kw">let</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];      <span class="co">//        +</span>
+                                 <span class="co">//        |</span>
+    <span class="kw">let</span> r1 = &amp;v1;                <span class="co">//  +    &#39;v1</span>
+                                 <span class="co">//  |     |</span>
+    consume(v1);                 <span class="co">// &#39;r1   (moved)</span>
+    foo(r1);                     <span class="co">//  |</span>
+}                                <span class="co">//  *</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">    <span class="kw">fn</span> foo&lt;<span class="ot">&#39;a</span>&gt;(v: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { <span class="pp">println!</span>(<span class="st">&quot;v[1]: {}&quot;</span>, v[<span class="dv">1</span>]); }
+    <span class="kw">fn</span> consume(v: <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { <span class="co">/* `v` *dropped* at scope end */</span> }</code></pre></div>
+<p><code>foo(r1)</code> attempts an indirect read of <code>v1</code></p>
+<pre class="fragment"><code>error: cannot move out of `v1` because it is borrowed
+    consume(v1);
+            ^~
+note: borrow of `v1` occurs here
+    let r1 = &amp;v1;
+              ^~</code></pre>
+</section><section id="lifetimes-and-lexical-scope" class="slide level2" data-transition="fade-in">
+<h1><a href="http://is.gd/IA6Vlj">Lifetimes and Lexical Scope</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> borrow_checking_may_seem_simple_minded() {
+
+    <span class="kw">let</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];      <span class="co">//        +</span>
+                                 <span class="co">//        |</span>
+    <span class="kw">let</span> r1 = &amp;v1;                <span class="co">//  +    &#39;v1</span>
+                                 <span class="co">//  |     |</span>
+    consume(v1);                 <span class="co">// &#39;r1   (moved)</span>
+    <span class="co">// (no call to read)         //  |</span>
+}                                <span class="co">//  *</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">    <span class="kw">fn</span> foo&lt;<span class="ot">&#39;a</span>&gt;(v: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { <span class="pp">println!</span>(<span class="st">&quot;v[1]: {}&quot;</span>, v[<span class="dv">1</span>]); }
+    <span class="kw">fn</span> consume(v: <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { }</code></pre></div>
+<pre><code>error: cannot move out of `v1` because it is borrowed
+    consume(v1);
+            ^~
+note: borrow of `v1` occurs here
+    let r1 = &amp;v1;
+              ^~</code></pre>
+<p>(artifact of lexical-scope based implementation)</p>
+</section><section id="built-on-lexical-scopes-but-non-trivial" class="slide level2" data-transition="slide-in fade-out">
+<h1><a href="http://is.gd/aJR3jP">Built on lexical scopes, but non-trivial</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> copying_can_extend_a_borrows_lifetime_1() {
+    <span class="kw">fn</span> foo&lt;<span class="ot">&#39;a</span>&gt;(v: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { <span class="pp">println!</span>(<span class="st">&quot;v[1]: {}&quot;</span>, v[<span class="dv">1</span>]); }
+    <span class="kw">let</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]; <span class="co">//         +</span>
+    <span class="kw">let</span> v2 = <span class="pp">vec!</span>[<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]; <span class="co">//         |    +</span>
+    <span class="kw">let</span> r2 = {              <span class="co">//         |    |</span>
+        <span class="kw">let</span> r1 = &amp;v1;       <span class="co">//  +      |    |</span>
+        <span class="co">//       ~~~ &lt;--- A //  |      |    |</span>
+        foo(r1);            <span class="co">// &#39;r1     |    |</span>
+        &amp;v2                 <span class="co">//  |     &#39;v1  &#39;v2</span>
+    };                      <span class="co">//  *  +   |    |</span>
+    <span class="co">// (maybe mutate `v1`   //     |   |    |</span>
+    <span class="co">// here someday?)       //     |   |    |</span>
+                            <span class="co">//    &#39;r2  |    |</span>
+    foo(r2);                <span class="co">//     |   |    |</span>
+}                           <span class="co">//     *   *    *</span></code></pre></div>
+<p>How long should the borrow <code>&amp;v1</code> last?</p>
+<aside class="notes">
+<p>In this case, the borrow marked &quot;A&quot; only needs to last long enough for the call to <code>foo(r1)</code>; after that point, the borrow is never needed.</p>
+</aside>
+</section><section id="built-on-lexical-scopes-but-non-trivial-1" class="slide level2" data-transition="fade-in slide-out">
+<h1><a href="http://is.gd/Kse2Gz">Built on lexical scopes, but non-trivial</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> copying_can_extend_a_borrows_lifetime_2() {
+    <span class="kw">fn</span> foo&lt;<span class="ot">&#39;a</span>&gt;(v: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { <span class="pp">println!</span>(<span class="st">&quot;v[1]: {}&quot;</span>, v[<span class="dv">1</span>]); }
+    <span class="kw">let</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]; <span class="co">//         +</span>
+    <span class="kw">let</span> v2 = <span class="pp">vec!</span>[<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]; <span class="co">//         |    +</span>
+    <span class="kw">let</span> r2 = {              <span class="co">//         |    |</span>
+        <span class="kw">let</span> r1 = &amp;v1;       <span class="co">//  +      |    |</span>
+        <span class="co">//       ~~~ &lt;--- A //  |      |    |</span>
+        foo(r1);            <span class="co">// &#39;r1     |    |</span>
+        r1  <span class="co">// &lt;--------- B //  |     &#39;v1  &#39;v2</span>
+    };                      <span class="co">//  *  +   |    |</span>
+    <span class="co">// (maybe mutate `v1`   //     |   |    |</span>
+    <span class="co">// here someday?)       //     |   |    |</span>
+                            <span class="co">//    &#39;r2  |    |</span>
+    foo(r2);                <span class="co">//     |   |    |</span>
+}                           <span class="co">//     *   *    *</span></code></pre></div>
+<p>How long should the borrow <code>&amp;v1</code> last now?</p>
+<aside class="notes">
+<p>In this case, the borrow marked &quot;A&quot; needs to last longer! The value of <code>r1</code> is being copied into <code>r2</code> on the line marked &quot;B&quot;, so the borrow marked &quot;A&quot; needs to include the scope of both <code>'r1</code> and <code>'r2</code>.</p>
+<p>Regarding that &quot;someday&quot; comment: http://is.gd/rRPVe2</p>
+</aside>
+</section><section id="imm-borrows-can-be-copied-freely" class="slide level2" data-transition="fade-out">
+<h1>imm-borrows: can be copied freely</h1>
+<p>(super super useful to be able to share readable data!)</p>
+</section><section id="imm-borrows-can-be-copied-freely-1" class="slide level2" data-transition="fade-in fade-out">
+<h1><a href="http://is.gd/MioaBw">imm-borrows: can be copied freely</a></h1>
+<p>Implications:</p>
+<ul>
+<li>must assume aliased (perhaps by another thread)</li>
+<li>therefore <em>not safe</em> to mutate in general</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_cannot_mutate_imm_borrow() {
+    <span class="kw">let</span> <span class="kw">mut</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    <span class="kw">let</span> b = &amp;v1;
+    <span class="kw">let</span> (b1, b2, b3) = (b, b, b);
+    try_modify(b);
+    <span class="pp">println!</span>(<span class="st">&quot;v1: {:?}&quot;</span>, v1);
+}
+
+<span class="kw">fn</span> try_modify(v: &amp;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) {
+    v.push(<span class="dv">4</span>);
+}</code></pre></div>
+<pre class="fragment error_message"><code>error: cannot borrow immutable borrowed content `*v` as mutable
+    v.push(4);
+    ^</code></pre>
+</section><section id="imm-borrows-can-be-copied-freely-2" class="slide level2" data-transition="fade-in slide-out">
+<h1><a href="http://is.gd/MioaBw">imm-borrows: can be copied freely</a></h1>
+<p>Implications:</p>
+<ul>
+<li>must assume aliased (perhaps by another thread)</li>
+<li>therefore <em>not safe</em> to mutate in general</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_cannot_mutate_imm_borrow() {
+    <span class="kw">let</span> <span class="kw">mut</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    <span class="kw">let</span> b = &amp;v1;
+    <span class="kw">let</span> (b1, b2, b3) = (b, b, b);
+    try_modify(b);
+    <span class="pp">println!</span>(<span class="st">&quot;v1: {:?}&quot;</span>, v1);
+}
+
+<span class="kw">fn</span> try_modify(v: &amp;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) {
+    v.push(<span class="dv">4</span>);
+}</code></pre></div>
+<pre><code>WHAT
+      A
+         BUMMER!!!</code></pre>
+</section><section id="my-precious-imperative-algorithms" class="slide level2 center">
+<h1>my precious imperative algorithms!</h1>
+</section><section id="mut-borrows" class="slide level2 center">
+<h1><a href="http://is.gd/FWAPCw"><code class="sourceCode rust">&amp;<span class="kw">mut</span></code> borrows</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_can_mutate_mut_borrow() {
+    <span class="kw">let</span> <span class="kw">mut</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    modify_vec(&amp;<span class="kw">mut</span> v1);
+    <span class="pp">println!</span>(<span class="st">&quot;v1: {:?}&quot;</span>, v1);
+}
+
+<span class="kw">fn</span> modify_vec(v: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) {
+    v.push(<span class="dv">4</span>);
+}</code></pre></div>
+<pre class="fragment"><code>v1: [1, 2, 3, 4]</code></pre>
+</section><section id="what-does-mut-mean-crucial" class="slide level2 center left_align" data-transition="zoom-out">
+<h1>What does <code class="sourceCode rust">&amp;<span class="kw">mut</span></code> mean (crucial)</h1>
+<p>For many (but not all) types, safe mutation <em>requires</em> exclusive access</p>
+<div class="fragment">
+<p>Any operation requiring exclusive access should either:</p>
+<ul>
+<li><p>take ownership, or,</p></li>
+<li><p>take an <code class="sourceCode rust">&amp;<span class="kw">mut</span></code>-reference</p></li>
+</ul>
+</div>
+</section><section id="exclusive-access-versus-ownership" class="slide level2">
+<h1><a href="http://is.gd/J5YMKs">Exclusive Access versus Ownership</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> take_by_value(v: <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { <span class="kw">let</span> <span class="kw">mut</span> v = v; v.push(<span class="dv">4</span>);  }
+<span class="kw">fn</span> take_mut_borrow(b: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { b.push(<span class="dv">10</span>); }
+<span class="co">// seemingly similar in power</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_exclusive_access_versus_ownership() {
+    <span class="kw">let</span> (<span class="kw">mut</span> v1, <span class="kw">mut</span> v2) = (<span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], <span class="pp">vec!</span>[<span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">9</span>]);
+    take_by_value(v1);
+    take_mut_borrow(&amp;<span class="kw">mut</span> v2);
+    <span class="pp">println!</span>(<span class="st">&quot;v1: {:?} v2: {:?}&quot;</span>, v1, v2);
+}</code></pre></div>
+<pre class="fragment error_message"><code>error: use of moved value: `v1` [E0382]
+    println!(&quot;v1: {:?} v2: {:?}&quot;, v1, v2);
+                                  ^~
+note: `v1` moved here
+    take_by_value(v1);
+                  ^~</code></pre>
+<div class="fragment">
+<p>ownership ⇒ power + responsibility (for dropping)</p>
+<p><code>&amp;mut</code> ⇒ power without responsibility; (can only <em>swap</em>)</p>
+</div>
+</section></section>
+<section><section id="mut-safety-enforcement" class="titleslide slide level1 center"><h1><code class="sourceCode rust">&amp;<span class="kw">mut</span></code> safety enforcement</h1></section><section id="data-has-at-most-one-mut-borrow" class="slide level2" data-transition="slide-in fade-out">
+<h1><a href="http://is.gd/Z72hwM">Data has at most one <code class="sourceCode rust">&amp;<span class="kw">mut</span></code> borrow</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> take2&lt;<span class="ot">&#39;a</span>&gt;(v1: &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;, v2: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { }</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_cannot_mut_borrow_multiple_times() {
+    <span class="kw">let</span> <span class="kw">mut</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    <span class="kw">let</span> <span class="kw">mut</span> v2 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    take2(&amp;<span class="kw">mut</span> v1, &amp;<span class="kw">mut</span> v2); <span class="co">// &lt;-- this is okay</span>
+    take2(&amp;<span class="kw">mut</span> v1, &amp;<span class="kw">mut</span> v1);
+}</code></pre></div>
+<pre class="fragment error_message"><code>error: cannot borrow `v1` as mutable more than once at a time
+    take2(&amp;mut v1, &amp;mut v1);
+                        ^~
+note: previous borrow of `v1` occurs here; the mutable borrow
+      prevents subsequent moves, borrows, or modification of
+      `v1` until the borrow ends
+    take2(&amp;mut v1, &amp;mut v1);
+               ^~
+
+</code></pre>
+</section><section id="cannot-alias-mut-borrowed-data" class="slide level2" data-transition="fade">
+<h1><a href="http://is.gd/MRxBeK">Cannot alias <code class="sourceCode rust">&amp;<span class="kw">mut</span></code>-borrowed data</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> take2&lt;<span class="ot">&#39;a</span>&gt;(v1: &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;, v2: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { }</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_cannot_alias_mut_borrowed_data() {
+    <span class="kw">let</span> <span class="kw">mut</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    <span class="kw">let</span> <span class="kw">mut</span> v2 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    take2(&amp;<span class="kw">mut</span> v1, &amp;v2); <span class="co">// &lt;-- this is okay</span>
+    take2(&amp;<span class="kw">mut</span> v1, &amp;v1);
+}</code></pre></div>
+<pre class="fragment error_message"><code>error: cannot borrow `v1` as immutable because it is also borrowed
+       as mutable
+    take2(&amp;mut v1, &amp;v1);
+                    ^~
+note: previous borrow of `v1` occurs here; the mutable borrow 
+      prevents subsequent moves, borrows, or modification of `v1`
+      until the borrow ends
+    take2(&amp;mut v1, &amp;v1);
+               ^~</code></pre>
+</section><section id="mut-t-is-non-copy" class="slide level2" data-transition="fade-in slide-out">
+<h1><a href="http://is.gd/vBPs15"><code class="sourceCode rust">&amp;<span class="kw">mut</span> T</code> is non-copy</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> take2&lt;<span class="ot">&#39;a</span>&gt;(v1: &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;, v2: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { }</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_cannot_copy_mut_borrows() {
+    <span class="kw">let</span> <span class="kw">mut</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    <span class="kw">let</span> b = &amp;<span class="kw">mut</span> v1;
+    <span class="kw">let</span> c = b;
+    take2(b, c);
+}</code></pre></div>
+<pre class="fragment error_message"><code>error: use of moved value: `*b` [E0382]
+    take2(b, c);
+          ^
+note: `b` moved here because it has type
+      `&amp;mut collections::vec::Vec&lt;i32&gt;`, which is moved by default
+    let c = b;
+        ^</code></pre>
+<p>(ensures exclusive access)</p>
+</section></section>
+<section><section id="wither-a.method" class="titleslide slide level1 center"><h1>Wither <code class="sourceCode rust">a.method()</code> ?</h1></section><section id="rust-has-methods-too" class="slide level2">
+<h1><a href="http://is.gd/2r7DRl">Rust has methods too</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">struct</span> Point { x: <span class="dt">i32</span>, y: <span class="dt">i32</span> }
+
+<span class="kw">impl</span> Point {
+    <span class="kw">fn</span> distance_from_origin(&amp;<span class="kw">self</span>) -&gt; <span class="dt">i32</span> {
+        <span class="kw">let</span> Point { x, y } = *<span class="kw">self</span>;
+        <span class="kw">let</span> sum = (x*x + y*y) <span class="kw">as</span> <span class="dt">f64</span>;
+        sum.sqrt() <span class="kw">as</span> <span class="dt">i32</span>
+    }
+}
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_dist() {
+    <span class="kw">let</span> p = Point { x: <span class="dv">3</span>, y: <span class="dv">4</span> };
+    <span class="pp">assert_eq!</span>(<span class="dv">5</span>, p.distance_from_origin());
+}</code></pre></div>
+</section><section id="method-signatures" class="slide level2 center">
+<h1>Method signatures</h1>
+<ul>
+<li><code class="sourceCode rust"><span class="kw">self</span></code>: <em>consumes</em> receiver</li>
+<li><code class="sourceCode rust">&amp;<span class="kw">self</span></code>: <em>accesses</em> receiver</li>
+<li><code class="sourceCode rust">&amp;<span class="kw">mut</span> <span class="kw">self</span></code>: <em>mutates</em> receiver</li>
+</ul>
+</section><section id="method-signatures-self" class="slide level2">
+<h1>Method signatures: &amp;self</h1>
+<p>Accesses receiver</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">enum</span> <span class="dt">Option</span>&lt;T&gt; { <span class="cn">None</span>, <span class="cn">Some</span>(T) } <span class="co">// algebraic data! generics!</span>
+
+<span class="kw">impl</span>&lt;T&gt; <span class="dt">Option</span>&lt;T&gt; {
+    <span class="co">// &amp;Option&lt;T&gt; -&gt; bool</span>
+    <span class="kw">fn</span> is_some(&amp;<span class="kw">self</span>) -&gt; <span class="dt">bool</span> {
+        <span class="kw">match</span> *<span class="kw">self</span> {
+            <span class="cn">Some</span>(_) =&gt; <span class="cn">true</span>,
+            <span class="cn">None</span> =&gt; <span class="cn">false</span>
+        }
+    }
+
+    <span class="kw">fn</span> is_none(&amp;<span class="kw">self</span>) -&gt; <span class="dt">bool</span> {
+        !<span class="kw">self</span>.is_some()
+    }
+}</code></pre></div>
+</section><section id="method-signatures-mut-self" class="slide level2">
+<h1>Method signatures: &amp;mut self</h1>
+<p>&quot;Mutates&quot; receiver</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">enum</span> <span class="dt">Option</span>&lt;T&gt; { <span class="cn">None</span>, <span class="cn">Some</span>(T) }
+
+<span class="kw">impl</span>&lt;T&gt; <span class="dt">Option</span>&lt;T&gt; {
+    <span class="co">// &amp;mut Option&lt;T&gt; -&gt; Option&lt;T&gt;</span>
+    <span class="kw">fn</span> take(&amp;<span class="kw">mut</span> <span class="kw">self</span>) -&gt; <span class="dt">Option</span>&lt;T&gt; {
+        <span class="kw">let</span> <span class="kw">mut</span> src = <span class="cn">None</span>;
+        swap(<span class="kw">self</span>, &amp;<span class="kw">mut</span> src);
+        src
+    }
+}</code></pre></div>
+</section><section id="method-signatures-self-1" class="slide level2">
+<h1>Method signatures: self</h1>
+<p><span class="strike">&quot;Consumes&quot;</span> Takes ownership of receiver</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">impl</span>&lt;T&gt; <span class="dt">Option</span>&lt;T&gt; {
+    <span class="co">// Option&lt;T&gt; -&gt; T</span>
+    <span class="kw">fn</span> unwrap_or(<span class="kw">self</span>, default: T) -&gt; T {
+        <span class="kw">match</span> <span class="kw">self</span> {
+            <span class="cn">Some</span>(x) =&gt; x,
+            <span class="cn">None</span> =&gt; default
+        }
+    } <span class="co">// one of `self` or `default` dropped at end</span>
+}</code></pre></div>
+</section><section class="slide level2">
+
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">impl</span>&lt;T&gt; <span class="dt">Option</span>&lt;T&gt; {
+    <span class="kw">fn</span> is_some(&amp;<span class="kw">self</span>) -&gt; <span class="dt">bool</span> { ... }
+    <span class="kw">fn</span> is_none(&amp;<span class="kw">self</span>) -&gt; <span class="dt">bool</span> { ... }
+    <span class="kw">fn</span> take(&amp;<span class="kw">mut</span> <span class="kw">self</span>) -&gt; <span class="dt">Option</span>&lt;T&gt; { ... }
+    <span class="kw">fn</span> unwrap_or(<span class="kw">self</span>, default: T) -&gt; T { ... }
+}</code></pre></div>
+<!--
+```rust
+#[test]
+fn demo_reading_protocol() {
+    demo_subroutine(format!("World"));
+}
+```
+-->
+<div class="fragment">
+<p>Some magic: <a href="http://is.gd/n8CaTJ">method invocations</a> automatically do borrows <em>and</em> derefs as necessary on the receiver (&quot;auto-ref&quot;).</p>
+</div>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> demo_subroutine(name: <span class="dt">String</span>) {
+    <span class="kw">let</span> <span class="kw">mut</span> hi = <span class="cn">Some</span>(<span class="pp">format!</span>(<span class="st">&quot;Hello {}&quot;</span>, &amp;name));
+    <span class="pp">assert!</span>(hi.is_some());   <span class="co">// this is an `&amp;hi`</span>
+
+    <span class="kw">let</span> grabbed = hi.take(); <span class="co">// this is an `&amp;mut hi`</span>
+    <span class="pp">assert!</span>(hi.is_none());   <span class="co">// this is an `&amp;hi`</span>
+
+    <span class="co">// and this consumes `grabbed`</span>
+    <span class="pp">assert!</span>(&amp;grabbed.unwrap_or(name)[<span class="dv">0.</span>.<span class="dv">5</span>] == <span class="st">&quot;Hello&quot;</span>);
+}</code></pre></div>
+</div>
+</section></section>
+<section><section id="for-the-c-fans-in-the-audience-smart-pointers" class="titleslide slide level1 center"><h1>For the C++ fans in the audience: Smart Pointers</h1></section><section id="smart-pointers" class="slide level2 center">
+<h1>&quot;Smart&quot; &quot;Pointers&quot;</h1>
+<ul>
+<li><p><code>Box&lt;T&gt;</code>: unique reference to <code>T</code> on (<code>malloc</code>/<code>free</code>-style) heap</p></li>
+<li><p><code>Rc&lt;T&gt;</code>: shared ownership, thread-local</p></li>
+<li><p><code>Arc&lt;T&gt;</code>: shared ownership, safe across threads</p></li>
+</ul>
+<div class="fragment">
+<p>All of above deref to <code>&amp;T</code></p>
+</div>
+</section><section id="deref-works-here-too" class="slide level2 center">
+<h1><a href="http://is.gd/J9RKXK"><code>Deref</code> works here too</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_rc_of_point() {
+    <span class="kw">use</span> std::rc::Rc;
+    <span class="kw">let</span> p1 = Rc::new(Point { x: <span class="dv">3</span>, y: <span class="dv">4</span> });
+    <span class="kw">let</span> p2 = p1.clone();
+    <span class="pp">assert_eq!</span>(<span class="dv">5</span>, p1.distance_from_origin());
+    <span class="pp">assert_eq!</span>(<span class="dv">5</span>, p2.distance_from_origin());
+
+    <span class="co">// p1.x = 6; // (STATIC ERROR; cannot assign Rc contents)</span>
+}</code></pre></div>
+</section><section id="other-deref-fun" class="slide level2">
+<h1>Other Deref fun</h1>
+<p><code>Box&lt;T&gt;</code>, <code>Rc&lt;T&gt;</code>, <code>Arc&lt;T&gt;</code> all deref to <code>&amp;T</code></p>
+<p>But we also have things like this:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">pub</span> <span class="kw">enum</span> Cow&lt;<span class="ot">&#39;a</span>, B&gt; <span class="kw">where</span> B: ToOwned {
+    Borrowed(&amp;<span class="ot">&#39;a</span> B),
+    Owned(&lt;B <span class="kw">as</span> ToOwned&gt;::Owned)
+}</code></pre></div>
+<p>which derefs to <code>&amp;B</code>, even if it is in the <code>Owned</code> variant.</p>
+<div class="fragment">
+<p>(Useful for APIs that want to delay the decision of whether to return an owned value or a borrowed reference.)</p>
+</div>
+</section></section>
+<section><section id="lifetime-bindings" class="titleslide slide level1 center"><h1>Lifetime Bindings</h1></section><section id="lifetime-bindings-1" class="slide level2 center">
+<h1><a href="http://is.gd/YUeL9J">Lifetime Bindings 1</a></h1>
+<p>We saw this kind of thing before:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> explicit_lifetime_binding_1() {
+    <span class="kw">fn</span> print&lt;<span class="ot">&#39;a</span>&gt;(ints: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ints[<span class="dv">1</span>]);
+    }
+    <span class="kw">let</span> v1 = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    print(&amp;v1)
+}</code></pre></div>
+</section><section id="lifetime-bindings-2" class="slide level2" data-transition="fade-out">
+<h1><a href="http://is.gd/VUhzbN">Lifetime Bindings 2</a></h1>
+<p>You can bind distinct lifetimes:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> explicit_lifetime_binding_2() {
+    <span class="kw">fn</span> print&lt;<span class="ot">&#39;a</span>, <span class="ot">&#39;b</span>&gt;(ptrs: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ptrs[<span class="dv">1</span>]);
+
+    }
+    <span class="kw">let</span> one = <span class="dv">1</span>;
+    <span class="kw">let</span> two = <span class="dv">2</span>;
+    <span class="kw">let</span> three = <span class="dv">3</span>;
+    <span class="kw">let</span> four = <span class="dv">4</span>;
+    <span class="kw">let</span> v1 = <span class="pp">vec!</span>[&amp;one, &amp;two, &amp;three];
+    print(&amp;v1)
+}</code></pre></div>
+</section><section id="lifetime-bindings-3" class="slide level2" data-transition="fade">
+<h1><a href="http://is.gd/I22UHF">Lifetime Bindings 3</a></h1>
+<p>Encode constraints by reusing same lifetime:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> explicit_lifetime_binding_3() {
+    <span class="kw">fn</span> print&lt;<span class="ot">&#39;a</span>, <span class="ot">&#39;b</span>&gt;(ptrs: &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> <span class="dt">Vec</span>&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;, ptr: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ptrs[<span class="dv">1</span>]);
+        ptrs.push(ptr);
+    }
+    <span class="kw">let</span> one = <span class="dv">1</span>;
+    <span class="kw">let</span> two = <span class="dv">2</span>;
+    <span class="kw">let</span> three = <span class="dv">3</span>;
+    <span class="kw">let</span> four = <span class="dv">4</span>;
+    <span class="kw">let</span> <span class="kw">mut</span> v1 = <span class="pp">vec!</span>[&amp;one, &amp;two, &amp;three];
+    print(&amp;<span class="kw">mut</span> v1, &amp;four);
+}</code></pre></div>
+</section><section id="lifetime-bindings-4" class="slide level2" data-transition="fade-in">
+<h1><a href="http://is.gd/5wOydB">Lifetime Bindings 4</a></h1>
+<p>Encode constraints by reusing same lifetime:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> explicit_lifetime_binding_4() {
+    <span class="kw">fn</span> print&lt;<span class="ot">&#39;a</span>, <span class="ot">&#39;b</span>&gt;(ptrs: &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> <span class="dt">Vec</span>&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;, ptr: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ptrs[<span class="dv">1</span>]);<span class="co">//~~~            ~~~</span>
+        ptrs.push(ptr);            <span class="co">//   |              |</span>
+    }                              <span class="co">// this must match that,</span>
+    <span class="kw">let</span> one = <span class="dv">1</span>;                   <span class="co">// otherwise push is bogus</span>
+    <span class="kw">let</span> two = <span class="dv">2</span>;
+    <span class="kw">let</span> three = <span class="dv">3</span>;
+    <span class="kw">let</span> four = <span class="dv">4</span>;
+    <span class="kw">let</span> <span class="kw">mut</span> v1 = <span class="pp">vec!</span>[&amp;one, &amp;two, &amp;three];
+    print(&amp;<span class="kw">mut</span> v1, &amp;four);
+}</code></pre></div>
+</section><section id="lifetime-bindings-5" class="slide level2" data-transition="fade-in">
+<h1><a href="http://is.gd/JX2zpy">Lifetime Bindings 5</a></h1>
+<p>Compiler catches missing necessary constraints:</p>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> explicit_lifetime_binding_5() {
+    <span class="kw">fn</span> print&lt;<span class="ot">&#39;a</span>, <span class="ot">&#39;b</span>, <span class="ot">&#39;c</span>&gt;(ptrs: &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> <span class="dt">Vec</span>&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;, ptr: &amp;<span class="ot">&#39;c</span> <span class="dt">i32</span>) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ptrs[<span class="dv">1</span>]);  <span class="co">//  ~~~            ~~~</span>
+        ptrs.push(ptr);                <span class="co">//   |              |</span>
+    }                                  <span class="co">// this must match that,</span>
+    <span class="kw">let</span> one = <span class="dv">1</span>;                       <span class="co">// otherwise push is bogus</span>
+}</code></pre></div>
+<pre class="fragment"><code>error: cannot infer an appropriate lifetime for automatic coercion
+       due to conflicting requirements
+        ptrs.push(ptr);
+                  ^~~
+help: consider using an explicit lifetime parameter as shown:
+    fn print&lt;&#39;a, &#39;b&gt;(ptrs: &amp;&#39;a mut Vec&lt;&amp;&#39;b i32&gt;, ptr: &amp;&#39;b i32)</code></pre>
+</section><section id="borrowed-return-values-1" class="slide level2" data-transition="fade-out">
+<h1><a href="http://is.gd/gKhfy0">Borrowed return values 1</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> first_n_last&lt;<span class="ot">&#39;a</span>&gt;(ints: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) -&gt; (&amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>, &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>) {
+    <span class="co">//                                      ~~~~~~~  ~~~~~~~</span>
+    (&amp;ints[<span class="dv">0</span>], &amp;ints[ints.len() - <span class="dv">1</span>])
+}</code></pre></div>
+<!--
+TODO: Exercise idea: Try to write `fn first_and_last_mut`. Why is it impossible
+in general?
+-->
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_borrowed_return_values() {
+    <span class="kw">let</span> v = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>];
+    <span class="kw">let</span> (first, fourth) = first_n_last(&amp;v);
+    <span class="pp">assert_eq!</span>(*first, <span class="dv">1</span>);
+    <span class="pp">assert_eq!</span>(*fourth, <span class="dv">4</span>);
+}</code></pre></div>
+<p>(compiler ensures borrow <code class="sourceCode rust">&amp;v</code> lasts long enough to satisfy reads of <code>first</code> and <code>fourth</code>)</p>
+</div>
+</section><section id="borrowed-return-values-2" class="slide level2" data-transition="fade-in">
+<h1><a href="http://is.gd/DzWgSs">Borrowed return values 2</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> first_n_last&lt;<span class="ot">&#39;a</span>&gt;(ints: <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) -&gt; (&amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>, &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>) {
+    <span class="co">//                    ~~~~~~~~ (hint)</span>
+    (&amp;ints[<span class="dv">0</span>], &amp;ints[ints.len() - <span class="dv">1</span>])
+}</code></pre></div>
+<p>Why doesn't this work?</p>
+<pre class="fragment" data-fragment-index="1"><code>error: `ints` does not live long enough
+    (&amp;ints[0], &amp;ints[ints.len() - 1])
+      ^~~~
+note: reference must be valid for the lifetime &#39;a ...
+note: ...but borrowed value is only valid for the scope of
+note:    parameters for function</code></pre>
+<div class="fragment">
+<p>caller chooses <code class="sourceCode rust"><span class="ot">&#39;a</span></code>; <code>fn</code> body must work for any such choice</p>
+<p>(Parameters dropped at scope end; won't live long enough)</p>
+</div>
+</section></section>
+<section><section id="lifetime-elision" class="titleslide slide level1 center"><h1>Lifetime Elision</h1></section><section id="all-the-a-b-...-are-ugly" class="slide level2 center">
+<h1>All the <code class="sourceCode rust"><span class="ot">&#39;a</span></code>, <code class="sourceCode rust"><span class="ot">&#39;b</span></code>, ... are ugly</h1>
+</section><section id="lifetime-elision-1" class="slide level2" data-transition="fade-out">
+<h1><a href="http://is.gd/72HT0U">Lifetime Elision 1</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> lifetime_elision_1() {
+    <span class="kw">fn</span> print1&lt;<span class="ot">&#39;a</span>&gt;(ints: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ints[<span class="dv">1</span>]);
+    }
+    <span class="kw">fn</span> print2&lt;<span class="ot">&#39;a</span>, <span class="ot">&#39;b</span>&gt;(ptrs: &amp;<span class="ot">&#39;a</span> <span class="dt">Vec</span>&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ptrs[<span class="dv">1</span>]);
+
+    }
+    <span class="kw">fn</span> print3&lt;<span class="ot">&#39;a</span>, <span class="ot">&#39;b</span>&gt;(ptrs: &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> <span class="dt">Vec</span>&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;, ptr: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ptrs[<span class="dv">1</span>]);
+        ptrs.push(ptr);
+    }
+}</code></pre></div>
+</section><section id="lifetime-elision-2" class="slide level2" data-transition="fade">
+<h1><a href="http://is.gd/UvyycH">Lifetime Elision 2</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> lifetime_elision_2() {
+    <span class="kw">fn</span> print1    (ints: &amp;   <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ints[<span class="dv">1</span>]);
+    }
+    <span class="kw">fn</span> print2        (ptrs: &amp;   <span class="dt">Vec</span>&lt;&amp;   <span class="dt">i32</span>&gt;) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ptrs[<span class="dv">1</span>]);
+
+    }
+    <span class="kw">fn</span> print3&lt;    <span class="ot">&#39;b</span>&gt;(ptrs: &amp;   <span class="kw">mut</span> <span class="dt">Vec</span>&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;, ptr: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ptrs[<span class="dv">1</span>]);
+        ptrs.push(ptr);
+    }
+}</code></pre></div>
+</section><section id="lifetime-elision-3" class="slide level2" data-transition="fade-in">
+<h1><a href="http://is.gd/Rm4qIc">Lifetime Elision 3</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> lifetime_elision_3() {
+    <span class="kw">fn</span> print1(ints: &amp;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ints[<span class="dv">1</span>]);
+    }
+    <span class="kw">fn</span> print2(ptrs: &amp;<span class="dt">Vec</span>&lt;&amp;<span class="dt">i32</span>&gt;) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ptrs[<span class="dv">1</span>]);
+
+    }
+    <span class="kw">fn</span> print3&lt;<span class="ot">&#39;b</span>&gt;(ptrs: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;, ptr: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ptrs[<span class="dv">1</span>]);
+        ptrs.push(ptr);
+    }
+}</code></pre></div>
+</section></section>
+<section><section id="generic-items" class="titleslide slide level1 center"><h1>Generic items</h1></section><section id="generic-items-1" class="slide level2" data-transition="fade-out">
+<h1><a href="http://is.gd/Rd0aYF">Generic items 1</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> generic_items_1() {
+    <span class="kw">fn</span> push_twice&lt;<span class="ot">&#39;b</span>&gt;(ptrs: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;, ptr: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>) {
+        ptrs.push(ptr);
+        ptrs.push(ptr);
+    }
+    <span class="kw">let</span> (one, two, three, four) = (<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>);
+    <span class="kw">let</span> <span class="kw">mut</span> v = <span class="pp">vec!</span>[&amp;one, &amp;two, &amp;three];
+    push_twice(&amp;<span class="kw">mut</span> v, &amp;four);
+}</code></pre></div>
+<p>This obviously generalizes beyond <code>i32</code>!</p>
+</section><section id="generic-items-2" class="slide level2" data-transition="fade-in">
+<h1><a href="http://is.gd/ehrrSy">Generic items 2</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> generic_items_2() {
+    <span class="kw">fn</span> push_twice&lt;<span class="ot">&#39;b</span>, T&gt;(ptrs: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;&amp;<span class="ot">&#39;b</span> T&gt;, ptr: &amp;<span class="ot">&#39;b</span> T) {
+        ptrs.push(ptr);
+        ptrs.push(ptr);
+    }
+    <span class="kw">let</span> (one, two, three, four) = (<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>);
+    <span class="kw">let</span> <span class="kw">mut</span> v = <span class="pp">vec!</span>[&amp;one, &amp;two, &amp;three];
+    push_twice(&amp;<span class="kw">mut</span> v, &amp;four);
+}</code></pre></div>
+<p>This is going so smoothly; lets try printing <code>v_1</code> again!</p>
+</section><section id="generic-items-3" class="slide level2">
+<h1><a href="http://is.gd/bINY38">Generic items 3</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> generic_items_3() {
+    <span class="kw">fn</span> push_twice&lt;<span class="ot">&#39;b</span>, T&gt;(ptrs: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;&amp;<span class="ot">&#39;b</span> T&gt;, ptr: &amp;<span class="ot">&#39;b</span> T) {
+        <span class="pp">println!</span>(<span class="st">&quot;v_1: {}&quot;</span>, ptrs[<span class="dv">1</span>]);
+        ptrs.push(ptr);
+        ptrs.push(ptr);
+    }
+    <span class="kw">let</span> (one, two, three, four) = (<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>);
+    <span class="kw">let</span> <span class="kw">mut</span> v = <span class="pp">vec!</span>[&amp;one, &amp;two, &amp;three];
+    push_twice(&amp;<span class="kw">mut</span> v, &amp;four);
+}</code></pre></div>
+<pre class="fragment"><code>error: trait `core::fmt::Display` not implemented for the type `T`
+        println!(&quot;v_1: {}&quot;, ptrs[1]);
+                            ^~~~~~~</code></pre>
+<p>(Reminder: Rust is not C++)</p>
+</section></section>
+<section><section id="trait-bounded-polymorphism" class="titleslide slide level1 center"><h1>Trait-bounded polymorphism</h1></section><section id="trait-bounded-polymorphism-1" class="slide level2 center">
+<h1><a href="http://is.gd/Xy9l7N">Trait-bounded polymorphism</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">trait</span> Dimensioned {
+    <span class="kw">fn</span> height(&amp;<span class="kw">self</span>) -&gt; <span class="dt">u32</span>;
+    <span class="kw">fn</span> width(&amp;<span class="kw">self</span>) -&gt; <span class="dt">u32</span>;
+}
+
+<span class="kw">fn</span> stacked_height&lt;S&gt;(v: &amp;[S]) -&gt; <span class="dt">u32</span> <span class="kw">where</span> S: Dimensioned {
+    <span class="kw">let</span> <span class="kw">mut</span> accum = <span class="dv">0</span>;
+    <span class="kw">for</span> s <span class="kw">in</span> v { accum += s.height() }
+    accum
+}</code></pre></div>
+</section><section id="trait-impls" class="slide level2 center">
+<h1><a href="http://is.gd/Xy9l7N">Trait Impls</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">struct</span> Rect { w: <span class="dt">u32</span>, h: <span class="dt">u32</span> }
+<span class="kw">struct</span> Circle { r: <span class="dt">u32</span> }
+
+<span class="kw">impl</span> Dimensioned <span class="kw">for</span> Rect {
+    <span class="kw">fn</span> height(&amp;<span class="kw">self</span>) -&gt; <span class="dt">u32</span> { <span class="kw">self</span>.h }
+    <span class="kw">fn</span> width(&amp;<span class="kw">self</span>) -&gt; <span class="dt">u32</span> { <span class="kw">self</span>.w }
+}
+
+<span class="kw">impl</span> Dimensioned <span class="kw">for</span> Circle {
+    <span class="kw">fn</span> height(&amp;<span class="kw">self</span>) -&gt; <span class="dt">u32</span> { <span class="kw">self</span>.r * <span class="dv">2</span> }
+    <span class="kw">fn</span> width(&amp;<span class="kw">self</span>) -&gt; <span class="dt">u32</span> { <span class="kw">self</span>.r * <span class="dv">2</span> }
+}</code></pre></div>
+</section><section id="traits-in-action" class="slide level2 center">
+<h1><a href="http://is.gd/Xy9l7N">Traits in Action</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">impl</span> Rect {
+    <span class="kw">fn</span> square(l: <span class="dt">u32</span>) -&gt; Rect { Rect { w: l, h: l } }
+}
+<span class="kw">impl</span> Circle {
+    <span class="kw">fn</span> with_radius(r: <span class="dt">u32</span>) -&gt; Circle { Circle { r: r } }
+}
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> trait_bounded_polymorphism() {
+    <span class="kw">let</span> squares = [ Rect::square(<span class="dv">1</span>), Rect::square(<span class="dv">2</span>) ];
+    <span class="kw">let</span> circles = [ Circle::with_radius(<span class="dv">1</span>), Circle::with_radius(<span class="dv">2</span>)];
+    <span class="pp">assert_eq!</span>(stacked_height(&amp;squares), <span class="dv">3</span>);
+    <span class="pp">assert_eq!</span>(stacked_height(&amp;circles), <span class="dv">6</span>);
+}</code></pre></div>
+</section></section>
+<section><section id="generics-do-not-suffice" class="titleslide slide level1 center"><h1>Generics do not suffice</h1></section><section id="generics-do-not-suffice-1" class="slide level2 center">
+<h1><a href="http://is.gd/S5fXjQ">Generics do not suffice</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> parametric_fail() {
+    <span class="kw">let</span> shapes = [Rect::square(<span class="dv">1</span>), Circle::with_radius(<span class="dv">2</span>)];
+    <span class="pp">assert_eq!</span>(stacked_height(&amp;shapes), <span class="dv">5</span>);
+}</code></pre></div>
+<pre class="fragment"><code>error: mismatched types:
+ expected `Rect`,
+    found `Circle`
+    let shapes = [Rect::square(1), Circle::with_radius(2)];
+                                   ^~~~~~~~~~~~~~~~~~~~~~</code></pre>
+</section><section id="uniformity-of-t-in-vect-is-why" class="slide level2 center">
+<h1><a href="http://is.gd/fA53YK">Uniformity of <code>T</code> in <code>Vec&lt;T&gt;</code> is why</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">struct</span> Rect { w: <span class="dt">u32</span>, h: <span class="dt">u32</span> }
+<span class="kw">struct</span> Circle { r: <span class="dt">u32</span> }
+
+<span class="kw">fn</span> parametric_fail() {
+    <span class="kw">let</span> shapes = [Rect::square(<span class="dv">1</span>), Circle::with_radius(<span class="dv">2</span>)];
+    <span class="co">//  ~~~~~~    ~~~~~~~~~~~~~~~  ~~~~~~~~~~~~~~~~~~~~~~</span>
+    <span class="co">//    |              |                    |</span>
+    <span class="co">//    |       This is 8 bytes     This is 4-bytes</span>
+    <span class="co">//    |</span>
+    <span class="co">//  There&#39;s no uniform array</span>
+    <span class="co">//  type to hold both in-line.</span>
+}</code></pre></div>
+</section><section id="this-is-a-job-for-..." class="slide level2 center">
+<h1>This is a job for ...</h1>
+<h3 id="object-oriented-programming" class="fragment">Object-Oriented Programming!</h3>
+</section><section id="traits-as-objects-1" class="slide level2">
+<h1><a href="http://is.gd/akO1vd">Traits as Objects 1</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> stacked_obj_refs(v: &amp;[&amp;Dimensioned]) -&gt; <span class="dt">u32</span> {
+    <span class="kw">let</span> <span class="kw">mut</span> accum = <span class="dv">0</span>;
+    <span class="kw">for</span> s <span class="kw">in</span> v { accum += s.height() }
+    accum
+}
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_objs_1() {
+    <span class="kw">let</span> r = Rect::square(<span class="dv">1</span>);
+    <span class="kw">let</span> c = Circle::with_radius(<span class="dv">2</span>);
+    <span class="kw">let</span> shapes: [&amp;Dimensioned; <span class="dv">2</span>] = [&amp;r, &amp;c];
+    <span class="pp">assert_eq!</span>(stacked_obj_refs(&amp;shapes), <span class="dv">5</span>);
+}</code></pre></div>
+</section><section id="traits-as-objects-2" class="slide level2">
+<h1><a href="http://is.gd/BbBlOz">Traits as Objects 2</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> stacked_obj_boxes(v: &amp;[<span class="dt">Box</span>&lt;Dimensioned&gt;]) -&gt; <span class="dt">u32</span> {
+    <span class="kw">let</span> <span class="kw">mut</span> accum = <span class="dv">0</span>;
+    <span class="kw">for</span> s <span class="kw">in</span> v { accum += s.height() }
+    accum
+}
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_objs_2() {
+    <span class="kw">let</span> shapes: [<span class="dt">Box</span>&lt;Dimensioned&gt;; <span class="dv">2</span>] =
+        [<span class="dt">Box</span>::new(Rect::square(<span class="dv">1</span>)), <span class="dt">Box</span>::new(Circle::with_radius(<span class="dv">2</span>))];
+    <span class="pp">assert_eq!</span>(stacked_obj_boxes(&amp;shapes), <span class="dv">5</span>);
+}</code></pre></div>
+</section></section>
+<section><section id="oop-is-nice-how-about-functional-programming" class="titleslide slide level1 center"><h1>OOP is nice; how about Functional Programming?</h1></section><section id="closures-1" class="slide level2 center">
+<h1>Closures 1</h1>
+<ul>
+<li><p>Can pass functions around as first class entities</p></li>
+<li><p>Functions can <em>close</em> over externally defined state</p></li>
+</ul>
+<p>Reminder from Javascript:</p>
+<p><code class="filename">closures.js</code></p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="at">add3</span>(x) <span class="op">{</span> <span class="cf">return</span> x <span class="op">+</span> <span class="dv">3</span><span class="op">;</span> <span class="op">}</span>
+
+<span class="co">// take function as parameter:</span>
+<span class="kw">function</span> <span class="at">do_twice</span>(f<span class="op">,</span> y) <span class="op">{</span> <span class="cf">return</span> <span class="at">f</span>(<span class="at">f</span>(y))<span class="op">;</span> <span class="op">}</span>
+
+<span class="co">// return function that references outer parameter `z`</span>
+<span class="kw">function</span> <span class="at">make_adder</span>(z) <span class="op">{</span>
+    <span class="cf">return</span> <span class="kw">function</span>(w) <span class="op">{</span> <span class="cf">return</span> w <span class="op">+</span> z<span class="op">;</span> <span class="op">};</span>
+<span class="op">}</span>
+
+<span class="kw">var</span> add4 <span class="op">=</span> <span class="at">make_adder</span>(<span class="dv">4</span>)<span class="op">;</span>
+<span class="kw">var</span> ten <span class="op">=</span> <span class="at">do_twice</span>(add4<span class="op">,</span> <span class="dv">2</span>)<span class="op">;</span></code></pre></div>
+</section><section id="closures-2" class="slide level2 center">
+<h1>Closures 2</h1>
+<ul>
+<li><p>In (classic) Javascript, closure syntax is:</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> (args<span class="op">,</span> ...) <span class="op">{</span> body<span class="op">;</span> ... <span class="op">}</span></code></pre></div>
+<p>where <code>body</code> can refer to things from outside.</p></li>
+<li><p>In Rust, the analogous closure expression syntax is:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">|args, ...| { body; ... }</code></pre></div>
+<p>with a few extra details:</p></li>
+</ul>
+<div class="fragment">
+<ul>
+<li><p>opt. <code class="sourceCode rust"><span class="kw">move</span></code> (forces capture-by-move)</p></li>
+<li><p>opt. arg. and return types (inferred when omitted)</p></li>
+</ul>
+</div>
+</section><section id="closures-3" class="slide level2 center">
+<h1><a href="http://is.gd/Kc3f8v">Closures 3</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_closure() {
+    <span class="kw">fn</span> add3(x: <span class="dt">i32</span>) -&gt; <span class="dt">i32</span> { x + <span class="dv">3</span> } <span class="co">// &lt;- fn, *not* a closure</span>
+    <span class="kw">fn</span> do_twice1&lt;F:<span class="bu">Fn</span>(<span class="dt">i32</span>) -&gt; <span class="dt">i32</span>&gt;(f: F, x: <span class="dt">i32</span>) -&gt; <span class="dt">i32</span> { f(f(x)) }
+    <span class="co">//             ~~~~~~~~~~~~~~ closure type</span>
+    <span class="kw">fn</span> do_twice2(f: &amp;<span class="bu">Fn</span>(<span class="dt">i32</span>) -&gt; <span class="dt">i32</span>, x: <span class="dt">i32</span>) -&gt; <span class="dt">i32</span> { f(f(x)) }
+
+    <span class="kw">fn</span> make_adder(y: <span class="dt">i32</span>) -&gt; <span class="dt">Box</span>&lt;<span class="bu">Fn</span>(<span class="dt">i32</span>) -&gt; <span class="dt">i32</span>&gt; {
+        <span class="dt">Box</span>::new(<span class="kw">move</span> |x| { x + y })
+            <span class="co">//   ~~~~~~~~~~~~~~~~~~ closure expression</span>
+    }
+
+    <span class="kw">let</span> add4 = make_adder(<span class="dv">4</span>);
+    <span class="kw">let</span> six = do_twice1(&amp;add3, <span class="dv">0</span>); <span class="kw">let</span> ten = do_twice1(&amp;*add4, <span class="dv">2</span>);
+    <span class="pp">assert_eq!</span>((six, ten), (<span class="dv">6</span>, <span class="dv">10</span>));
+    <span class="kw">let</span> six = do_twice2(&amp;add3, <span class="dv">0</span>); <span class="kw">let</span> ten = do_twice2(&amp;*add4, <span class="dv">2</span>);
+    <span class="pp">assert_eq!</span>((six, ten), (<span class="dv">6</span>, <span class="dv">10</span>));
+}</code></pre></div>
+</section></section>
+<section><section id="interior-mutability" class="titleslide slide level1 center"><h1>Interior Mutability</h1></section><section id="what-about-mutation-outside-of-mut" class="slide level2 center">
+<h1>What about mutation outside of <code class="sourceCode rust">&amp;<span class="kw">mut</span></code>?</h1>
+</section><section id="interior-mutability-cell-and-refcell-structs" class="slide level2 center">
+<h1>Interior Mutability: <code>Cell</code> and <code>RefCell</code> structs</h1>
+<ul>
+<li><p>Both types have mutator methods that take <code class="sourceCode rust">&amp;<span class="kw">self</span></code></p>
+<ul>
+<li><em>not</em> <code class="sourceCode rust">&amp;<span class="kw">mut</span> <span class="kw">self</span></code></li>
+</ul></li>
+<li><p><code>Cell&lt;T&gt;</code>: has <code>get</code> and <code>set</code> methods, but only accepts <code>T:Copy</code></p></li>
+<li><p><code>RefCell&lt;T&gt;</code> handles all types <code>T</code>, but <em>dynamically</em> <em>enforces</em> the rules.</p>
+<ul>
+<li><p><code>borrow</code> method returns read-only <code>Ref</code> (many-readers), and <code class="sourceCode rust"><span class="pp">panic!</span></code>'s on outstanding mut-borrow</p></li>
+<li><p><code>borrow_mut</code> method returns read/write <code>RefMut</code>, and <code class="sourceCode rust"><span class="pp">panic!</span></code>'s on any outstanding borrow.</p></li>
+</ul></li>
+</ul>
+</section><section id="demos-of-cell-and-refcell-types" class="slide level2 center">
+<h1>Demos of <code>Cell</code> and <code>RefCell</code> types</h1>
+</section><section id="cell-working" class="slide level2">
+<h1><a href="http://is.gd/3fa2J6"><code>Cell</code> working:</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_cell() {
+    <span class="kw">use</span> std::cell::Cell;
+    <span class="kw">let</span> c = Cell::new(<span class="dv">3</span>);
+    <span class="kw">let</span> p1: &amp;Cell&lt;<span class="dt">i32</span>&gt; = &amp;c;
+    <span class="kw">let</span> p2: &amp;Cell&lt;<span class="dt">i32</span>&gt; = &amp;c;
+    <span class="pp">assert_eq!</span>(p2.get(), <span class="dv">3</span>);
+    p1.set(<span class="dv">4</span>);
+    <span class="pp">assert_eq!</span>(p2.get(), <span class="dv">4</span>);
+}</code></pre></div>
+</section><section id="cell-cannot-hold-non-copy-data" class="slide level2">
+<h1><a href="http://is.gd/EGXBTt"><code>Cell</code> cannot hold non-<code>Copy</code> data</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_cell_vec_no_work() {
+    <span class="kw">use</span> std::cell::Cell;
+    <span class="kw">let</span> c = Cell::new(<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]);
+    <span class="kw">let</span> p1: &amp;Cell&lt;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;&gt; = &amp;c;
+    <span class="kw">let</span> p2: &amp;Cell&lt;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;&gt; = &amp;c;
+    <span class="pp">assert_eq!</span>(p2.get(), [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]);
+    p1.set(<span class="pp">vec!</span>[<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]);
+    <span class="pp">assert_eq!</span>(p2.get(), [<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]);
+}</code></pre></div>
+<pre class="fragment"><code>error: the trait `core::marker::Copy` is not implemented
+       for the type `collections::vec::Vec&lt;_&gt;` [E0277]
+    let c = Cell::new(vec![1,2,3]);
+            ^~~~~~~~~</code></pre>
+</section><section id="refcell-handles-all-data" class="slide level2">
+<h1><a href="http://is.gd/OwUeLZ"><code>RefCell</code> handles all data</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_refcell_vec() {
+    <span class="kw">use</span> std::cell::RefCell;
+    <span class="kw">let</span> c = RefCell::new(<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]);
+    <span class="kw">let</span> p1: &amp;RefCell&lt;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;&gt; = &amp;c;
+    <span class="kw">let</span> p2: &amp;RefCell&lt;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;&gt; = &amp;c;
+    <span class="pp">assert_eq!</span>(*p2.borrow(), [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]);
+    p1.borrow_mut().push(<span class="dv">4</span>);
+    <span class="pp">assert_eq!</span>(*p2.borrow(), [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>]);
+}</code></pre></div>
+</section><section id="refcell-dynamically-errors-if-misused" class="slide level2">
+<h1><a href="http://is.gd/2vcGT0"><code>RefCell</code> dynamically errors if misused</a></h1>
+<!--
+```rust
+#[should_panic]
+```
+-->
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_refcell_vec_no_work() {
+    <span class="kw">use</span> std::cell::RefCell;
+    <span class="kw">let</span> c = RefCell::new(<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]);
+    <span class="kw">let</span> p1: &amp;RefCell&lt;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;&gt; = &amp;c;
+    <span class="kw">let</span> p2: &amp;RefCell&lt;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;&gt; = &amp;c;
+    <span class="kw">let</span> b2 = p2.borrow();
+    <span class="pp">assert_eq!</span>(*b2, [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]);
+    p1.borrow_mut().push(<span class="dv">4</span>);
+    <span class="pp">assert_eq!</span>(*b2, [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>]);
+}</code></pre></div>
+<pre class="fragment"><code>---- a01_start::demo_refcell_vec_no_work stdout ----
+    thread &#39;a01_start::demo_refcell_vec_no_work&#39; panicked
+        at &#39;RefCell&lt;T&gt; already borrowed&#39;</code></pre>
+<div class="fragment">
+<p>(This is <em>not</em> unsound!)</p>
+</div>
+</section></section>
+<section><section id="destructors" class="titleslide slide level1 center"><h1>Destructors</h1></section><section id="the-drop-trait" class="slide level2 center">
+<h1>The <code>Drop</code> trait</h1>
+<p>If a data-type is represents some resource with associated cleanup actions, then it should implement <code>Drop</code></p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">struct</span> Yell { name: &amp;<span class="ot">&#39;static</span> <span class="dt">str</span> }
+<span class="kw">impl</span> <span class="bu">Drop</span> <span class="kw">for</span> Yell {
+    <span class="kw">fn</span> drop(&amp;<span class="kw">mut</span> <span class="kw">self</span>) {
+        <span class="pp">println!</span>(<span class="st">&quot;My name is {}; &quot;</span>, <span class="kw">self</span>.name);
+    }
+}</code></pre></div>
+</section><section id="silly-example-of-yelling" class="slide level2">
+<h1><a href="http://is.gd/X3b6pA">Silly example of Yelling</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> main() {
+    <span class="kw">let</span> bob = Yell { name: <span class="st">&quot;Bob&quot;</span> };
+    <span class="kw">let</span> carol = Yell {
+        name: {
+            <span class="kw">let</span> carols_dad = Yell { name: <span class="st">&quot;David&quot;</span> };
+            <span class="st">&quot;Carol&quot;</span>
+        } <span class="co">// end of scope: carols_dad is dropped</span>
+    };
+    <span class="kw">let</span> ed = Yell { name: <span class="st">&quot;Ed&quot;</span> };
+    <span class="kw">let</span> frank = Yell { name: <span class="pp">panic!</span>(<span class="st">&quot;What is Frank&#39;s name?&quot;</span>) };
+    <span class="pp">println!</span>(<span class="st">&quot;We never get to Gregor&quot;</span>);
+    <span class="kw">let</span> gregor = Yell { name: <span class="st">&quot;Gregor&quot;</span> };
+}</code></pre></div>
+<div class="fragment">
+<p>prints:</p>
+<pre><code>My name is David;
+thread &#39;&lt;main&gt;&#39; panicked at &#39;What is Frank&#39;s name?&#39;, &lt;anon&gt;:16
+My name is Ed;
+My name is Carol;
+My name is Bob;</code></pre>
+</div>
+</section><section id="more-realistic-example-rc-implementation" class="slide level2">
+<h1>More realistic example: <code>Rc</code> implementation</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">struct</span> RcBox&lt;T&gt; { strong: Cell&lt;<span class="dt">usize</span>&gt;, value: T }
+<span class="kw">pub</span> <span class="kw">struct</span> Rc&lt;T&gt; { _ptr: NonZero&lt;*<span class="kw">mut</span> RcBox&lt;T&gt;&gt; }
+
+<span class="kw">impl</span>&lt;T: ?<span class="bu">Sized</span>&gt; <span class="bu">Clone</span> <span class="kw">for</span> Rc&lt;T&gt; {
+    <span class="kw">fn</span> clone(&amp;<span class="kw">self</span>) -&gt; Rc&lt;T&gt; {
+        <span class="kw">self</span>.inc_strong();
+        Rc { _ptr: <span class="kw">self</span>._ptr }
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; <span class="bu">Drop</span> <span class="kw">for</span> Rc&lt;T&gt; {
+    <span class="kw">fn</span> drop(&amp;<span class="kw">mut</span> <span class="kw">self</span>) {
+        <span class="kw">unsafe</span> {
+            <span class="kw">let</span> ptr = *<span class="kw">self</span>._ptr;
+            <span class="kw">self</span>.decrement_count();
+            <span class="kw">if</span> <span class="kw">self</span>.current_count() == <span class="dv">0</span> {
+                drop_in_place(&amp;<span class="kw">mut</span> (*ptr).value);
+                deallocate(ptr);
+            }
+        }
+    }
+}</code></pre></div>
+</section></section>
+<section><section id="concurrency" class="titleslide slide level1 center"><h1>Concurrency</h1></section><section id="concurrency-1" class="slide level2 center">
+<h1>Concurrency</h1>
+<p>Rust's killer feature:</p>
+<h3 id="data-race-freedom">Data-race freedom</h3>
+<p>built atop same foundation as memory safety</p>
+</section><section id="heres-what-one-concurrency-api-looks-like" class="slide level2 center">
+<h1>Here's what one concurrency API looks like</h1>
+</section><section id="threadspawn" class="slide level2">
+<h1><a href="http://is.gd/RmKTsv"><code>thread::spawn</code></a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">pub</span> <span class="kw">fn</span> main() {
+    <span class="kw">use</span> std::thread;
+    <span class="kw">let</span> al = <span class="st">&quot;long lost pal&quot;</span>;
+    thread::spawn(<span class="kw">move</span> || {
+
+        <span class="pp">println!</span>(<span class="st">&quot;i can be your {}&quot;</span>, al);
+    });
+
+    <span class="pp">println!</span>(<span class="st">&quot;why am i soft in the middle&quot;</span>);
+    <span class="co">// Note: might exit before spawned thread gets chance to print</span>
+}</code></pre></div>
+</section><section id="channels-for-message-passing" class="slide level2">
+<h1><a href="http://is.gd/vYdfV1">channels for message passing</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span> <span class="kw">fn</span> demo_channel() {
+    <span class="kw">fn</span> fib(x: <span class="dt">i64</span>) -&gt; (<span class="dt">i64</span>, <span class="dt">i64</span>) { <span class="co">// returns `(x, fib(x))`</span>
+        <span class="kw">if</span> x &lt;= <span class="dv">1</span> { (x,<span class="dv">1</span>) } <span class="kw">else</span> { (x, fib(x-<span class="dv">1</span>).<span class="dv">1</span> + fib(x-<span class="dv">2</span>).<span class="dv">1</span>) }
+    }
+    <span class="kw">use</span> std::thread;
+    <span class="kw">use</span> std::sync::mpsc::channel;
+    <span class="kw">let</span> (tx, rx) = channel(); <span class="co">// tx: &quot;transmit&quot;, rx: &quot;receive&quot;</span>
+    <span class="kw">let</span> al = <span class="st">&quot;al&quot;</span>;
+    thread::spawn(<span class="kw">move</span> || {
+        tx.send(fib(<span class="dv">10</span>)).unwrap();
+        <span class="pp">println!</span>(<span class="st">&quot;you can call me {}&quot;</span>, al);
+    });
+    <span class="kw">let</span> f_15 = fib(<span class="dv">15</span>).<span class="dv">1</span>;
+    <span class="pp">println!</span>(<span class="st">&quot;why am i short of attention&quot;</span>);
+    <span class="kw">let</span> f_10 = rx.recv().unwrap().<span class="dv">1</span>; <span class="co">// (this blocks to await data)</span>
+    <span class="pp">assert_eq!</span>((f_10, f_15), (<span class="dv">89</span>, <span class="dv">987</span>));
+}</code></pre></div>
+<h4 id="channels-are-abstraction-data-race-free" class="fragment">channels are abstraction, data-race free</h4>
+</section><section id="no-data-races-what-about-our-precious-mutation" class="slide level2">
+<h1>No data races: What about our precious mutation?</h1>
+</section><section id="no-data-races-1-direct-assign" class="slide level2" data-transition="fade-out">
+<h1>No data races 1: <a href="http://is.gd/Zi67Nv">&quot;direct&quot; assign</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span> <span class="kw">fn</span> demo_catch_direct() {
+    <span class="kw">fn</span> fib(x: <span class="dt">i64</span>) -&gt; (<span class="dt">i64</span>, <span class="dt">i64</span>) { <span class="co">// returns `(x, fib(x))`</span>
+        <span class="kw">if</span> x &lt;= <span class="dv">1</span> { (x,<span class="dv">1</span>) } <span class="kw">else</span> { (x, fib(x-<span class="dv">1</span>).<span class="dv">1</span> + fib(x-<span class="dv">2</span>).<span class="dv">1</span>) }
+    }
+    <span class="kw">use</span> std::thread;
+    <span class="kw">let</span> al = <span class="st">&quot;al&quot;</span>;
+    <span class="kw">let</span> <span class="kw">mut</span> f_10_recv = (<span class="dv">0</span>, <span class="dv">0</span>);
+
+    thread::spawn(<span class="kw">move</span> || {
+        f_10_recv = fib(<span class="dv">10</span>);
+        <span class="pp">println!</span>(<span class="st">&quot;you can call me {}&quot;</span>, al);
+    });
+    <span class="kw">let</span> f_15 = fib(<span class="dv">15</span>).<span class="dv">1</span>;
+    <span class="kw">while</span> f_10_recv.<span class="dv">0</span> == <span class="dv">0</span> { }  <span class="co">// &lt;-- many alarm bells</span>
+    <span class="kw">let</span> f_10 = f_10_recv.<span class="dv">1</span>;
+    <span class="pp">println!</span>(<span class="st">&quot;why am i short of attention&quot;</span>);
+    <span class="pp">assert_eq!</span>((f_10, f_15), (<span class="dv">89</span>, <span class="dv">987</span>));
+}</code></pre></div>
+<h4 id="compiles-does-not-work-no-actual-communication-implicit-copying" class="fragment">compiles; does not work (no actual communication; implicit copying)</h4>
+</section><section id="no-data-races-2-mut-ref" class="slide level2" data-transition="fade-in">
+<h1>No data races 2: <a href="http://is.gd/Sq2ySS">mut-ref</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span> <span class="kw">fn</span> demo_catch_mutref() {
+    <span class="kw">fn</span> fib(x: <span class="dt">i64</span>) -&gt; (<span class="dt">i64</span>, <span class="dt">i64</span>) { <span class="co">// returns `(x, fib(x))`</span>
+        <span class="kw">if</span> x &lt;= <span class="dv">1</span> { (x,<span class="dv">1</span>) } <span class="kw">else</span> { (x, fib(x-<span class="dv">1</span>).<span class="dv">1</span> + fib(x-<span class="dv">2</span>).<span class="dv">1</span>) }
+    }
+    <span class="kw">use</span> std::thread;
+    <span class="kw">let</span> al = <span class="st">&quot;al&quot;</span>;
+    <span class="kw">let</span> <span class="kw">mut</span> f_10_recv = (<span class="dv">0</span>, <span class="dv">0</span>);
+    <span class="kw">let</span> ptr_recv = &amp;<span class="kw">mut</span> f_10_recv; <span class="co">// &lt;-- Okay, say what we meant</span>
+    thread::spawn(<span class="kw">move</span> || {
+        *ptr_recv = fib(<span class="dv">10</span>);
+        <span class="pp">println!</span>(<span class="st">&quot;you can call me {}&quot;</span>, al);
+    });
+    <span class="kw">let</span> f_15 = fib(<span class="dv">15</span>).<span class="dv">1</span>;
+    <span class="kw">while</span> f_10_recv.<span class="dv">0</span> == <span class="dv">0</span> { }  <span class="co">// &lt;-- many alarm bells</span>
+    <span class="kw">let</span> f_10 = f_10_recv.<span class="dv">1</span>;
+    <span class="pp">println!</span>(<span class="st">&quot;why am i short of attention&quot;</span>);
+    <span class="pp">assert_eq!</span>((f_10, f_15), (<span class="dv">89</span>, <span class="dv">987</span>));
+}</code></pre></div>
+<h4 id="does-not-compile-spawn-cant-share-ref-to-stack-local" class="fragment">does not compile: <code>spawn</code> can't share ref to stack-local</h4>
+</section></section>
+<section><section id="concurrency-as-a-library-concern" class="titleslide slide level1 center"><h1>Concurrency as a library concern</h1></section><section id="libraries-can-provide-new-apis" class="slide level2 center">
+<h1>Libraries can provide new APIs</h1>
+<h3 id="new-system-interfaces">New system interfaces</h3>
+<h3 id="new-abstractions">New abstractions</h3>
+</section></section>
+<section><section id="concurrency-new-system-interfaces" class="titleslide slide level1 center"><h1>Concurrency: New system interfaces</h1></section><section id="new-system-interfaces-1" class="slide level2" data-transition="fade-out">
+<h1>New system interfaces</h1>
+<p>e.g., Apple's <a href="https://developer.apple.com/library/mac/documentation/Performance/Reference/GCD_libdispatch_Ref/index.html">Grand Central Dispatch</a></p>
+<p><a href="https://crates.io/crates/dispatch">Rust wrapper developed by 3rd party contributor</a></p>
+<div class="screen_grab">
+<figure>
+<img src="curry-on2015/dispatch-cratesio-grab.png" alt="dispatch (from crates.io)" /><figcaption>dispatch (from <code>crates.io</code>)</figcaption>
+</figure>
+</div>
+</section><section id="new-system-interfaces-2" class="slide level2" data-transition="fade-in">
+<h1>New system interfaces</h1>
+<p><code class="filename">Cargo.toml</code></p>
+<pre><code>[dependencies]
+dispatch = &quot;0.0.1&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> demo_gcd() {
+    <span class="kw">use</span> dispatch::{Queue, QueuePriority};
+    <span class="kw">let</span> queue = Queue::global(QueuePriority::<span class="bu">Default</span>);
+    <span class="kw">let</span> <span class="kw">mut</span> nums = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>];
+    queue.apply(&amp;<span class="kw">mut</span> nums, |x| *x += <span class="dv">1</span>);
+    <span class="pp">assert!</span>(nums == [<span class="dv">2</span>, <span class="dv">3</span>]);
+    <span class="kw">let</span> nums = queue.map(nums, |x| x.to_string());
+    <span class="pp">assert!</span>(nums[<span class="dv">0</span>] == <span class="st">&quot;2&quot;</span>);
+}</code></pre></div>
+<div class="fragment">
+<p>Implementation almost certainly relies on <code class="sourceCode rust"><span class="kw">unsafe</span></code> code</p>
+<p>&quot;buyer beware&quot; (i.e. audit, in some manner)</p>
+<!--
+
+(Lets test that too.)
+
+```rust
+#[test]
+fn test_demo_gcd() {
+    demo_gcd();
+}
+```
+-->
+</div>
+</section><section id="demo-dispatch-misuse-caught" class="slide level2 center">
+<h1>Demo: <code>dispatch</code> misuse, caught!</h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> demo_gcd2() {
+    <span class="kw">use</span> dispatch::{Queue, QueuePriority};
+    <span class="kw">let</span> queue = Queue::global(QueuePriority::<span class="bu">Default</span>);
+    <span class="kw">let</span> <span class="kw">mut</span> indices = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">0</span>];
+    <span class="kw">let</span> <span class="kw">mut</span> nums = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>];
+    queue.apply(&amp;<span class="kw">mut</span> indices, |i| nums[*i] += <span class="dv">1</span>);
+    <span class="pp">assert!</span>(nums == [<span class="dv">2</span>, <span class="dv">3</span>]);
+    <span class="kw">let</span> nums = queue.map(nums, |x| x.to_string());
+    <span class="pp">assert!</span>(nums[<span class="dv">0</span>] == <span class="st">&quot;2&quot;</span>);
+}</code></pre></div>
+<p>(Type system catches above attempt to close over <code>&amp;mut</code>-references in a closure that is not allowed carry such.)</p>
+</section></section>
+<section><section id="concurrency-new-abstractions" class="titleslide slide level1 center"><h1>Concurrency: New abstractions</h1></section><section id="new-abstractions-1" class="slide level2 center left_align">
+<h1>New abstractions</h1>
+<div class="fragment">
+<h3>
+Old: <code>thread::spawn</code>
+</h3>
+<ul>
+<li><p>child and parent proceed independently</p>
+<ul>
+<li>(parent can wait for the child, but not required to)</li>
+</ul></li>
+</ul>
+</div>
+<div class="fragment">
+<p>
+</p>
+<h3>
+New: Fork-join parallelism
+</h3>
+<ul>
+<li><p>parent can share stack-local state with child thread(s)</p>
+<ul>
+<li>parent <em>must</em> wait for child (since it shared local state on stack frame)</li>
+</ul></li>
+</ul>
+</div>
+</section><section id="new-abstractions-constraints" class="slide level2 center left_align">
+<h1>New abstractions: Constraints</h1>
+<ul>
+<li><p><code>thread::spawn</code>: child and parent cannot share stack state</p></li>
+<li><p>fork-join: parent must wait for children before returning</p></li>
+</ul>
+<p>We can encode both constraints in Rust</p>
+<ul>
+<li>Ensures clients obey the relevant protocol!</li>
+</ul>
+</section></section>
+<section><section id="demo-of-unstable-unsound-fork-join-api" class="titleslide slide level1 center"><h1>Demo of (unstable, unsound) fork join API</h1></section><section id="threadscoped" class="slide level2">
+<h1><a href="http://is.gd/zOH5aL"><code>thread::scoped</code></a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> seq_max(partial_data: &amp;[<span class="dt">u8</span>]) -&gt; <span class="dt">u8</span> {
+    *partial_data.iter().max().unwrap()
+}
+
+<span class="kw">fn</span> par_max(data: &amp;[<span class="dt">u8</span>]) -&gt; <span class="dt">u8</span> {
+    <span class="kw">if</span> data.len() &lt;= <span class="dv">4</span> { <span class="kw">return</span> seq_max(data); }
+    <span class="kw">let</span> len_4 = data.len() / <span class="dv">4</span>; <span class="co">// DATA = [A..B..C..D..]</span>
+    <span class="kw">let</span> (q1, rest) = data.split_at(len_4); <span class="co">// (A.. \ B..C..D..)</span>
+    <span class="kw">let</span> (q2, rest) = rest.split_at(len_4); <span class="co">//  (B.. \ C..D..)</span>
+    <span class="kw">let</span> (q3, q4)   = rest.split_at(len_4); <span class="co">//   (C.. \ D..)</span>
+    <span class="kw">let</span> t1 = ::std::thread::scoped(|| seq_max(q1)); <span class="co">// fork A..</span>
+    <span class="kw">let</span> t2 = ::std::thread::scoped(|| seq_max(q2)); <span class="co">// fork B..</span>
+    <span class="kw">let</span> t3 = ::std::thread::scoped(|| seq_max(q3)); <span class="co">// fork C..</span>
+    <span class="kw">let</span> v4 = seq_max(q4); <span class="co">//                        compute D..</span>
+    <span class="kw">let</span> (v1, v2, v3) = (t1.join(), t2.join(), t3.join()); <span class="co">// join!</span>
+    <span class="kw">return</span> seq_max(&amp;[v1, v2, v3, v4]);
+}</code></pre></div>
+</section><section id="threadscoped-shows-a-new-trick" class="slide level2">
+<h1><code>thread::scoped</code> shows a new trick</h1>
+<ul>
+<li><p><code>thread::spawn</code> disallowed passing refs to stack-local data</p></li>
+<li><p>Allowing that is the whole point of <code>thread::scoped</code></p>
+<ul>
+<li>(caveat: <code>thread::scoped</code> API is unstable, and undergoing revision due to subtle soundness issue)</li>
+</ul></li>
+</ul>
+</section><section id="benchmarking-par_max-1" class="slide level2">
+<h1>Benchmarking <code>par_max</code> 1</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">extern</span> <span class="kw">crate</span> test; <span class="kw">use</span> std::iter;
+<span class="kw">const</span> LIL: <span class="dt">usize</span> = <span class="dv">20</span> * <span class="dv">1024</span>;
+<span class="kw">const</span> BIG: <span class="dt">usize</span> = LIL * <span class="dv">1024</span>;
+
+<span class="kw">fn</span> make_data(count: <span class="dt">usize</span>) -&gt; <span class="dt">Vec</span>&lt;<span class="dt">u8</span>&gt; {
+    <span class="kw">let</span> <span class="kw">mut</span> data: <span class="dt">Vec</span>&lt;<span class="dt">u8</span>&gt; = iter::repeat(<span class="dv">10</span>).take(count).collect();
+    data.push(<span class="dv">200</span>); data.push(<span class="dv">3</span>); <span class="kw">return</span> data;
+}
+
+<span class="at">#[</span>bench<span class="at">]</span> <span class="kw">fn</span> bench_big_seq(b: &amp;<span class="kw">mut</span> test::Bencher) {
+    <span class="kw">let</span> data = make_data(BIG);
+    b.iter(|| <span class="pp">assert_eq!</span>(seq_max(&amp;data), <span class="dv">200</span>));
+}
+<span class="at">#[</span>bench<span class="at">]</span> <span class="kw">fn</span> bench_big_par(b: &amp;<span class="kw">mut</span> test::Bencher) {
+    <span class="kw">let</span> data = make_data(BIG);
+    b.iter(|| <span class="pp">assert_eq!</span>(par_max(&amp;data), <span class="dv">200</span>));
+}</code></pre></div>
+<pre><code>bench_big_par ... bench:   3,763,711 ns/iter (+/- 1,140,321)
+bench_big_seq ... bench:  21,633,799 ns/iter (+/- 2,522,262)</code></pre>
+</section><section id="benchmarking-par_max-2" class="slide level2">
+<h1><a href="http://is.gd/ip3FpQ">Benchmarking <code>par_max</code> 2</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">const</span> LIL: <span class="dt">usize</span> = <span class="dv">20</span> * <span class="dv">1024</span>;
+<span class="kw">const</span> BIG: <span class="dt">usize</span> = LIL * <span class="dv">1024</span>;</code></pre></div>
+<pre><code>bench_big_par ... bench:   3,763,711 ns/iter (+/- 1,140,321)
+bench_big_seq ... bench:  21,633,799 ns/iter (+/- 2,522,262)</code></pre>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>bench<span class="at">]</span> <span class="kw">fn</span> bench_lil_seq(b: &amp;<span class="kw">mut</span> test::Bencher) {
+    <span class="kw">let</span> data = make_data(LIL);
+    b.iter(|| <span class="pp">assert_eq!</span>(seq_max(&amp;data), <span class="dv">200</span>));
+}
+<span class="at">#[</span>bench<span class="at">]</span> <span class="kw">fn</span> bench_lil_par(b: &amp;<span class="kw">mut</span> test::Bencher) {
+    <span class="kw">let</span> data = make_data(LIL);
+    b.iter(|| <span class="pp">assert_eq!</span>(par_max(&amp;data), <span class="dv">200</span>));
+}</code></pre></div>
+<pre><code>bench_lil_par ... bench:      59,274 ns/iter (+/- 7,756)
+bench_lil_seq ... bench:      15,432 ns/iter (+/- 1,961)</code></pre>
+<p>(<code>fn par_max</code> could tune threshold for seq. path)</p>
+</section><section id="what-was-that-about-preventing-data-races" class="slide level2">
+<h1>What was that about preventing data races?</h1>
+</section><section id="send-sync" class="slide level2">
+<h1><code>Send</code>, <code>Sync</code></h1>
+<ul>
+<li><p>If <code>S: Send</code>, then passing (e.g. moving) a <code>S</code> to another thread is safe.</p></li>
+<li><p>If <code>T: Sync</code>, then copying a <code>&amp;T</code> to another thread is safe.</p></li>
+<li><p>(For Rust, &quot;safe&quot; includes &quot;no data races exposed.&quot;)</p></li>
+</ul>
+<!-- FIXME: elaborate, add e.g. counter-examples
+Or maybe just drop this slide entirely.
+-->
+</section></section>
+<section><section id="concurrency-how" class="titleslide slide level1 center"><h1>Concurrency: How?</h1></section><section id="crucial-trick-send-and-sync-traits" class="slide level2 center">
+<h1>Crucial trick: <code>Send</code> and <code>Sync</code> traits</h1>
+<p>If <code>S: Send</code>, can transfer <code>S</code> across thread boundaries</p>
+<p>OTOH: A type <code>T</code> implementing <code>Sync</code> or might might not be sendable...</p>
+<div class="fragment">
+<p>...but <code>&amp;T</code> is <em>always</em> <code>Send</code> for a <code>T: Sync</code> (!)</p>
+<p>(This is what makes <code>Sync</code> interesting)</p>
+</div>
+<div class="fragment">
+<p>Rust compiler <em>automatically</em> marks types as <code>Send</code> or <code>Sync</code>, based on a recursive analysis of their structure</p>
+</div>
+</section><section id="examples" class="slide level2 center left_align">
+<h1>Examples</h1>
+<p>Rust compiler <em>automatically</em> marks types as <code>Send</code> or <code>Sync</code>, based on a recursive analysis of their structure</p>
+<div class="fragment">
+<p>e.g.:</p>
+<ul>
+<li><p><code>i32</code> is <code>Send</code>.</p></li>
+<li><p><code>Vec&lt;T&gt;</code>: <code>Send</code> iff <code>T: Send</code></p></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li><p><code>Box&lt;T&gt;</code> (owned): <code>Send</code> iff <code>T: Send</code>, <code>Sync</code> iff <code>T: Sync</code></p>
+<ul>
+<li>Why <code>Send</code> rule? because can move <code>T</code> out of a (consumed) box.</li>
+</ul></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li><p><code>Rc&lt;T&gt;</code> (shared): neither <code>Send</code> nor <code>Sync</code> (for any <code>T</code>)</p></li>
+<li><p><code>Arc&lt;T&gt;</code> (shared): always requires <code>T: Send + Sync</code> <!-- * (aside: why require `Send`? I have theories...) --></p></li>
+</ul>
+</div>
+<div class="fragment">
+<p>(remember that <code>Rc&lt;T&gt;</code> and <code>Arc&lt;T&gt;</code> do not allow <code>&amp;mut</code> access to <code>T</code> itself)</p>
+</div>
+</section><section id="sendsync-demo-boxrcarc" class="slide level2">
+<h1><a href="http://is.gd/FYLSvp"><code>Send</code>/<code>Sync</code> demo: <code>Box</code>/<code>Rc</code>/<code>Arc</code></a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> is_sync&lt;T:<span class="bu">Sync</span>&gt;(t: T) {} <span class="co">// Felix: too lazy to construct</span>
+<span class="kw">fn</span> is_send&lt;T:<span class="bu">Send</span>&gt;(t: T) {} <span class="co">//   appropriate channels</span>
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_send_sync_vals_refs_box_rc_arc() {
+    <span class="kw">use</span> std::rc::Rc;
+    <span class="kw">use</span> std::sync::Arc;
+    is_sync(<span class="dv">3</span>);
+    is_sync(<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]);
+    is_send(<span class="dv">3</span>);
+    is_send(&amp;<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]);
+
+    is_sync(&amp;<span class="dv">3</span>);
+    is_sync(&amp;<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]);
+    is_send(&amp;<span class="dv">3</span>);
+    is_send(&amp;<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]);
+
+    is_sync(<span class="dt">Box</span>::new(<span class="dv">3</span>));
+    is_sync(<span class="dt">Box</span>::new(<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]));
+    is_send(<span class="dt">Box</span>::new(<span class="dv">3</span>));
+    is_send(<span class="dt">Box</span>::new(<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]));
+}</code></pre></div>
+</section><section id="sendsync-demo-box-rules" class="slide level2 center">
+<h1><a href="http://is.gd/kJoxPW"><code>Send</code>/<code>Sync</code> demo: <code>Box</code> Rules</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_send_sync_box_rules() {
+    <span class="kw">fn</span> take_send&lt;T:<span class="bu">Send</span>+<span class="bu">Clone</span>&gt;(t: T) {
+        <span class="co">// is_sync(Box::new(t.clone())); // (STATIC ERROR)</span>
+        is_send(<span class="dt">Box</span>::new(t.clone()));
+        <span class="co">// is_sync(&amp;Box::new(t.clone())); // (STATIC ERROR)</span>
+        <span class="co">// is_send(&amp;Box::new(t.clone())); // (STATIC ERROR)</span>
+    }
+    <span class="kw">fn</span> take_sync&lt;T:<span class="bu">Sync</span>+<span class="bu">Clone</span>&gt;(t: T) {
+        is_sync(<span class="dt">Box</span>::new(t.clone()));
+        <span class="co">// is_send(Box::new(t.clone())); // (STATIC ERROR)</span>
+        is_sync(&amp;<span class="dt">Box</span>::new(t.clone()));
+        is_send(&amp;<span class="dt">Box</span>::new(t.clone()));
+    }
+    <span class="kw">fn</span> take_send_sync&lt;T:<span class="bu">Send</span>+<span class="bu">Sync</span>+<span class="bu">Clone</span>&gt;(t: T) {
+        is_sync(<span class="dt">Box</span>::new(t.clone()));
+        is_send(<span class="dt">Box</span>::new(t.clone()));
+        is_sync(&amp;<span class="dt">Box</span>::new(t.clone()));
+        is_send(&amp;<span class="dt">Box</span>::new(t.clone()));
+    }
+}</code></pre></div>
+</section><section id="sendsync-demo-rc-values" class="slide level2 center">
+<h1><a href="http://is.gd/bZS3eI"><code>Send</code>/<code>Sync</code> demo: <code>Rc</code> values</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_send_sync_rc() {
+    <span class="kw">use</span> std::rc::Rc;
+
+    <span class="co">// is_sync(Rc::new(3)); // (STATIC ERROR)</span>
+    <span class="co">// is_sync(Rc::new(vec![1,2,3])); // (STATIC ERROR)</span>
+    <span class="co">// is_send(Rc::new(3)); // (STATIC ERROR)</span>
+    <span class="co">// is_send(Rc::new(vec![1,2,3])); // (STATIC ERROR)</span>
+
+    <span class="co">// is_sync(vec![Rc::new(1)]); // (STATIC ERROR)</span>
+    <span class="co">// is_send(vec![Rc::new(1)]); // (STATIC ERROR)</span>
+    <span class="co">// is_sync(&amp;vec![Rc::new(1)]); // (STATIC ERROR)</span>
+    <span class="co">// is_send(&amp;vec![Rc::new(1)]); // (STATIC ERROR)</span>
+
+    <span class="co">// is_sync(Box::new(Rc::new(1))); // (STATIC ERROR)</span>
+    <span class="co">// is_send(Box::new(Rc::new(1))); // (STATIC ERROR)</span>
+    <span class="co">// is_sync(&amp;Box::new(Rc::new(1))); // (STATIC ERROR)</span>
+    <span class="co">// is_send(&amp;Box::new(Rc::new(1))); // (STATIC ERROR)</span>
+}</code></pre></div>
+</section><section id="sendsync-demo-arc-values" class="slide level2 center">
+<h1><a href="http://is.gd/cQfGEh"><code>Send</code>/<code>Sync</code> demo: <code>Arc</code> values</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_send_sync_arc() {
+    <span class="kw">use</span> std::sync::Arc;
+    is_sync(<span class="pp">vec!</span>[Arc::new(<span class="dv">1</span>)]);
+    is_send(<span class="pp">vec!</span>[Arc::new(<span class="dv">1</span>)]);
+    is_sync(&amp;<span class="pp">vec!</span>[Arc::new(<span class="dv">1</span>)]);
+    is_send(&amp;<span class="pp">vec!</span>[Arc::new(<span class="dv">1</span>)]);
+
+    is_sync(Arc::new(<span class="dv">3</span>));
+    is_sync(Arc::new(<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]));
+    is_send(Arc::new(<span class="dv">3</span>));
+    is_send(Arc::new(<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]));
+}</code></pre></div>
+</section><section id="sendsync-demo-arc-rules" class="slide level2 center">
+<h1><a href="http://is.gd/ZYsEph"><code>Send</code>/<code>Sync</code> demo: <code>Arc</code> rules</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_send_sync_arc_rules() {
+    <span class="kw">use</span> std::sync::Arc;
+    <span class="kw">fn</span> take_send&lt;T:<span class="bu">Send</span>+<span class="bu">Clone</span>&gt;(t: T) {
+        <span class="co">// is_sync(Arc::new(t.clone())); // (STATIC ERROR)</span>
+        <span class="co">// is_send(Arc::new(t.clone())); // (STATIC ERROR)</span>
+        <span class="co">// is_sync(&amp;Arc::new(t.clone())); // (STATIC ERROR)</span>
+        <span class="co">// is_send(&amp;Arc::new(t.clone())); // (STATIC ERROR)</span>
+    }
+    <span class="kw">fn</span> take_sync&lt;T:<span class="bu">Sync</span>+<span class="bu">Clone</span>&gt;(t: T) {
+        <span class="co">// is_sync(Arc::new(t.clone())); // (STATIC ERROR)</span>
+        <span class="co">// is_send(Arc::new(t.clone())); // (STATIC ERROR)</span>
+        <span class="co">// is_sync(&amp;Arc::new(t.clone())); // (STATIC ERROR)</span>
+        <span class="co">// is_send(&amp;Arc::new(t.clone())); // (STATIC ERROR)</span>
+    }
+    <span class="kw">fn</span> take_send_sync&lt;T:<span class="bu">Send</span>+<span class="bu">Sync</span>+<span class="bu">Clone</span>&gt;(t: T) {
+        is_sync(Arc::new(t.clone()));
+        is_send(Arc::new(t.clone()));
+        is_sync(&amp;Arc::new(t.clone()));
+        is_send(&amp;Arc::new(t.clone()));
+    }
+}</code></pre></div>
+</section><section id="sendsync-demo-cell-and-refcell-values" class="slide level2 center">
+<h1><a href="http://is.gd/CaxT7f"><code>Send</code>/<code>Sync</code> demo: <code>Cell</code> and <code>RefCell</code> values</a></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_send_sync_cell_refcell() {
+    <span class="kw">use</span> std::cell::Cell;
+    <span class="kw">use</span> std::cell::RefCell;
+
+    <span class="co">// is_sync(Cell::new(3)); // (STATIC ERROR)</span>
+    <span class="co">// Cell::new(vec![1,2,3]);</span>
+    is_send(Cell::new(<span class="dv">3</span>));
+
+    <span class="co">// is_sync(&amp;Cell::new(3)); // (STATIC ERROR)</span>
+    <span class="co">// is_send(&amp;Cell::new(3)); // (STATIC ERROR)</span>
+
+    <span class="co">// is_sync(RefCell::new(3)); // (STATIC ERROR)</span>
+    <span class="co">// is_sync(RefCell::new(vec![1,2,3])); // (STATIC ERROR)</span>
+    is_send(RefCell::new(<span class="dv">3</span>));
+    is_send(RefCell::new(<span class="pp">vec!</span>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]));
+}</code></pre></div>
+<!--
+
+## Ligatures?
+
+```rust
+fn foo(x: (u32, u32)) -> u32 {
+    match x {
+        (x, 1) => x,
+        (1, y) => y,
+        (x, y) => x + y + 3,
+    }
+}
+```
+
+What `about => here`{.rust}
+
+-->
+</section></section>
+<section><section id="conclusion" class="titleslide slide level1 center"><h1>Conclusion</h1></section><section id="rust" class="slide level2 left_align">
+<h1>Rust</h1>
+<div class="fragment">
+<ul>
+<li><p>Access to (many!) safe concurrency primitives</p></li>
+<li><p>Access arbitrary native services</p></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li><p>Ownership and Borrowing are deep parts of language</p></li>
+<li><p><code>rustc</code> catches bugs!</p></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>HACK WITHOUT FEAR!</li>
+</ul>
+</div>
+</section></section>
+<section><section id="thanks-everyone-for-listening-and-participating" class="titleslide slide level1 center"><h1>Thanks everyone for listening and participating!</h1></section><section id="thanks" class="slide level2">
+<h1>Thanks!</h1>
+<div class="no_border logo">
+<div/>
+<img src="Rust_programming_language_black_logo.svg" alt="Rust Logo" />
+<div>
+
+</div>
+<p><a href="http://www.rust-lang.org/" class="uri">http://www.rust-lang.org/</a></p>
+</section></section>
+    </div>
+  </div>
+
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,         // Display controls in the bottom right corner
+        progress: true,         // Display a presentation progress bar
+        history: true,          // Push each slide change to the browser history
+        center: false,                       // Vertical centering of slides
+        maxScale: 1.5,                  // Bounds for smallest/largest possible content scale
+        slideNumber: false,                // Display the page number of the current slide
+        theme: 'mozilla-sandstone', // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+//          { src: 'reveal.js/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; }, }
+//          { src: 'reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+]});
+    </script>
+    </body>
+</html>
