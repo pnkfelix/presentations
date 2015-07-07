@@ -48,7 +48,7 @@ Language and API docs
 
 ## Playpen (encore) {.center .center_align}
 
-[http://play.rust-lang.org/]
+### [http://play.rust-lang.org/]
 
 # Motivational Demos {.center}
 
