@@ -1,6 +1,6 @@
 # Concurrency { .center }
 
-## Concurrency
+## Concurrency {.center}
 
 Rust's killer feature:
 
@@ -8,7 +8,7 @@ Rust's killer feature:
 
 built atop same foundation as memory safety
 
-## Here's what one concurrency API looks like
+## Here's what one concurrency API looks like {.center}
 
 ## [`thread::spawn`](http://is.gd/RmKTsv)
 
