@@ -10,7 +10,7 @@ built atop same foundation as memory safety
 
 ## Here's what one concurrency API looks like
 
-## `thread::spawn`
+## [`thread::spawn`](http://is.gd/RmKTsv)
 
 ```rust
 pub fn main() {
@@ -26,7 +26,7 @@ pub fn main() {
 }
 ```
 
-## channels for message passing
+## [channels for message passing](http://is.gd/vYdfV1)
 
 ```rust
 #[test] fn demo_channel() {
@@ -38,7 +38,7 @@ pub fn main() {
     let (tx, rx) = channel(); // tx: "transmit", rx: "receive"
     let al = "al";
     thread::spawn(move || {
-        tx.send(fib(10));
+        tx.send(fib(10)).unwrap();
         println!("you can call me {}", al);
     });
     let f_15 = fib(15).1;
@@ -52,7 +52,7 @@ pub fn main() {
 
 ## No data races: What about our precious mutation?
 
-## No data races 1: "direct" assign { data-transition="fade-out" }
+## No data races 1: ["direct" assign](http://is.gd/Zi67Nv) { data-transition="fade-out" }
 
 ``` {.rust}
 #[test] fn demo_catch_direct() {
@@ -77,7 +77,7 @@ pub fn main() {
 
 #### compiles; does not work (no actual communication; implicit copying) {.fragment }
 
-## No data races 2: mut-ref  { data-transition="fade-in" }
+## No data races 2: [mut-ref](http://is.gd/Sq2ySS)  { data-transition="fade-in" }
 
 ``` {.rust .compile_error}
 #[test] fn demo_catch_mutref() {
@@ -219,7 +219,7 @@ We can encode both constraints in Rust
 
 # Demo of (unstable, unsound) fork join API {.center}
 
-## `thread::scoped`
+## [`thread::scoped`](http://is.gd/zOH5aL)
 
 ```rust
 fn seq_max(partial_data: &[u8]) -> u8 {
@@ -277,7 +277,7 @@ bench_big_par ... bench:   3,763,711 ns/iter (+/- 1,140,321)
 bench_big_seq ... bench:  21,633,799 ns/iter (+/- 2,522,262)
 ```
 
-## Benchmarking `par_max` 2
+## [Benchmarking `par_max` 2](http://is.gd/ip3FpQ)
 
 ```{.rust}
 const LIL: usize = 20 * 1024;
@@ -311,7 +311,7 @@ bench_lil_seq ... bench:      15,432 ns/iter (+/- 1,961)
 
 ## `Send`, `Sync`
 
-  * If `T: Send`, then passing (e.g. moving) a `T` to another thread is safe.
+  * If `S: Send`, then passing (e.g. moving) a `S` to another thread is safe.
 
   * If `T: Sync`, then copying a `&T` to another thread is safe.
 
@@ -371,7 +371,7 @@ e.g.:
 (remember that `Rc<T>` and `Arc<T>` do not allow `&mut` access
 to `T` itself)
 
-## `Send`/`Sync` demo: `Box`/`Rc`/`Arc`
+## [`Send`/`Sync` demo: `Box`/`Rc`/`Arc`](http://is.gd/FYLSvp)
 
 ```rust
 fn is_sync<T:Sync>(t: T) {} // Felix: too lazy to construct
@@ -398,7 +398,7 @@ fn demo_send_sync_vals_refs_box_rc_arc() {
 }
 ```
 
-## `Send`/`Sync` demo: `Box` Rules {.center}
+## [`Send`/`Sync` demo: `Box` Rules](http://is.gd/kJoxPW) {.center}
 
 ```rust
 #[test]
@@ -424,7 +424,7 @@ fn demo_send_sync_box_rules() {
 }
 ```
 
-## `Send`/`Sync` demo: `Rc` values {.center}
+## [`Send`/`Sync` demo: `Rc` values](http://is.gd/bZS3eI) {.center}
 
 ```rust
 #[test]
@@ -448,9 +448,10 @@ fn demo_send_sync_rc() {
 }
 ```
 
-## `Send`/`Sync` demo: `Arc` values {.center}
+## [`Send`/`Sync` demo: `Arc` values](http://is.gd/cQfGEh) {.center}
 
 ```rust
+#[test]
 fn demo_send_sync_arc() {
     use std::sync::Arc;
     is_sync(vec![Arc::new(1)]);
@@ -465,7 +466,7 @@ fn demo_send_sync_arc() {
 }
 ```
 
-## `Send`/`Sync` demo: `Arc` rules {.center}
+## [`Send`/`Sync` demo: `Arc` rules](http://is.gd/ZYsEph) {.center}
 
 ```rust
 #[test]
@@ -492,7 +493,7 @@ fn demo_send_sync_arc_rules() {
 }
 ```
 
-## `Send`/`Sync` demo: `Cell` and `RefCell` values {.center}
+## [`Send`/`Sync` demo: `Cell` and `RefCell` values](http://is.gd/CaxT7f) {.center}
 
 ```rust
 #[test]
