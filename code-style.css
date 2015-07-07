@@ -10,7 +10,8 @@
 /* .sourceCode pre { font-family: Menlo,monospace; font-size: 100%; line-height: initial; background-color: #f3fff3 } */
 .sourceCode pre { background-color: #f3fff3 }
 code.sourceCode {
-    font-family: FiraCode,Menlo,monospace;
+    /* font-family: FiraCode,Menlo,monospace; */
+    font-family: Menlo,monospace;
     text-rendering: optimizeLegibility;
     /* font-variant-ligatures: discretionary-ligatures; */
     /* -webkit-font-variant-ligatures: discretionary-ligatures; */
@@ -19,6 +20,13 @@ code.sourceCode {
     background-color: #f3fff3;
 }
  pre { text-align: left; }
+
+.reveal code {
+    /* font-family: FiraCode,Menlo,monospace; */
+    font-family: Menlo,monospace;
+    text-rendering: optimizeLegibility;
+}
+
 /* .sourceCode pre { text-align: left; } */
 /* .sourceCode code { text-align: left; } */
 
@@ -31,6 +39,11 @@ code.sourceCode {
 .sourceCode .bash { background-color: #F0F0F0; }
 .sourceCode .javascript { background-color: #FFFFFF; }
 
+.error_message code, .error_message pre {
+    font-family: Menlo,monospace;
+    color: black;
+    background-color: #brightwhite;
+}
 
 /* .sourceCode .rust { overflow: visible; } */
 .sourceCode { overflow: visible; }

@@ -1,4 +1,6 @@
-.reveal .filename { font-size: 50%; line-height: 0; float: right }
+/* .reveal .slides { text-align: initial; } */
+
+.reveal .filename { font-size: 50%; /* line-height: 0ex; */ float: right }
 
 /* .reveal h1 { font-family: sans-serif; } */
 .reveal h1 { font-size: 3.77em; }
@@ -9,11 +11,22 @@
 
 .reveal .heads_up { position: absolute; right: 0; top: 20ex; z-index: 10; }
 
-/* .reveal pre code { color: #000000; background-color: white; } */
+.reveal pre code { color: #000000; background-color: white; }
 
-/* .reveal code { font-family: Menlo,monospace; font-size: 100%; line-height: initial; } */
+.reveal code {
+    font-family: Menlo,monospace;
+    font-size: 125%;
+    line-height: initial;
+}
 
-.left_align > div { text-align: left; }
+.left_align > div {
+    text-align: left;
+}
+.left_align ol, .left_align ul {
+    display: initial; margin: initial;
+}
+
+/* div .center_align { text-align: center; } */
 
 div.no_border img {
     box-shadow: initial;
@@ -39,3 +52,5 @@ div.screen_grab img {
 .no_center {
     min-height: initial !important;
 }
+
+.strike { text-decoration: line-through; color: #8f4040; }
