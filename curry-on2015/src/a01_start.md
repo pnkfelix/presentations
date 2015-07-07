@@ -65,7 +65,7 @@ The below [loop demo] compiles down to tight code:
 <!--
 ```rust
 #[allow(dead_code)]
-fn main() {
+fn main1() {
     let v1: Vec<i32> = (-100..10).collect();
     let s1 = sum_pos(&v1);
     let v2: Vec<i32> = (-100..1000).collect();
@@ -1561,12 +1561,180 @@ fn demo_closure() {
 
 # Interior Mutability {.center}
 
+## What about mutation outside of `&mut`{.rust}? {.center}
+
 ## Interior Mutability: `Cell` and `RefCell` structs {.center}
 
-TODO
+ * Both types have mutator methods that take `&self`{.rust}
+
+     * *not* `&mut self`{.rust}
+
+ * `Cell<T>`: has `get` and `set` methods, but only accepts `T:Copy`
+
+ * `RefCell<T>` handles all types `T`, but *dynamically*
+   *enforces* the rules.
+
+     * `borrow` method returns read-only `Ref` (many-readers),
+        and `panic!`{.rust}'s on outstanding mut-borrow
+
+     * `borrow_mut` method returns read/write `RefMut`,
+        and `panic!`{.rust}'s on any outstanding borrow.
+
+## Demos of `Cell` and `RefCell` types {.center}
+
+## [`Cell` working:](http://is.gd/3fa2J6)
+
+```rust
+#[test]
+fn demo_cell() {
+    use std::cell::Cell;
+    let c = Cell::new(3);
+    let p1: &Cell<i32> = &c;
+    let p2: &Cell<i32> = &c;
+    assert_eq!(p2.get(), 3);
+    p1.set(4);
+    assert_eq!(p2.get(), 4);
+}
+```
+
+## [`Cell` cannot hold non-`Copy` data](http://is.gd/EGXBTt)
+
+``` {.rust .compile_error}
+#[test]
+fn demo_cell_vec_no_work() {
+    use std::cell::Cell;
+    let c = Cell::new(vec![1,2,3]);
+    let p1: &Cell<Vec<i32>> = &c;
+    let p2: &Cell<Vec<i32>> = &c;
+    assert_eq!(p2.get(), [1,2,3]);
+    p1.set(vec![4,5,6]);
+    assert_eq!(p2.get(), [4,5,6]);
+}
+```
+
+``` {.fragment}
+error: the trait `core::marker::Copy` is not implemented
+       for the type `collections::vec::Vec<_>` [E0277]
+    let c = Cell::new(vec![1,2,3]);
+            ^~~~~~~~~
+```
+
+## [`RefCell` handles all data](http://is.gd/OwUeLZ)
+
+```rust
+#[test]
+fn demo_refcell_vec() {
+    use std::cell::RefCell;
+    let c = RefCell::new(vec![1,2,3]);
+    let p1: &RefCell<Vec<i32>> = &c;
+    let p2: &RefCell<Vec<i32>> = &c;
+    assert_eq!(*p2.borrow(), [1,2,3]);
+    p1.borrow_mut().push(4);
+    assert_eq!(*p2.borrow(), [1,2,3,4]);
+}
+```
+
+## [`RefCell` dynamically errors if misused](http://is.gd/2vcGT0)
+
+<!--
+```rust
+#[should_panic]
+```
+-->
+
+```rust
+#[test]
+fn demo_refcell_vec_no_work() {
+    use std::cell::RefCell;
+    let c = RefCell::new(vec![1,2,3]);
+    let p1: &RefCell<Vec<i32>> = &c;
+    let p2: &RefCell<Vec<i32>> = &c;
+    let b2 = p2.borrow();
+    assert_eq!(*b2, [1,2,3]);
+    p1.borrow_mut().push(4);
+    assert_eq!(*b2, [1,2,3,4]);
+}
+```
+
+``` {.fragment}
+---- a01_start::demo_refcell_vec_no_work stdout ----
+    thread 'a01_start::demo_refcell_vec_no_work' panicked
+        at 'RefCell<T> already borrowed'
+```
+
+. . .
+
+(This is *not* unsound!)
 
 # Destructors {.center}
 
 ## The `Drop` trait {.center}
 
-TODO
+If a data-type is represents some resource with associated
+cleanup actions, then it should implement `Drop`
+
+```rust
+struct Yell { name: &'static str }
+impl Drop for Yell {
+    fn drop(&mut self) {
+        println!("My name is {}; ", self.name);
+    }
+}
+```
+
+## [Silly example of Yelling](http://is.gd/X3b6pA)
+
+```rust
+fn main() {
+    let bob = Yell { name: "Bob" };
+    let carol = Yell {
+        name: {
+            let carols_dad = Yell { name: "David" };
+            "Carol"
+        } // end of scope: carols_dad is dropped
+    };
+    let ed = Yell { name: "Ed" };
+    let frank = Yell { name: panic!("What is Frank's name?") };
+    println!("We never get to Gregor");
+    let gregor = Yell { name: "Gregor" };
+}
+```
+
+. . .
+
+prints:
+
+```
+My name is David;
+thread '<main>' panicked at 'What is Frank's name?', <anon>:16
+My name is Ed;
+My name is Carol;
+My name is Bob;
+```
+
+## More realistic example: `Rc` implementation
+
+``` {.rust}
+struct RcBox<T> { strong: Cell<usize>, value: T }
+pub struct Rc<T> { _ptr: NonZero<*mut RcBox<T>> }
+
+impl<T: ?Sized> Clone for Rc<T> {
+    fn clone(&self) -> Rc<T> {
+        self.inc_strong();
+        Rc { _ptr: self._ptr }
+    }
+}
+
+impl<T> Drop for Rc<T> {
+    fn drop(&mut self) {
+        unsafe {
+            let ptr = *self._ptr;
+            self.decrement_count();
+            if self.current_count() == 0 {
+                drop_in_place(&mut (*ptr).value);
+                deallocate(ptr);
+            }
+        }
+    }
+}
+```
