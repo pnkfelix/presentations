@@ -12,10 +12,10 @@ dispatch = "0.0.1"
 # to the build-dependencies.
 
 [build-dependencies]
-tango = "^0.3.0"
+tango = "^0.3.*"
 
 [build-dependencies.cmd-pandoc]
-path = "/Users/pnkfelix/Dev/Mozilla/pnk-presents/cmd-pandoc"
+path = "/Users/fklock/Dev/Mozilla/pnk-presents/cmd-pandoc"
 
 # Since the lib may be a tango file stored in `src/lib.md`, we need to
 # explicitly specify that this is a library project with a `[lib]`
