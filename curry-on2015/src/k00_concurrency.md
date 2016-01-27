@@ -226,17 +226,20 @@ fn seq_max(partial_data: &[u8]) -> u8 {
     *partial_data.iter().max().unwrap()
 }
 
+use rayon;
 fn par_max(data: &[u8]) -> u8 {
     if data.len() <= 4 { return seq_max(data); }
     let len_4 = data.len() / 4; // DATA = [A..B..C..D..]
     let (q1, rest) = data.split_at(len_4); // (A.. \ B..C..D..)
     let (q2, rest) = rest.split_at(len_4); //  (B.. \ C..D..)
     let (q3, q4)   = rest.split_at(len_4); //   (C.. \ D..)
-    let t1 = ::std::thread::scoped(|| seq_max(q1)); // fork A..
-    let t2 = ::std::thread::scoped(|| seq_max(q2)); // fork B..
-    let t3 = ::std::thread::scoped(|| seq_max(q3)); // fork C..
-    let v4 = seq_max(q4); //                        compute D..
-    let (v1, v2, v3) = (t1.join(), t2.join(), t3.join()); // join!
+
+    let ((v1, v2), (v3, v4)) =
+        rayon::join(|| rayon::join(|| seq_max(q1),
+                                   || seq_max(q2)),
+                    || rayon::join(|| seq_max(q3),
+                                   || seq_max(q4)));
+
     return seq_max(&[v1, v2, v3, v4]);
 }
 ```
@@ -254,8 +257,8 @@ fn par_max(data: &[u8]) -> u8 {
 
 ```rust
 extern crate test; use std::iter;
-const LIL: usize = 20 * 1024;
-const BIG: usize = LIL * 1024;
+const LIL: usize = 1024;
+const BIG: usize = LIL * 4 * 1024;
 
 fn make_data(count: usize) -> Vec<u8> {
     let mut data: Vec<u8> = iter::repeat(10).take(count).collect();

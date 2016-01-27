@@ -173,18 +173,19 @@ fn seq_max(partial_data: &[u8]) -> u8 {
 -->
 
 ```rust
-use std::thread;
+use rayon;
 fn par_max(data: &[u8]) -> u8 {
     if data.len() <= 4 { return seq_max(data); }
     let len_4 = data.len() / 4; // DATA = [A .., B .., C .., D..]
     let (q1, rest) = data.split_at(len_4);    // (A.. \ B..C..D..)
     let (q2, rest) = rest.split_at(len_4);    //  (B.. \ C..D..)
     let (q3, q4)   = rest.split_at(len_4);    //   (C.. \ D..)
-    let t1 = thread::scoped(|| seq_max(q1));  // fork A..
-    let t2 = thread::scoped(|| seq_max(q2));  // fork B..
-    let t3 = thread::scoped(|| seq_max(q3));  // fork C..
-    let v4 = seq_max(q4);                     // compute D..
-    let (v1, v2, v3) = (t1.join(), t2.join(), t3.join()); // join!
+
+    let ((v1, v2), (v3, v4)) =
+        rayon::join(|| rayon::join(|| seq_max(q1),
+                                   || seq_max(q2)),
+                    || rayon::join(|| seq_max(q3),
+                                   || seq_max(q4)));
     return seq_max(&[v1, v2, v3, v4]);
 }
 ```

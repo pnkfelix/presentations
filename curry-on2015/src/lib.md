@@ -17,7 +17,7 @@ Ugh, I once again resorted to including the `thread::scoped`
 code, "just in case"
 
 ```rust
-#![feature(scoped, test)]
+#![feature(test)]
 ```
 
 Here are any `extern crate` declarations that I happen
@@ -25,6 +25,7 @@ to be referencing in the presentation.
 
 ```rust
 extern crate dispatch;
+extern crate rayon;
 ```
 
 Next, the module hierarchy for the presentation itself.
