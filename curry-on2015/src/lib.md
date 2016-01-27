@@ -12,12 +12,15 @@ but every other `.md` file is included in the pandoc output.
 So, I will use this space for meta-text with notes on how this code
 and the corresponding slides are structured.
 
-
-Ugh, I once again resorted to including the `thread::scoped`
-code, "just in case"
-
 ```rust
 #![feature(test)]
+```
+
+We ignore all dead code warnings (and similar, like unused variable warnings), since so much of the presentation
+consists of little functions that are not exported nor called.
+
+```rust
+#![allow(dead_code, unused_variables)]
 ```
 
 Here are any `extern crate` declarations that I happen
@@ -28,7 +31,7 @@ extern crate dispatch;
 extern crate rayon;
 ```
 
-Next, the module hierarchy for the presentation itself.
+Next, the (shallow) module hierarchy for the presentation itself.
 
 ```rust
 mod a00_title;

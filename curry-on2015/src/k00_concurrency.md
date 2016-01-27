@@ -381,9 +381,7 @@ fn is_sync<T:Sync>(t: T) {} // Felix: too lazy to construct
 fn is_send<T:Send>(t: T) {} //   appropriate channels
 
 #[test]
-fn demo_send_sync_vals_refs_box_rc_arc() {
-    use std::rc::Rc;
-    use std::sync::Arc;
+fn demo_send_sync_vals_ints_and_vec() {
     is_sync(3);
     is_sync(vec![1,2,3]);
     is_send(3);
@@ -432,6 +430,7 @@ fn demo_send_sync_box_rules() {
 ```rust
 #[test]
 fn demo_send_sync_rc() {
+    #![allow(unused_imports)]
     use std::rc::Rc;
 
     // is_sync(Rc::new(3)); // (STATIC ERROR)

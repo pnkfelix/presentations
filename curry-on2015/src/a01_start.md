@@ -196,7 +196,7 @@ fn par_max(data: &[u8]) -> u8 {
 ```rust
 #[test]
 fn hi() {
-    let mut v = vec![2, 1, 10, 9, 8, 7, 6, 5, 4, 3];
+    let v = vec![2, 1, 10, 9, 8, 7, 6, 5, 4, 3];
     let m = par_max(&v);
     assert_eq!(m, 10);
 }
