@@ -11,7 +11,12 @@
 
 .reveal .heads_up { position: absolute; right: 0; top: 20ex; z-index: 10; }
 
-.reveal pre code { color: #000000; background-color: white; }
+.reveal pre code {
+    color: #000000;
+
+    // This messes up the background-color green that I use in some slides
+    // background-color: white;
+}
 
 .reveal pre code {
     font-family: Menlo,monospace;
@@ -54,3 +59,20 @@ div.screen_grab img {
 }
 
 .strike { text-decoration: line-through; color: #8f4040; }
+
+section.center table, .centertable table {
+    margin: auto;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+kbd.key {
+    padding: 0.04em 0.5em;
+    border: 1px solid #CCC;
+    background-color: #F7F7F7;
+    box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 2px #FFF inset;
+    border-radius: 3px;
+    text-shadow: 0px 1px 0px #FFF;
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 75%;
+}
