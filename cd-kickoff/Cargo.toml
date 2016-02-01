@@ -1,0 +1,24 @@
+[package]
+name = "cd-kickoff"
+version = "0.1.0"
+authors = ["Felix S. Klock II <pnkfelix@pnkfx.org>"]
+
+build = "build.rs"
+
+[dependencies]
+dispatch = "0.0.1"
+rayon = "0.2.*"
+
+# The preprocessor is the `tango` crate, so we need to add that
+# to the build-dependencies.
+
+[build-dependencies]
+tango = "^0.4.2"
+cmd-pandoc = "0.1.*"
+
+# Since the lib may be a tango file stored in `src/lib.md`, we need to
+# explicitly specify that this is a library project with a `[lib]`
+# section, which then requires an explicit name.
+
+[lib]
+name = "lib"
