@@ -14,7 +14,7 @@ Parallel Systems Programming
 
 ----
 
-## {.center }
+## {.center .equation}
 
 An "Equation"
 
