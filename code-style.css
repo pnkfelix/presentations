@@ -9,7 +9,7 @@
 /* .sourceCode pre code { font-family: Menlo,monospace; font-size: 100%; line-height: initial; background-color: #f3fff3; } */
 /* .sourceCode pre { font-family: Menlo,monospace; font-size: 100%; line-height: initial; background-color: #f3fff3 } */
 .sourceCode pre { background-color: #f3fff3 }
-code.sourceCode {
+.sourceCode code {
     /* font-family: FiraCode,Menlo,monospace; */
     font-family: Menlo,monospace;
     text-rendering: optimizeLegibility;
@@ -19,14 +19,13 @@ code.sourceCode {
     line-height: initial;
     background-color: #f3fff3;
 }
- pre { text-align: left; }
+pre { text-align: left; }
 
 .reveal code {
     /* font-family: FiraCode,Menlo,monospace; */
     font-family: Menlo,monospace;
     text-rendering: optimizeLegibility;
 }
-
 /* .sourceCode pre { text-align: left; } */
 /* .sourceCode code { text-align: left; } */
 
