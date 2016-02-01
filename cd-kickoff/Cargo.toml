@@ -13,8 +13,8 @@ rayon = "0.2.*"
 # to the build-dependencies.
 
 [build-dependencies]
-tango = "^0.4.2"
-cmd-pandoc = "0.1.*"
+tango = "^0.4.5"
+cmd-pandoc = "0.2.*"
 
 # Since the lib may be a tango file stored in `src/lib.md`, we need to
 # explicitly specify that this is a library project with a `[lib]`

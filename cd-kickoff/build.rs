@@ -4,6 +4,7 @@ extern crate cmd_pandoc as pandoc;
 fn main() {
     use pandoc::PandocOption as O;
     use pandoc::OutputFormat as F;
+    use pandoc::OutputFormatExt as E;
 
     tango::process_root().unwrap();
 
@@ -11,7 +12,7 @@ fn main() {
     // generate `.md` files that we want to process.
     pandoc::run_pandoc("slides", "../cd-kickoff-2016",
                        &[O::Standalone,
-                         O::To(F::revealjs),
+                         O::To(E::FmtExt(F::revealjs, vec![format!("fenced_code_attributes")])),
                          O::Var("theme", Some("mozilla-sandstone")),
                          O::Var("center", Some("false")),
                          O::Css("slide-style.css"),
@@ -29,7 +30,7 @@ fn main() {
         pandoc::run_pandoc(source_dir,
                            target_file,
                            &[O::Standalone,
-                             O::To(F::html5),
+                             O::To(E::Fmt(F::html5)),
                              O::Css("exercise-style.css"),
                              ])
     }
