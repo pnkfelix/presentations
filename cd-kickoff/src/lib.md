@@ -42,9 +42,7 @@ extern crate rayon;
 Next, the (shallow) module hierarchy for the presentation itself.
 
 ```rust
-mod slides {
-    mod a00_title;
-}
+mod slides;
 
 mod exercises;
 ```
