@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="exercise-style.css">
+</head>
+<body>
+<h1 id="threads">Threads</h1>
+<p>(Time: 10 minutes.)</p>
+<ul>
+<li><p>Goal: Join the threads and print out the store with the best price.</p></li>
+<li><p>Extra credit #1: Use channels instead</p></li>
+<li><p>Extra credit #2: Or, instead of channels, use a mutex to compute the best price in the parallel threads themselves.</p></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#![</span>allow<span class="at">(</span>dead_code<span class="at">)]</span>
+
+<span class="kw">use</span> std::<span class="dt">f32</span>::INFINITY;
+<span class="kw">use</span> std::sync::Arc;
+<span class="kw">use</span> std::thread;
+
+<span class="kw">struct</span> Store {
+    name: <span class="dt">String</span>,
+    items: <span class="dt">Vec</span>&lt;Item&gt;,
+}
+
+<span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="at">)]</span>
+<span class="kw">struct</span> Item {
+    name: &amp;<span class="ot">&#39;static</span> <span class="dt">str</span>,
+    price: <span class="dt">f32</span>,
+}
+
+<span class="kw">impl</span> Store {
+    <span class="kw">fn</span> new(name: <span class="dt">String</span>) -&gt; Store {
+        Store {
+            name: name,
+            items: <span class="pp">vec!</span>[],
+        }
+    }
+
+    <span class="kw">fn</span> add_item(&amp;<span class="kw">mut</span> <span class="kw">self</span>, item: Item) {
+        <span class="kw">self</span>.items.push(item);
+    }
+
+    <span class="kw">fn</span> price(&amp;<span class="kw">self</span>, item_name: &amp;<span class="dt">str</span>) -&gt; <span class="dt">f32</span> {
+        <span class="kw">for</span> item <span class="kw">in</span> &amp;<span class="kw">self</span>.items {
+            <span class="kw">if</span> item.name == item_name {
+                <span class="kw">return</span> item.price;
+            }
+        }
+
+        <span class="pp">panic!</span>(<span class="st">&quot;no such item {:?}&quot;</span>, item_name);
+    }
+
+    <span class="kw">fn</span> total_price(&amp;<span class="kw">self</span>, shopping_list: &amp;[&amp;<span class="dt">str</span>]) -&gt; <span class="dt">f32</span> {
+        shopping_list.iter()
+                     .map(|name| <span class="kw">self</span>.price(name))
+                     .fold(<span class="dv">0.0</span>, |a, b| a + b)
+    }
+}
+
+<span class="kw">fn</span> build_stores() -&gt; <span class="dt">Vec</span>&lt;Store&gt; {
+    <span class="kw">let</span> <span class="kw">mut</span> stores = <span class="pp">vec!</span>[];
+
+    <span class="kw">let</span> <span class="kw">mut</span> store = Store::new(<span class="pp">format!</span>(<span class="st">&quot;Rustmart&quot;</span>));
+    store.add_item(Item { name: <span class="st">&quot;chocolate&quot;</span>, price: <span class="dv">5.0</span> });
+    store.add_item(Item { name: <span class="st">&quot;socks&quot;</span>, price: <span class="dv">23.0</span> });
+    store.add_item(Item { name: <span class="st">&quot;plush Mozilla dinosaur&quot;</span>, price: <span class="dv">13.0</span> });
+    stores.push(store);
+
+    <span class="kw">let</span> <span class="kw">mut</span> store = Store::new(<span class="pp">format!</span>(<span class="st">&quot;Rarget&quot;</span>));
+    store.add_item(Item { name: <span class="st">&quot;chocolate&quot;</span>, price: <span class="dv">2.5</span> });
+    store.add_item(Item { name: <span class="st">&quot;socks&quot;</span>, price: <span class="dv">20.0</span> });
+    store.add_item(Item { name: <span class="st">&quot;plush Mozilla dinosaur&quot;</span>, price: <span class="dv">20.0</span> });
+    stores.push(store);
+
+    stores
+}
+
+<span class="kw">fn</span> main() {
+    <span class="kw">let</span> stores = build_stores();
+
+    <span class="kw">let</span> shopping_list = <span class="pp">vec!</span>[<span class="st">&quot;chocolate&quot;</span>, <span class="st">&quot;plush Mozilla dinosaur&quot;</span>];
+    <span class="kw">let</span> shopping_list = Arc::new(shopping_list);
+
+    <span class="kw">let</span> <span class="kw">mut</span> handles = <span class="pp">vec!</span>[];
+    <span class="kw">for</span> store <span class="kw">in</span> stores {
+        <span class="kw">let</span> shopping_list = shopping_list.clone();
+        handles.push(thread::spawn(<span class="kw">move</span> || {
+            <span class="kw">let</span> sum = store.total_price(&amp;shopping_list);
+            (store.name, sum)
+        }));
+    }
+
+    <span class="kw">let</span> <span class="kw">mut</span> best = <span class="cn">None</span>;
+    <span class="kw">let</span> <span class="kw">mut</span> best_price = INFINITY;
+
+    <span class="co">// Goal: join the threads here!</span>
+    <span class="co">// Extra credit: rewrite to use channels or mutexes.</span>
+
+    <span class="pp">println!</span>(<span class="st">&quot;--&gt; Go to {}!&quot;</span>, best.unwrap());
+}</code></pre></div>
+</body>
+</html>

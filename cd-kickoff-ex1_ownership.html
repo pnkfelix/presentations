@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="exercise-style.css">
+</head>
+<body>
+<h1 id="ownership">Ownership</h1>
+<p>(Time: 10 minutes)</p>
+<ul>
+<li><p>Goal #1: Get code below (<a href="https://play.rust-lang.org/?code=fn%20main%28%29%20%7B%0A%20%20%20%20let%20%28adjective%2C%20name%29%20%3D%20two_words%28%29%3B%0A%20%20%20%20let%20name%20%3D%20format%21%28%22%7B%7D%20%7B%7D%22%2C%20adjective%2C%20name%29%3B%0A%20%20%20%20print_out%28name%29%3B%0A%7D%0A%0Afn%20two_words%28%29%20-%3E%20%28String%2C%20String%29%20%7B%0A%20%20%20%20%28format%21%28%22fellow%22%29%2C%20format%21%28%22Rustaceans%22%29%29%0A%7D%0A%0Afn%20remove_vowels%28name%3A%20String%29%20-%3E%20String%20%7B%0A%20%20%20%20%2F%2F%20Goal%20%231%3A%20What%20is%20needed%20here%20to%20make%20this%20compile%3F%0A%20%20%20%20let%20output%20%3D%20String%3A%3Anew%28%29%3B%0A%20%20%20%20for%20c%20in%20name.chars%28%29%20%7B%0A%20%20%20%20%20%20%20%20match%20c%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%27a%27%20%7C%20%27e%27%20%7C%20%27i%27%20%7C%20%27o%27%20%7C%20%27u%27%20%3D%3E%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2F%2F%20skip%20vowels%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20_%20%3D%3E%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20output.push%28c%29%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%20%20output%0A%7D%0A%0Afn%20print_out%28name%3A%20String%29%20%7B%0A%20%20%20%20let%20devowelized_name%20%3D%20remove_vowels%28name%29%3B%0A%20%20%20%20println%21%28%22Removing%20vowels%20yields%20%7B%3A%3F%7D%22%2C%20devowelized_name%29%3B%0A%0A%20%20%20%20%2F%2F%20Goal%20%232%3A%20What%20happens%20when%20you%20uncomment%20the%20following%0A%20%20%20%20%2F%2F%20line%3F%20Can%20you%20change%20the%20code%20above%20so%20that%20this%20next%20line%3F%0A%20%20%20%20%2F%2F%20println%21%28%22Removing%20vowels%20from%20%7B%3A%3F%7D%20yields%20%7B%3A%3F%7D%22%2C%0A%20%20%20%20%2F%2F%20%20%20%20%20%20%20%20%20%20name%2C%20devowelized_name%29%3B%0A%0A%20%20%20%20%2F%2F%20Extra%20credit%3A%20Can%20you%20do%20it%20without%20copying%20any%20data%3F%0A%20%20%20%20%2F%2F%20%28Using%20only%20ownership%20transfer%29%0A%7D&amp;version=nightly">playpen</a>) to compile.</p></li>
+<li><p>Goal #2: Convert the code so that it prints <code>Removing vowels from &quot;Rustaceans&quot; yields &quot;Rstcns&quot;</code>.</p></li>
+<li><p>Extra-credit: Can you accomplish the previous goal without copying any data (e.g. no calls to <code>.clone()</code>).</p></li>
+<li><p>Goal #3: This code is sound, but it is still buggy; identify and fix the bug. Hint: <span id="hint1" class="hint" onclick="var h = document.getElementById(&#39;hint1&#39;); h.style.color = (h.style.color == &#39;inherit&#39;) ? &#39;transparent&#39; : &#39;inherit&#39;;">What happens if you pass <code>&quot;SNOBOL Throwers&quot;</code> instead?</span></p></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> main() {
+    <span class="kw">let</span> (adjective, name) = two_words();
+    <span class="kw">let</span> name = <span class="pp">format!</span>(<span class="st">&quot;{} {}&quot;</span>, adjective, name);
+    print_out(name);
+}
+
+<span class="kw">fn</span> two_words() -&gt; (<span class="dt">String</span>, <span class="dt">String</span>) {
+    (<span class="pp">format!</span>(<span class="st">&quot;fellow&quot;</span>), <span class="pp">format!</span>(<span class="st">&quot;Rustaceans&quot;</span>))
+}
+
+<span class="kw">fn</span> remove_vowels(name: <span class="dt">String</span>) -&gt; <span class="dt">String</span> {
+    <span class="co">// Goal #1: What is needed here to make this compile?</span>
+    <span class="kw">let</span> output = <span class="dt">String</span>::new();
+    <span class="kw">for</span> c <span class="kw">in</span> name.chars() {
+        <span class="kw">match</span> c {
+            <span class="ch">&#39;a&#39;</span> | <span class="ch">&#39;e&#39;</span> | <span class="ch">&#39;i&#39;</span> | <span class="ch">&#39;o&#39;</span> | <span class="ch">&#39;u&#39;</span> =&gt; {
+                <span class="co">// skip vowels</span>
+            }
+            _ =&gt; {
+                output.push(c);
+            }
+        }
+    }
+    output
+}
+
+<span class="kw">fn</span> print_out(name: <span class="dt">String</span>) {
+    <span class="kw">let</span> devowelized_name = remove_vowels(name);
+    <span class="pp">println!</span>(<span class="st">&quot;Removing vowels yields {:?}&quot;</span>, devowelized_name);
+
+    <span class="co">// Goal #2: What happens when you uncomment the following</span>
+    <span class="co">// line? Can you change the code above so that this next line?</span>
+    <span class="co">// println!(&quot;Removing vowels from {:?} yields {:?}&quot;,</span>
+    <span class="co">//          name, devowelized_name);</span>
+
+    <span class="co">// Extra credit: Can you do it without copying any data?</span>
+    <span class="co">// (Using only ownership transfer)</span>
+}</code></pre></div>
+</body>
+</html>

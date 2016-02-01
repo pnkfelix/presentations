@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="exercise-style.css">
+</head>
+<body>
+<h1 id="borrowing">Borrowing</h1>
+<p>Time: 10 minutes</p>
+<ul>
+<li><p>Goal: convert <code>strcat</code> function below (<a href="https://play.rust-lang.org/?code=pub%20fn%20main%28%29%20%7B%0A%20%20%20%20let%20str1%20%3D%20format%21%28%22fellow%20%22%29%3B%0A%20%20%20%20let%20str2%20%3D%20format%21%28%22Rustaceans%22%29%3B%0A%20%20%20%20let%20str3%20%3D%20strcat%28str1%2C%20str2%29%3B%0A%20%20%20%20println%21%28%22%7B%7D%22%2C%20str3%29%3B%0A%7D%0A%0A%2F%2F%2F%20Concatenate%20%60suffix%60%20onto%20the%20end%20of%20%60prefix%60.%0Afn%20strcat%28mut%20prefix%3A%20String%2C%20suffix%3A%20String%29%20-%3E%20String%20%7B%0A%20%20%20%20for%20ch%20in%20suffix.chars%28%29%20%7B%0A%20%20%20%20%20%20%20%20prefix.push%28ch%29%3B%0A%20%20%20%20%7D%0A%20%20%20%20prefix%0A%7D%0A%0A%2F%2F%20Challenge%3A%20Convert%20%60strcat%60%20to%20use%20borrowing%2C%20not%20ownership.%0A%0A%2F%2F%20Question%3A%20Now%20that%20you%27ve%20converted%20%60strcat%60%2C%20what%20happens%20if%20you%0A%2F%2F%20call%20%60strcat%60%20using%20the%20same%20string%20for%20%60prefix%60%20and%20%60suffix%60%3F%0A%2F%2F%20Why%3F&amp;version=nightly">playpen</a>) so that it uses borrowing, not ownership.</p>
+<p>(As part of this, we no longer want to build up a whole new string; so get rid of <code>str3</code> and make the code just change <code>str1</code> in-place.)</p>
+Hint: Getting the syntax right can be a bit tricky if you've never written in Rust before. Click on the hidden text below for some guidance.
+<div id="hint2" class="hint" onclick="var h = document.getElementById(&#39;hint2&#39;); h.style.color = (h.style.color == &#39;inherit&#39;) ? &#39;transparent&#39; : &#39;inherit&#39;;">
+<p>You want to change the signature of <code>join_words</code> as follows: <code>fn strcat(prefix: &amp;mut String, suffix: &amp;String) { ... }</code></p>
+<p>Now <code>prefix</code> is a mutable reference to some <code>String</code> on the caller's side. We need a mutable reference so we can push new content onto the string.</p>
+<p><code>suffix</code> is a shared reference; a shared reference suffices because we will only <em>read</em> from <code>suffix</code>.</p>
+<p>Note the return value has also changed; since we are going to be mutating <code>prefix</code> in place, we no longer need to return anything.</p>
+</div></li>
+<li><p>Question (also in code): now that you've converted <code>strcat</code>, what happens if you call <code>strcat</code> using the same string instance for <code>prefix</code> and <code>suffix</code>, i.e. <code>strcat(s, s)</code>? Why?</p></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">pub</span> <span class="kw">fn</span> main() {
+    <span class="kw">let</span> str1 = <span class="pp">format!</span>(<span class="st">&quot;fellow &quot;</span>);
+    <span class="kw">let</span> str2 = <span class="pp">format!</span>(<span class="st">&quot;Rustaceans&quot;</span>);
+    <span class="kw">let</span> str3 = strcat(str1, str2);
+    <span class="pp">println!</span>(<span class="st">&quot;{}&quot;</span>, str3);
+}
+
+<span class="co">/// Concatenate `suffix` onto the end of `prefix`.</span>
+<span class="kw">fn</span> strcat(<span class="kw">mut</span> prefix: <span class="dt">String</span>, suffix: <span class="dt">String</span>) -&gt; <span class="dt">String</span> {
+    <span class="kw">for</span> ch <span class="kw">in</span> suffix.chars() {
+        prefix.push(ch);
+    }
+    prefix
+}
+
+<span class="co">// Challenge: Convert `strcat` to use borrowing, not ownership.</span>
+
+<span class="co">// Question: Now that you&#39;ve converted `strcat`, what happens if you</span>
+<span class="co">// call `strcat` using the same string for `prefix` and `suffix`?</span>
+<span class="co">// Why?</span></code></pre></div>
+</body>
+</html>
