@@ -17,4 +17,6 @@ mod borrowing { mod borrowing; }
 mod structs { mod structs; }
 mod threads { mod threads; }
 mod closures { mod closures; }
+mod enums_match { mod enums_match; }
+mod lifetimes { mod lifetimes; }
 ```
