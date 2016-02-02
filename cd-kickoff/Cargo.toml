@@ -8,6 +8,7 @@ build = "build.rs"
 [dependencies]
 dispatch = "0.0.1"
 rayon = "0.2.*"
+rand = "0.3.*"
 
 # The preprocessor is the `tango` crate, so we need to add that
 # to the build-dependencies.
