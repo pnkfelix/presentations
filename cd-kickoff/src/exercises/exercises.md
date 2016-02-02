@@ -7,10 +7,11 @@ deployed.
  * Exercise 1: [Ownership][]
  * Exercise 2: [Borrowing][]
  * Exercise 3: [Structs][]
+ * Exercise _: [Closures][]
  * Exercise 4: [Threads][]
- * Exercise 5: [Enums and `match`][]
- * Exercise 6: [Lifetimes][]
- * Exercise 7: [Iterators][]
+ * Exercise _: [Enums and `match`][]
+ * Exercise _: [Lifetimes][]
+ * Exercise _: [Iterators][]
 
 [Hello Rust]: cd-kickoff-hello.html
 [Ownership]: cd-kickoff-ownership.html
@@ -20,3 +21,4 @@ deployed.
 [Enums and `match`]: cd-kickoff-enums_match.html
 [Lifetimes]: cd-kickoff-lifetimes.html
 [Iterators]: cd-kickoff-iterators.html
+[Closures]: cd-kickoff-closures.html
