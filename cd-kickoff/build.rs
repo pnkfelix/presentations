@@ -38,7 +38,7 @@ fn main() {
     exercise_page("exercises/", "../cd-kickoff-exercises").unwrap();
 
     for ex in &["hello", "ownership", "borrowing",
-                "structs", "threads", "enums_match",
+                "structs", "threads", "closures", "enums_match",
                 "lifetimes", "iterators"] {
         exercise_page(&format!("exercises/{}", ex),
                       &format!("../cd-kickoff-{}", ex)).unwrap();
