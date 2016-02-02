@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="exercise-style.css">
+</head>
+<body>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> twice_i32&lt;F&gt;(x0: <span class="dt">i32</span>, f: &amp;F) -&gt; <span class="dt">i32</span> <span class="kw">where</span> F: <span class="bu">Fn</span>(<span class="dt">i32</span>) -&gt; <span class="dt">i32</span> {
+    <span class="co">//      ~~~          ~~~~~               ~~~~~~~~~~~~~~~~~</span>
+    <span class="co">//       |             |                         |</span>
+    <span class="co">// Type Parameter      |                         |</span>
+    <span class="co">//                     |                         |</span>
+    <span class="co">//     `f` is reference to an `F`                |</span>
+    <span class="co">//                                               |</span>
+    <span class="co">//         `F` is any function that consumes an `i32` and produces an `i32`</span>
+
+    <span class="kw">let</span> x1 = f(x0); <span class="co">// apply `f` once ...</span>
+
+    f(x1)           <span class="co">// ... and again</span>
+}
+
+
+<span class="kw">fn</span> demo1() {
+    <span class="kw">fn</span> add_1(x: <span class="dt">i32</span>) -&gt; <span class="dt">i32</span> { x + <span class="dv">1</span> }
+    <span class="pp">println!</span>(<span class="st">&quot;demo1 twice_i32(0, add_1): {}&quot;</span>, twice_i32(<span class="dv">0</span>, &amp;add_1));
+    <span class="pp">println!</span>(<span class="st">&quot;demo1 twice_i32(0, λz.z+1): {}&quot;</span>, twice_i32(<span class="dv">0</span>, &amp;|y| y+<span class="dv">1</span>));
+    <span class="kw">let</span> w = <span class="dv">3</span>;
+    <span class="pp">println!</span>(<span class="st">&quot;demo1 twice_i32(0, add_w): {}&quot;</span>, twice_i32(<span class="dv">0</span>, &amp;|z| z+w));
+}
+
+<span class="kw">pub</span> <span class="kw">fn</span> twice&lt;X, F&gt;(x: X, f: &amp;F) -&gt; X <span class="kw">where</span> F: <span class="bu">Fn</span>(X) -&gt; X {
+    <span class="kw">let</span> x1 = f(x);
+    f(x1)
+}
+
+<span class="kw">fn</span> demo2() {
+    <span class="pp">println!</span>(<span class="st">&quot;twice(0, add_1): {}&quot;</span>, twice(<span class="dv">0i32</span>, &amp;|y| y+<span class="dv">1</span>));
+
+    <span class="co">// println!(&quot;twice_peano(0): {}&quot;, twice_peano(0i32)); // XXX (see exercise below)</span>
+}
+
+<span class="kw">pub</span> <span class="kw">fn</span> main() {
+    demo1();
+    demo2();
+    demo3();
+}
+
+<span class="kw">fn</span> demo3() {
+    <span class="kw">let</span> <span class="kw">mut</span> state = <span class="dv">0</span>;
+
+    {
+        <span class="kw">let</span> f1 = Funnel { x: &amp;<span class="kw">mut</span> state, f: |s| { *s = *s + <span class="dv">1</span>; s } };
+        f1.go();
+    } <span class="co">// Q for audience: what happens if we remove this pair of curly braces? Why?</span>
+
+    <span class="pp">println!</span>(<span class="st">&quot;demo2 state: {}&quot;</span>, state);
+}
+
+<span class="kw">struct</span> Funnel&lt;X, F&gt; <span class="kw">where</span> F: <span class="bu">FnOnce</span>(X) -&gt; X {
+    x: X,
+    f: F,
+}
+
+<span class="kw">impl</span>&lt;X, F&gt; Funnel&lt;X, F&gt; <span class="kw">where</span> F: <span class="bu">FnOnce</span>(X) -&gt; X {
+    <span class="kw">fn</span> go(<span class="kw">self</span>) -&gt; X {
+        <span class="kw">let</span> Funnel { x: object, f: callback } = <span class="kw">self</span>;
+        <span class="kw">return</span> callback(object);
+    }
+
+    <span class="co">// fn go_twice(self) -&gt; X {</span>
+    <span class="co">//     let Funnel { x: object, f: callback } = self;</span>
+    <span class="co">//     return callback(callback(object));</span>
+    <span class="co">// }</span>
+}</code></pre></div>
+</body>
+</html>

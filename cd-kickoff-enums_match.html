@@ -9,9 +9,133 @@
   <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
   <link rel="stylesheet" href="exercise-style.css">
 </head>
 <body>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="co">// Adapted from</span>
+<span class="co">// http://blog.rust-lang.org/2015/04/17/Enums-match-mutation-and-moves.html</span>
 
+<span class="kw">enum</span> BinaryTree&lt;X&gt; <span class="kw">where</span> X: <span class="bu">Ord</span> {
+    Leaf(X),
+    Node(<span class="dt">Box</span>&lt;BinaryTree&lt;X&gt;&gt;, X, <span class="dt">Box</span>&lt;BinaryTree&lt;X&gt;&gt;)
+}
+
+<span class="kw">fn</span> sample_tree() -&gt; BinaryTree&lt;<span class="dt">i32</span>&gt; {
+    <span class="kw">return</span> BinaryTree::Node(node(leaf(<span class="dv">1</span>),
+                                 <span class="dv">2</span>,
+                                 leaf(<span class="dv">3</span>)),
+                            <span class="dv">4</span>,
+                            leaf(<span class="dv">5</span>));
+
+    <span class="kw">type</span> BBT = <span class="dt">Box</span>&lt;BinaryTree&lt;<span class="dt">i32</span>&gt;&gt;;
+    <span class="kw">fn</span> leaf(x: <span class="dt">i32</span>) -&gt; BBT {
+        <span class="dt">Box</span>::new(BinaryTree::Leaf(x))
+    }
+    <span class="kw">fn</span> node(l: BBT, x: <span class="dt">i32</span>, r: BBT) -&gt; BBT {
+        <span class="dt">Box</span>::new(BinaryTree::Node(l, x, r))
+    }
+}
+
+<span class="kw">impl</span> BinaryTree&lt;<span class="dt">i32</span>&gt; {
+    <span class="kw">fn</span> weight_by_value(<span class="kw">self</span>) -&gt; <span class="dt">i32</span> {
+        <span class="kw">match</span> <span class="kw">self</span> {
+            BinaryTree::Leaf(payload) =&gt; payload,
+            BinaryTree::Node(left, payload, right) =&gt;
+                left.weight_by_value() + payload + right.weight_by_value()
+        }
+    }
+}
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> tree_demo_1() {
+    <span class="kw">let</span> tree = sample_tree();
+    <span class="pp">assert_eq!</span>(tree.weight_by_value(), (<span class="dv">1</span> + <span class="dv">2</span> + <span class="dv">3</span>) + <span class="dv">4</span> + <span class="dv">5</span>);
+}
+
+<span class="co">// EXERCISE: what happens if you get rid of the occurrences of `ref` in</span>
+<span class="co">// `ref left` and `ref right` below? Explain.</span>
+
+<span class="co">// EXERCISE: change to `match *self { ... }` instead of `match self { ... }`</span>
+<span class="co">// What else needs fixing?</span>
+<span class="kw">impl</span> BinaryTree&lt;<span class="dt">i32</span>&gt; {
+    <span class="kw">fn</span> weight(&amp;<span class="kw">self</span>) -&gt; <span class="dt">i32</span> {
+        <span class="kw">match</span> <span class="kw">self</span> {
+            &amp;BinaryTree::Leaf(payload) =&gt; payload,
+            &amp;BinaryTree::Node(<span class="kw">ref</span> left, payload, <span class="kw">ref</span> right) =&gt;
+                left.weight() + payload + right.weight()
+        }
+    }
+}
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> tree_demo_2() {
+    <span class="kw">let</span> tree = sample_tree();
+    <span class="pp">assert_eq!</span>(tree.weight(), (<span class="dv">1</span> + <span class="dv">2</span> + <span class="dv">3</span>) + <span class="dv">4</span> + <span class="dv">5</span>);
+}
+
+<span class="co">// EXERCISE: Finish the implementation of Tree::grow below. Some of</span>
+<span class="co">// the code has been provided, so you can see the `ref mut` variation</span>
+<span class="co">// of `ref` (it is analogous to `&amp;mut T`/`&amp;T`.)</span>
+
+<span class="kw">impl</span> BinaryTree&lt;<span class="dt">i32</span>&gt; {
+    <span class="co">/// Increments all of the integers in the tree by one.</span>
+    <span class="kw">fn</span> grow(&amp;<span class="kw">mut</span> <span class="kw">self</span>) {
+        <span class="kw">match</span> *<span class="kw">self</span> {
+            BinaryTree::Leaf(_) =&gt; {
+                <span class="pp">unimplemented!</span>()
+            }
+            BinaryTree::Node(<span class="kw">ref</span> <span class="kw">mut</span> left, _, <span class="kw">ref</span> <span class="kw">mut</span> right) =&gt; {
+                <span class="pp">unimplemented!</span>();
+            }
+        }
+    }
+}
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> tree_demo_3() {
+    <span class="kw">let</span> <span class="kw">mut</span> tree = sample_tree();
+    <span class="pp">assert_eq!</span>(tree.weight(), (<span class="dv">1</span> + <span class="dv">2</span> + <span class="dv">3</span>) + <span class="dv">4</span> + <span class="dv">5</span>);
+    tree.grow();
+    <span class="pp">assert_eq!</span>(tree.weight(), (<span class="dv">2</span> + <span class="dv">3</span> + <span class="dv">4</span>) + <span class="dv">5</span> + <span class="dv">6</span>);
+    tree.grow();
+    <span class="pp">assert_eq!</span>(tree.weight(), (<span class="dv">3</span> + <span class="dv">4</span> + <span class="dv">5</span>) + <span class="dv">6</span> + <span class="dv">7</span>);
+}</code></pre></div>
 </body>
 </html>

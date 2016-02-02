@@ -9,9 +9,94 @@
   <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
   <link rel="stylesheet" href="exercise-style.css">
 </head>
 <body>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">static</span> S_2_0: [<span class="dt">usize</span>; <span class="dv">2</span>] = [<span class="dv">2</span>, <span class="dv">0</span>];
+<span class="kw">pub</span> <span class="kw">fn</span> main() {
+    <span class="kw">let</span> s_1_0_2 = [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">2</span>];
+    <span class="kw">let</span> first_choice: &amp;[<span class="dt">usize</span>] = choose(&amp;s_1_0_2, &amp;S_2_0);
+    <span class="pp">println!</span>(<span class="st">&quot;first_choice: {:?}&quot;</span>, first_choice);
 
+    <span class="kw">let</span> second_choice = subdata_then_choose();
+    <span class="pp">println!</span>(<span class="st">&quot;second_choice: {:?}&quot;</span>, second_choice);
+}
+
+<span class="co">// EXERCISE 1: In `fn choose`, remove the `&lt;&#39;a&gt;` and all occurrences</span>
+<span class="co">// of `&#39;a` from the signature of `fn choose`. What happens? Why?</span>
+
+<span class="kw">fn</span> choose&lt;<span class="ot">&#39;a</span>&gt;(x: &amp;<span class="ot">&#39;a</span> [<span class="dt">usize</span>], y: &amp;<span class="ot">&#39;a</span> [<span class="dt">usize</span>]) -&gt; &amp;<span class="ot">&#39;a</span> [<span class="dt">usize</span>] {
+    <span class="co">// A semi-arbitrary predicate between the two inputs</span>
+    <span class="kw">if</span> y[x[<span class="dv">0</span>]] &gt; x[y[<span class="dv">0</span>]] {
+        x
+    } <span class="kw">else</span> {
+        y
+    }
+}
+
+<span class="co">// EXERCISE 2: In `fn subdata_then_choose`, remove `return &amp;ARRAY;`</span>
+<span class="co">// (marked `XXX`) and uncomment alternative code there. What happens</span>
+<span class="co">// when you try to compile this? What are some ways to address this?</span>
+
+<span class="kw">fn</span> subdata_then_choose&lt;<span class="ot">&#39;a</span>&gt;() -&gt; &amp;<span class="ot">&#39;a</span> [<span class="dt">usize</span>]  {
+    <span class="kw">return</span> &amp;ARRAY; <span class="co">// XXX</span>
+    <span class="co">/*</span>
+
+<span class="co">    let s_1_0_0 = [1, 0, 0];</span>
+<span class="co">    let s_0_2_0 = [0, 2, 0];</span>
+<span class="co">    choose(&amp;s_1_0_0, &amp;s_0_2_0)</span>
+
+<span class="co">    */</span>
+}
+
+<span class="kw">static</span> ARRAY : [<span class="dt">usize</span>; <span class="dv">3</span>] = [<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>];
+
+<span class="kw">const</span> C_2_0: [<span class="dt">usize</span>; <span class="dv">2</span>] = [<span class="dv">2</span>, <span class="dv">0</span>];
+
+<span class="co">// (EXTRA CREDIT)</span>
+<span class="co">// EXERCISE 3: In `fn main`, replace `&amp;S_2_0` with `&amp;C_2_0`.</span>
+<span class="co">//</span>
+<span class="co">//   * Investigate: why does the code stop compiling?</span>
+<span class="co">//</span>
+<span class="co">//   * How could we address this (within the body of `fn main` alone)?</span>
+<span class="co">//</span>
+<span class="co">//   * Why did the original code with `S_2_0` compile?</span></code></pre></div>
 </body>
 </html>

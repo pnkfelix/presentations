@@ -76,7 +76,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
     <h3 class="date">FYI: Slides form <em>2D space</em>: <kbd class="key">␠</kbd> goes to next slide; <kbd class="key">←</kbd> <kbd class="key">↑</kbd> <kbd class="key">→</kbd> <kbd class="key">↓</kbd> navigate; <kbd class="key">␛</kbd> gives overview.</h3>
 </section>
 
-<section><section id="hack-without-fear" class="titleslide slide level1 center"><h1>Hack Without Fear</h1></section><section id="section" class="slide level2 center">
+<section><section id="hack-without-fear" class="titleslide slide level1 center"><h1>Hack Without Fear</h1></section><section id="section" class="slide level2 center equation">
 <h1></h1>
 <p>An &quot;Equation&quot;</p>
 <table>
@@ -106,22 +106,176 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="fragment">
 <p>What is meant by &quot;Abstraction&quot;, &quot;Memory Safety&quot;, &quot;Concurrency&quot;?</p>
 </div>
-</section><section id="abstraction" class="slide level2">
-<h1>Abstraction</h1>
+</section><section id="high-level-coding-..." class="slide level2">
+<h1>High-level coding ...</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="co">/// sums all positive values in `v`</span>
+<span class="kw">fn</span> sum_pos(v: &amp;[<span class="dt">i32</span>]) -&gt; <span class="dt">i32</span> {
+    <span class="kw">let</span> <span class="kw">mut</span> sum = <span class="dv">0</span>;
+    <span class="kw">for</span> i <span class="kw">in</span> v.iter().filter(|i| **i &gt; <span class="dv">0</span>) {
+        sum += *i;
+    }
+    sum
+}</code></pre></div>
+<!-- NOTE: Above is *not* the actual source for playpen
+     link. See a01_abstraction_source.md for that. -->
+<p><a href="https://play.rust-lang.org/?code=%23%5Binline%28never%29%5D%0A%2F%2F%2F%20sums%20all%20positive%20values%20in%20%60v%60%0Afn%20sum_pos%28v%3A%20%26%5Bi32%5D%29%20-%3E%20i32%20%7B%0A%20%20%20%20let%20mut%20sum%20%3D%200%3B%0A%20%20%20%20for%20i%20in%20v.iter%28%29.filter%28%7Ci%7C%20**i%20%3E%200%29%20%7B%0A%20%20%20%20%20%20%20%20sum%20%2B%3D%20*i%3B%0A%20%20%20%20%7D%0A%20%20%20%20sum%0A%7D%0A%0Afn%20main%28%29%20%7B%0A%20%20%20%20println%21%28%22sum%3A%20%7B%7D%22%2C%20sum_pos%28%26%5B-13%2C%2010%2C%2020%2C%2030%2C%2040%5D%29%29%0A%7D&amp;version=nightly">sum_pos</a></p>
+</section><section id="with-low-level-performance" class="slide level2">
+<h1>... with low-level performance</h1>
+<div class="sourceCode"><pre class="sourceCode nasm"><code class="sourceCode nasm">    xorl    <span class="ot">%eax, %eax</span>
+    leaq    ref4197(<span class="ot">%rip), %rcx</span>
+    leaq    ref4197<span class="dv">+20</span>(<span class="ot">%rip), %rdx</span>
+    <span class="kw">jmp</span> .LBB0_1
+<span class="fu">.LBB0_3:</span>
+    addl    <span class="ot">%esi, %eax</span>
+    .<span class="kw">align</span>  <span class="dv">16</span><span class="bn">, 0x90</span>
+<span class="fu">.LBB0_1:</span>
+    cmpq    <span class="ot">%rcx, %rdx</span>
+    <span class="kw">je</span>  .LBB0_4
+    movl    (<span class="ot">%rcx), %esi</span>
+    addq<span class="bn">    $4, </span><span class="ot">%rcx</span>
+    testl   <span class="ot">%esi, %esi</span>
+    <span class="kw">jle</span> .LBB0_1
+    <span class="kw">jmp</span> .LBB0_3
+<span class="fu">.LBB0_4:</span>
+    retq</code></pre></div>
+<!--
+```rust
+#[inline(never)]
+/// sums all positive values in `v`
+fn sum_pos(v: &[i32]) -> i32 {
+    let mut sum = 0;
+    for i in v.iter().filter(|i| **i > 0) {
+        sum += *i;
+    }
+    sum
+}
+
+fn main() {
+    println!("sum: {}", sum_pos(&[-13, 10, 20, 30, 40]))
+}
+```
+-->
+<!--
+     HACK: commenting out code block but it will still get rendered into link below.
+     (The code is presented and linked in a01_abstraction.md.)
+
+     Further more, the code block will still get converted into
+     actual Rust code in the current module by `tango`, so
+     that is why this is in a file distinct from
+     a01_abstraction.md.
+-->
 </section><section id="memory-safety" class="slide level2">
 <h1>Memory Safety</h1>
-</section><section id="concurrency" class="slide level2">
-<h1>Concurrency</h1>
-<p>(Shout out to <a href="https://crates.io/crates/rayon/">Rayon</a>. And to the Rust <a href="https://play.rust-lang.org/?code=use%20rayon%3A%3Apar_iter%3A%3A*%3B%0A%0Astruct%20Store%3B%0A%0Afn%20min_val%28stores%3A%20Vec%3CStore%3E%29%20%7B%0A%20%20%20%20let%20total_price%20%3D%20stores.par_iter%28%29%3B%0A%7D&amp;version=nightly">playpen</a>.)</p>
-<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">use</span> rayon::par_iter::*;
-
-<span class="kw">struct</span> Store;
-
-<span class="kw">fn</span> min_val(stores: <span class="dt">Vec</span>&lt;Store&gt;) {
-    <span class="kw">let</span> total_price = stores.par_iter();
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> this_wont_compile(v: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) -&gt; <span class="dt">i32</span> {
+    <span class="kw">let</span> <span class="kw">mut</span> sum = <span class="dv">0</span>;
+    <span class="kw">for</span> &amp;i <span class="kw">in</span> v.iter() {
+        sum += i;
+        <span class="kw">if</span> i &gt; <span class="dv">0</span> { v.push(<span class="dv">0</span>); }
+    }
+    <span class="kw">return</span> sum;
 }</code></pre></div>
-</section><section id="next-slide" class="slide level2">
-<h1>Next Slide</h1>
+<p>(<a href="https://play.rust-lang.org/?code=fn%20this_wont_compile%28v%3A%20%26mut%20Vec%3Ci32%3E%29%20-%3E%20i32%20%7B%0A%20%20%20%20let%20mut%20sum%20%3D%200%3B%0A%20%20%20%20for%20%26i%20in%20v.iter%28%29%20%7B%0A%20%20%20%20%20%20%20%20sum%20%2B%3D%20i%3B%0A%20%20%20%20%20%20%20%20if%20i%20%3E%200%20%7B%20v.push%280%29%3B%20%7D%0A%20%20%20%20%7D%0A%20%20%20%20return%20sum%3B%0A%7D%0A%0Afn%20main%28%29%20%7B%7D&amp;version=nightly">playpen</a>)</p>
+<!--
+```rust
+fn this_wont_compile(v: &mut Vec<i32>) -> i32 {
+    let mut sum = 0;
+    for &i in v.iter() {
+        sum += i;
+        if i > 0 { v.push(0); }
+    }
+    return sum;
+}
+
+fn main() {}
+```
+-->
+<pre class="fragment"><code>&lt;anon&gt;:5:20: 5:21 error: cannot borrow `*v` as mutable because it is
+                         also borrowed as immutable [E0502]
+&lt;anon&gt;:5         if i &gt; 0 { v.push(0); }
+                            ^~
+&lt;anon&gt;:3:15: 3:16 note: previous borrow of `*v` occurs here; the
+                        immutable borrow prevents subsequent moves or
+                        mutable borrows of `*v` until the borrow ends
+&lt;anon&gt;:3     for &amp;i in v.iter() {
+                       ^~</code></pre>
+</section><section id="parallel-and-safe" class="slide level2" data-transition="fade-out">
+<h1>Parallel <span style="visibility: hidden">and Safe</span></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> parallel_qsort(<span class="kw">mut</span> vec: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) {
+    <span class="kw">use</span> {rayon, rand};
+    <span class="kw">if</span> vec.len() &lt;= <span class="dv">1</span> { <span class="kw">return</span>; }
+    <span class="kw">let</span> pivot = rand::random::&lt;<span class="dt">usize</span>&gt;() % vec.len();
+    <span class="kw">let</span> mid = vec.partition(pivot);
+    <span class="kw">let</span> (less, greater) = vec.split_at_mut(mid);
+    rayon::join(|| parallel_qsort(less),
+                || parallel_qsort(greater)
+    );
+}</code></pre></div>
+<p>(Shout out to <a href="https://crates.io/crates/rayon/">Rayon</a>.)</p>
+<!--
+```rust
+trait Partition { fn partition(&mut self, at_idx: usize) -> usize; }
+impl<'a, X> Partition for &'a mut [X] where X: Ord {
+    fn partition(&mut self, at_idx: usize) -> usize {
+        self.swap(0, at_idx);
+        let (mut i, mut j) = (1, self.len() - 1);
+        while i < j {
+            if self[i] < self[0] {
+                i += 1;
+                continue;
+            }
+            if self[j] > self[0] {
+                j -= 1;
+                continue;
+            }
+            // at this point, self[i] >= pivot and self[j] <= pivot.
+            self.swap(i, j);
+            i += 1;
+            j -= 1;
+        }
+        self.swap(0, i);
+        return i;
+    }
+}
+```
+-->
+</section><section id="parallel-and-safe-1" class="slide level2" data-transition="fade">
+<h1>Parallel and Safe</h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> parallel_qsort(<span class="kw">mut</span> vec: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) {
+    <span class="kw">use</span> {rayon, rand};
+    <span class="kw">if</span> vec.len() &lt;= <span class="dv">1</span> { <span class="kw">return</span>; }
+    <span class="kw">let</span> pivot = rand::random::&lt;<span class="dt">usize</span>&gt;() % vec.len();
+    <span class="kw">let</span> mid = vec.partition(pivot);
+    <span class="kw">let</span> (less, greater) = vec.split_at_mut(mid);
+    rayon::join(|| parallel_qsort(less),
+                || parallel_qsort(less)
+    );
+}</code></pre></div>
+</section><section id="parallel-and-safe-2" class="slide level2" data-transition="fade">
+<h1>Parallel and Safe</h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> parallel_qsort(<span class="kw">mut</span> vec: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) {
+    <span class="kw">use</span> {rayon, rand};
+    <span class="kw">if</span> vec.len() &lt;= <span class="dv">1</span> { <span class="kw">return</span>; }
+    <span class="kw">let</span> pivot = rand::random::&lt;<span class="dt">usize</span>&gt;() % vec.len();
+    <span class="kw">let</span> mid = vec.partition(pivot);
+    <span class="kw">let</span> (less, greater) = vec.split_at_mut(mid);
+    rayon::join(|| parallel_qsort(less),
+                || parallel_qsort(less)  <span class="co">// &lt;- BUG: DATA RACE</span>
+    );
+}</code></pre></div>
+<pre><code>code.rs:71:17: 71:40 error: closure requires unique access to `less`
+                            but it is already borrowed [E0500]
+code.rs:71                 || parallel_qsort(less)  // &lt;- BUG: DATA RACE
+                           ^~~~~~~~~~~~~~~~~~~~~~~
+code.rs:71:35: 71:39 note: borrow occurs due to use of `less`
+                           in closure
+code.rs:71                 || parallel_qsort(less)  // &lt;- BUG: DATA RACE
+                                             ^~~~
+code.rs:70:17: 70:40 note: previous borrow of `less` occurs here due
+                           to use in closure; the unique capture
+                           prevents subsequent moves or borrows of
+                           `less` until the borrow ends
+code.rs:70     rayon::join(|| parallel_qsort(less),
+                                  ^~~~~~~~~~~~~~~~~~~~~~~</code></pre>
 </section></section>
     </div>
   </div>
