@@ -18,7 +18,7 @@ fn sum_pos(v: &[i32]) -> i32 {
 
 ## ... with low-level performance
 
-```asm
+```nasm
 	xorl	%eax, %eax
 	leaq	ref4197(%rip), %rcx
 	leaq	ref4197+20(%rip), %rdx

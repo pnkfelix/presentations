@@ -37,8 +37,8 @@ of parallel code.
 
 ```rust
 extern crate rayon;
+extern crate rand;
 ```
-
 Next, the (shallow) module hierarchy for the presentation itself.
 
 ```rust

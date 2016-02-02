@@ -1,16 +1,35 @@
-## Concurrency
-
-(Shout out to [Rayon][]. And to the Rust [playpen][rayon_demo_playpen].)
+## Parallel <span style="visibility: hidden">and Safe</span> { data-transition="fade-out" }
 
 [Rayon]: https://crates.io/crates/rayon/
 
 ```rust
-use rayon::par_iter::*;
-
-struct Store;
-
-fn min_val(stores: Vec<Store>) {
-    let total_price = stores.par_iter();
+use rayon;
+fn parallel_qsort(vec: &mut [i32]) {
+    if vec.len() <= 1 { return; }
+    let pivot = vec[::rand::random(vec.len())];
+    let mid = vec.partition(vec, pivot);
+    let (less, greater) = vec.split_at_mut(mid);
+    rayon::join(|| parallel_qsort(less),
+                || parallel_qsort(greater)
+    );
 }
 ```
-[rayon_demo_playpen]: https://play.rust-lang.org/?code=use%20rayon%3A%3Apar_iter%3A%3A*%3B%0A%0Astruct%20Store%3B%0A%0Afn%20min_val%28stores%3A%20Vec%3CStore%3E%29%20%7B%0A%20%20%20%20let%20total_price%20%3D%20stores.par_iter%28%29%3B%0A%7D&version=nightly
+
+(Shout out to [Rayon][].)
+
+. . .
+
+## Parallel and Safe  { data-transition="fade-in" }
+
+``` {.rust .compile_error}
+use rayon;
+fn parallel_qsort(vec: &mut [i32]) {
+    if vec.len() <= 1 { return; }
+    let pivot = vec[::rand::random(vec.len())];
+    let mid = vec.partition(vec, pivot);
+    let (less, greater) = vec.split_at_mut(mid);
+    rayon::join(|| parallel_qsort(less),
+                || parallel_qsort(less)
+    );
+}
+```
