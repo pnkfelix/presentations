@@ -6,7 +6,7 @@ Time: 10 minutes
     borrowing, not ownership.
 
     (As part of this, we no longer want to build up a whole new string;
-     so get rid of `str3` and make the code just change `str1`
+     so, in `fn main`, get rid of `str3` and make the code just change `str1`
      in-place.)
 
     Hint: Getting the syntax right can be a bit tricky if you've never written in Rust before.
