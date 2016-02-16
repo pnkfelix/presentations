@@ -36,7 +36,7 @@ fn main() {
     };
     let mut mode = Mode::Waiting;
 
-    #[derive(Copy, Clone, Debug)]
+    #[derive(Clone, Debug)]
     struct DrawSpec {
         scale: Scale,
         width: u32,
@@ -49,7 +49,7 @@ fn main() {
         x: [-2.5, 1.0], y: [-1.0, 1.0], width: width, height: height
         // x: [0.0, 1.0], y: [0.0, 1.0], width: width, height: height
     };
-    let mut scale = orig_scale;
+    let mut scale = orig_scale.clone();
 
     #[derive(Copy, Clone, Debug)]
     enum BgElem { Unknown, InSet, Escapes(u32), }
@@ -63,15 +63,15 @@ fn main() {
     for i in 0..NUM_THREADS {
         let (tx2, rx2) = channel();
         let tx = tx.clone();
+        let mut scale = scale.clone();
         let handle = thread::spawn(move || {
-            let mut scale = scale;
             let work_size = (height + NUM_THREADS - 1) / NUM_THREADS;
             loop {
                 let start_y = i * work_size;
                 let limit_y = cmp::min(start_y + work_size, height);
                 for y in start_y..limit_y {
                     for x in 0..width {
-                        let bg_elem = match mandelbrot(x, y, scale) {
+                        let bg_elem = match mandelbrot(x, y, scale.clone()) {
                             Some(iters) => BgElem::Escapes(iters),
                             None => BgElem::Unknown,
                         };
@@ -113,15 +113,11 @@ fn main() {
         }
     };
 
-    process_results();
-    background(&mut canvas, scale);
-    let mut backup_canvas = canvas.clone();
-
     texture.update(&mut *window.factory.borrow_mut(), &canvas).unwrap();
 
-    let redo_background = |spec| {
+    let redo_background = |spec: DrawSpec| {
         for c in &background_state { c.set(BgElem::Unknown); }
-        for &(_, ref p) in &handles_and_ports { p.send(spec).unwrap(); }
+        for &(_, ref p) in &handles_and_ports { p.send(spec.clone()).unwrap(); }
     };
 
     let mut last_pos = None;
@@ -137,15 +133,14 @@ fn main() {
         }
         if let Some(idle_args) = e.idle_args() {
             process_results();
-            background(&mut canvas, scale);
-            backup_canvas = canvas.clone();
+            background(&mut canvas, scale.clone());
             texture.update(&mut *e.factory.borrow_mut(), &canvas).unwrap();
         } else if let Some(s) = e.text_args() {
             match &s[..] {
                 "r" => {
-                    scale = orig_scale;
+                    scale = orig_scale.clone();
                     redo_background(DrawSpec {
-                        scale: scale,
+                        scale: scale.clone(),
                         width: width,
                         height: height,
                     });
@@ -159,7 +154,7 @@ fn main() {
                         ..scale
                     };
                     redo_background(DrawSpec {
-                        scale: scale,
+                        scale: scale.clone(),
                         width: width,
                         height: height,
                     })
@@ -173,7 +168,7 @@ fn main() {
                         ..scale
                     };
                     redo_background(DrawSpec {
-                        scale: scale,
+                        scale: scale.clone(),
                         width: width,
                         height: height,
                     })
@@ -200,7 +195,7 @@ fn main() {
 
         if let Mode::ZoomTo(p1, p2) = mode {
             scale.zoom_to(p1, p2);
-            redo_background(DrawSpec { scale: scale, width: width, height: height, });
+            redo_background(DrawSpec { scale: scale.clone(), width: width, height: height, });
             mode = Mode::Waiting;
         }
 
@@ -235,8 +230,10 @@ fn main() {
 
 // FIXME: I wanted to use fixed-point fractions, not floating.
 type Frac = f64;
+// #[derive(Clone, Debug)] struct Frac(f64);
+// struct Frac { numer: ramp::Int, denom: ramp::Int, }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 struct Scale {
     /// range for mandelbrot scale [min, max]
     x: [Frac; 2],
@@ -254,7 +251,7 @@ fn minmax<O:PartialOrd>(a: O, b: O) -> (O, O) {
 
 impl Scale {
     fn zoom_to(&mut self, p1: [f64; 2], p2: [f64; 2]) {
-        let old_scale = *self;
+        let old_scale = self.clone();
         let (disp_x1, disp_x2) = minmax(p1[0], p2[0]);
         let (disp_y1, disp_y2) = minmax(p1[1], p2[1]);
 
