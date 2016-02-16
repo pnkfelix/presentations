@@ -1,7 +1,10 @@
 ```rust
+#![feature(float_extras)]
+
 extern crate piston_window;
 extern crate image as im;
 extern crate vecmath;
+extern crate ramp;
 
 use im::GenericImage;
 use piston_window::*;
@@ -45,8 +48,19 @@ fn main() {
 
     type IB = im::ImageBuffer<im::Rgba<u8>, Vec<u8>>;
 
+    let zoomed_scale = Scale {
+        // x: [Frac::from(-2.5), Frac::from(1)],
+        x: [Frac::from(-0.7387733983830036),  Frac::from(-0.7387733983830016)],
+        y: [Frac::from(-0.13407787050277506), Frac::from(-0.13407787050277412)],
+        width: width,
+        height: height
+        // x: [0.0, 1.0], y: [0.0, 1.0], width: width, height: height
+    };
     let orig_scale = Scale {
-        x: [-2.5, 1.0], y: [-1.0, 1.0], width: width, height: height
+        x: [Frac::from(-5) / Frac::from(2),  Frac::from(1)],
+        y: [Frac::from(-1), Frac::from(1)],
+        width: width,
+        height: height
         // x: [0.0, 1.0], y: [0.0, 1.0], width: width, height: height
     };
     let mut scale = orig_scale.clone();
@@ -66,7 +80,7 @@ fn main() {
         let mut scale = scale.clone();
         let handle = thread::spawn(move || {
             let work_size = (height + NUM_THREADS - 1) / NUM_THREADS;
-            loop {
+            'draw: loop {
                 let start_y = i * work_size;
                 let limit_y = cmp::min(start_y + work_size, height);
                 for y in start_y..limit_y {
@@ -76,8 +90,17 @@ fn main() {
                             None => BgElem::Unknown,
                         };
                         tx.send((x, y, bg_elem)).unwrap();
+                        if let Ok(spec) = rx2.try_recv() {
+                            let spec: DrawSpec = spec;
+                            scale = spec.scale;
+                            width = spec.width;
+                            height = spec.height;
+                            continue 'draw;
+                        }
                     }
                 }
+
+                // if we finish, then just wait for a new command to come in.
                 let spec: DrawSpec = rx2.recv().unwrap();
                 scale = spec.scale;
                 width = spec.width;
@@ -145,11 +168,15 @@ fn main() {
                     });
                 }
                 "-" => {
-                    let w_2 = (scale.x[1] - scale.x[0]) / 2.0;
-                    let h_2 = (scale.y[1] - scale.y[0]) / 2.0;
+                    let x0 = scale.x[0].clone();
+                    let x1 = scale.x[1].clone();
+                    let y0 = scale.y[0].clone();
+                    let y1 = scale.y[1].clone();
+                    let w_2 = (x1.clone() - x0.clone()) / 2.0;
+                    let h_2 = (y1.clone() - y0.clone()) / 2.0;
                     scale = Scale {
-                        x: [scale.x[0] - w_2, scale.x[1] + w_2],
-                        y: [scale.y[0] - h_2, scale.y[1] + h_2],
+                        x: [x0 - w_2.clone(), x1 + w_2],
+                        y: [y0 - h_2.clone(), y1 + h_2],
                         ..scale
                     };
                     redo_background(DrawSpec {
@@ -159,11 +186,15 @@ fn main() {
                     })
                 }
                 "+" => {
-                    let w_4 = (scale.x[1] - scale.x[0]) / 4.0;
-                    let h_4 = (scale.y[1] - scale.y[0]) / 4.0;
+                    let x0 = scale.x[0].clone();
+                    let x1 = scale.x[1].clone();
+                    let y0 = scale.y[0].clone();
+                    let y1 = scale.y[1].clone();
+                    let w_4 = (x1.clone() - x0.clone()) / 4.0;
+                    let h_4 = (y1.clone() - y0.clone()) / 4.0;
                     scale = Scale {
-                        x: [scale.x[0] + w_4, scale.x[1] - w_4],
-                        y: [scale.y[0] + h_4, scale.y[1] - h_4],
+                        x: [x0 + w_4.clone(), x1 - w_4.clone()],
+                        y: [y0 + h_4.clone(), y1 - h_4.clone()],
                         ..scale
                     };
                     redo_background(DrawSpec {
@@ -227,12 +258,172 @@ fn main() {
     }
 }
 
-// FIXME: I wanted to use fixed-point fractions, not floating.
-type Frac = f64;
-// #[derive(Clone, Debug)] struct Frac(f64);
-// struct Frac { numer: ramp::Int, denom: ramp::Int, }
+use frac_type_f64::Frac;
 
-#[derive(Clone, Debug)]
+mod frac_type_f64 { pub type Frac = f64; }
+
+mod frac_wrap_f64 {
+    use std::cmp;
+
+    #[derive(Clone, Debug, PartialEq)]
+    pub struct Frac(f64);
+
+    use std::ops::{Add, Sub, Mul, Div};
+
+    impl Add<Frac> for Frac {
+        type Output = Frac; fn add(self, other: Frac) -> Frac { Frac(self.0 + other.0) }
+    }
+    impl Sub<Frac> for Frac {
+        type Output = Frac; fn sub(self, other: Frac) -> Frac { Frac(self.0 - other.0) }
+    }
+    impl Mul<Frac> for Frac {
+        type Output = Frac; fn mul(self, other: Frac) -> Frac { Frac(self.0 * other.0) }
+    }
+    impl Mul<f64> for Frac {
+        type Output = Frac; fn mul(self, other: f64) -> Frac { Frac(self.0 * other) }
+    }
+    impl Div<Frac> for Frac {
+        type Output = Frac; fn div(self, other: Frac) -> Frac { Frac(self.0 / other.0) }
+    }
+    impl Div<f64> for Frac {
+        type Output = Frac; fn div(self, other: f64) -> Frac { Frac(self.0 / other) }
+    }
+
+    impl PartialOrd for Frac {
+        fn partial_cmp(&self, other: &Frac) -> Option<cmp::Ordering> { self.0.partial_cmp(&other.0) }
+    }
+
+    impl From<u32> for Frac { fn from(n: u32) -> Frac { Frac(n as f64) } }
+    impl From<i32> for Frac { fn from(n: i32) -> Frac { Frac(n as f64) } }
+
+    impl From<f64> for Frac {
+        fn from(f: f64) -> Frac {
+            use ramp::Int;
+            let (mantissa, exponent, sign): (u64, i16, i8) = f.integer_decode();
+            let mantissa = mantissa as i64;
+            let mantissa = if sign < 0 { -mantissa } else { mantissa };
+            let mantissa = Int::from(mantissa);
+            let (_numer, _denom) = if exponent < 0 {
+                let e = -exponent as usize;
+                (mantissa, Int::from(2).pow(e))
+            } else {
+                let e = exponent as usize;
+                (mantissa * Int::from(2).pow(e), Int::from(1))
+            };
+            Frac(f)
+        }
+    }
+}
+
+mod frac_bigratio {
+    use std::cmp;
+    use ramp;
+
+    #[derive(Clone, Debug, PartialEq)]
+    pub struct Frac { numer: ramp::Int, denom: ramp::Int, }
+
+    use std::ops::{Add, Sub, Mul, Div};
+
+    impl Add<Frac> for Frac {
+        type Output = Frac;
+        fn add(self, other: Frac) -> Frac {
+            if self.denom == other.denom {
+                Frac { numer: self.numer + other.numer, denom: self.denom }
+            } else {
+                Frac { numer: self.numer * other.denom.clone() + other.numer * self.denom.clone(),
+                       denom: self.denom * other.denom }
+            }
+        }
+    }
+    impl Add<u32> for Frac {
+        type Output = Frac;
+        fn add(self, other: u32) -> Frac {
+            Frac { numer: self.numer + self.denom.clone() * (other as usize),
+                   denom: self.denom }
+        }
+    }
+    impl Sub<Frac> for Frac {
+        type Output = Frac;
+        fn sub(self, other: Frac) -> Frac {
+            if self.denom == other.denom {
+                Frac { numer: self.numer - other.numer, denom: self.denom }
+            } else {
+                Frac { numer: self.numer * other.denom.clone() - other.numer * self.denom.clone(),
+                       denom: self.denom * other.denom }
+            }
+        }
+    }
+    impl Sub<u32> for Frac {
+        type Output = Frac;
+        fn sub(self, other: u32) -> Frac {
+            Frac { numer: self.numer - self.denom.clone() * (other as usize),
+                   denom: self.denom }
+        }
+    }
+    impl Mul<Frac> for Frac {
+        type Output = Frac;
+        fn mul(self, other: Frac) -> Frac {
+            Frac { numer: self.numer * other.numer, denom: self.denom * other.denom }
+        }
+    }
+    impl Mul<u32> for Frac {
+        type Output = Frac;
+        fn mul(self, other: u32) -> Frac {
+            Frac { numer: self.numer * (other as usize), denom: self.denom }
+        }
+    }
+    impl Div<Frac> for Frac {
+        type Output = Frac;
+        fn div(self, other: Frac) -> Frac {
+            Frac { numer: self.numer * other.denom, denom: self.denom * other.numer }
+        }
+    }
+    impl Div<u32> for Frac {
+        type Output = Frac;
+        fn div(self, other: u32) -> Frac {
+            Frac { numer: self.numer, denom: self.denom * (other as usize) }
+        }
+    }
+
+    impl PartialOrd for Frac {
+        fn partial_cmp(&self, other: &Frac) -> Option<cmp::Ordering> {
+            let lhs = self.numer.clone() * other.denom.clone();
+            let rhs = self.denom.clone() * other.numer.clone();
+            lhs.partial_cmp(&rhs)
+        }
+    }
+
+    impl From<u32> for Frac {
+        fn from(n: u32) -> Frac {
+            Frac { numer: From::from(n), denom: From::from(1) }
+        }
+    }
+    impl From<i32> for Frac {
+        fn from(n: i32) -> Frac {
+            Frac { numer: From::from(n), denom: From::from(1) }
+        }
+    }
+    impl From<f64> for Frac {
+        fn from(f: f64) -> Frac {
+            use ramp::Int;
+            let (mantissa, exponent, sign): (u64, i16, i8) = f.integer_decode();
+            let mantissa = mantissa as i64;
+            let mantissa = if sign < 0 { -mantissa } else { mantissa };
+            let mantissa = Int::from(mantissa);
+            let (numer, denom) = if exponent < 0 {
+                let e = -exponent as usize;
+                (mantissa, Int::from(2).pow(e))
+            } else {
+                let e = exponent as usize;
+                (mantissa * Int::from(2).pow(e), Int::from(1))
+            };
+            Frac { numer: numer, denom: denom }
+        }
+    }
+    }
+
+
+#[derive(Debug)]
 struct Scale {
     /// range for mandelbrot scale [min, max]
     x: [Frac; 2],
@@ -242,6 +433,17 @@ struct Scale {
     width: u32,
     /// display height
     height: u32,
+}
+
+impl Clone for Scale {
+    fn clone(&self) -> Self {
+        Scale {
+            x: [self.x[0].clone(), self.x[1].clone()],
+            y: [self.y[0].clone(), self.y[1].clone()],
+            width: self.width,
+            height: self.height,
+        }
+    }
 }
 
 fn minmax<O:PartialOrd>(a: O, b: O) -> (O, O) {
@@ -256,14 +458,16 @@ impl Scale {
 
         let disp_width = self.width as f64;
         let disp_height = self.height as f64;
-        let old_x1 = self.x[0]; let old_x2 = self.x[1];
-        let old_y1 = self.y[0]; let old_y2 = self.y[1];
-        let old_width = old_x2 - old_x1;
-        let old_height = old_y2 - old_y1;
-        let new_x1 = old_x1 + disp_x1 / disp_width * old_width;
-        let new_x2 = old_x1 + disp_x2 / disp_width * old_width;
-        let new_y1 = old_y1 + disp_y1 / disp_height * old_height;
-        let new_y2 = old_y1 + disp_y2 / disp_height * old_height;
+        let old_x1 = self.x[0].clone();
+        let old_x2 = self.x[1].clone();
+        let old_y1 = self.y[0].clone();
+        let old_y2 = self.y[1].clone();
+        let old_width =  old_x2.clone() - old_x1.clone();
+        let old_height = old_y2.clone() - old_y1.clone();
+        let new_x1 = old_x1.clone() + old_width.clone() * disp_x1 / disp_width;
+        let new_x2 = old_x1.clone() + old_width.clone() * disp_x2 / disp_width;
+        let new_y1 = old_y1.clone() + old_height.clone() * disp_y1 / disp_height;
+        let new_y2 = old_y1.clone() + old_height.clone() * disp_y2 / disp_height;
 
         self.x[0] = new_x1;
         self.x[1] = new_x2;
@@ -279,39 +483,41 @@ impl Scale {
     fn from_display(&self, x: u32, y: u32) -> (Frac, Frac) {
         debug_assert!(x < self.width);
         debug_assert!(y < self.height);
-        let x_delta = self.x[1] - self.x[0];
-        let x_offset = x_delta * (x as Frac) / (self.width as Frac);
-        let y_delta = self.y[1] - self.y[0];
-        let y_offset = y_delta * (y as Frac) / (self.height as Frac);
-        (self.x[0] + x_offset, self.y[0] + y_offset)
+        let x_delta = self.x[1].clone() - self.x[0].clone();
+        let x_offset = x_delta * Frac::from(x) / Frac::from(self.width);
+        let y_delta = self.y[1].clone() - self.y[0].clone();
+        let y_offset = y_delta * Frac::from(y) / Frac::from(self.height);
+        (self.x[0].clone() + x_offset, self.y[0].clone() + y_offset)
     }
 }
 
+#[derive(Clone)]
 struct Complex(Frac, Frac);
 impl Complex {
     #[inline]
     fn mag_less_than(&self, mag: Frac) -> bool {
-        self.0 * self.0 + self.1 * self.1 < mag * mag
+        self.0.clone() * self.0.clone() + self.1.clone() * self.1.clone() < mag.clone() * mag
     }
     #[inline]
     fn sqr(&self) -> Complex {
         // (a + b*i)*(a + b*i) = a*a + 2*a*b*i - b*b = a*a - b*b + 2*a*b*i
-        let Complex(x,y) = *self;
-        Complex(x*x - y*y, 2.0 * x * y)
+        let Complex(x,y) = self.clone();
+        Complex(x.clone()*x.clone() - y.clone()*y.clone(), Frac::from(2) * x * y)
     }
     #[inline]
     fn add(&self, other: &Complex) -> Complex {
-        Complex(self.0 + other.0, self.1 + other.1)
+        Complex(self.0.clone() + other.0.clone(), self.1.clone() + other.1.clone())
     }
 }
 
 fn mandelbrot(x: u32, y: u32, scale: Scale) -> Option<u32> {
     let (x0, y0) = scale.from_display(x, y);
     let c = Complex(x0, y0);
-    let mut z = Complex(0.0, 0.0);
+    let mut z = Complex(Frac::from(0), Frac::from(0));
     let mut iteration = 0;
     const MAX_ITERATION: u32 = 0xF_FF;
-    while iteration < MAX_ITERATION && z.mag_less_than(2.0) {
+    // const MAX_ITERATION: u32 = 0xFF_FF_FF;
+    while iteration < MAX_ITERATION && z.mag_less_than(Frac::from(2)) {
         z = z.sqr().add(&c);
         iteration += 1;
     }
