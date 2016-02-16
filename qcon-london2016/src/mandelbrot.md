@@ -45,16 +45,16 @@ fn main() {
 
     type IB = im::ImageBuffer<im::Rgba<u8>, Vec<u8>>;
 
-    let mut orig_scale = Scale {
+    let orig_scale = Scale {
         x: [-2.5, 1.0], y: [-1.0, 1.0], width: width, height: height
         // x: [0.0, 1.0], y: [0.0, 1.0], width: width, height: height
     };
     let mut scale = orig_scale.clone();
 
     #[derive(Copy, Clone, Debug)]
-    enum BgElem { Unknown, InSet, Escapes(u32), }
+    enum BgElem { Unknown, _InSet, Escapes(u32), }
 
-    let mut background_state: Vec<Cell<BgElem>> =
+    let background_state: Vec<Cell<BgElem>> =
         vec![Cell::new(BgElem::Unknown); (width * height) as usize];
     const NUM_THREADS: u32 = 8;
     let mut handles_and_ports = vec![];
@@ -75,7 +75,7 @@ fn main() {
                             Some(iters) => BgElem::Escapes(iters),
                             None => BgElem::Unknown,
                         };
-                        tx.send((x, y, bg_elem));
+                        tx.send((x, y, bg_elem)).unwrap();
                     }
                 }
                 let spec: DrawSpec = rx2.recv().unwrap();
@@ -87,25 +87,25 @@ fn main() {
         handles_and_ports.push((handle, tx2));
     }
 
-    let mut process_results = || {
+    let process_results = || {
         loop {
             match rx.try_recv() {
                 Ok((x, y, bg_elem)) => {
                     let idx = x * width + y;
                     background_state[idx as usize].set(bg_elem);
                 }
-                Err(e) => break,
+                Err(_) => break,
             }
         }
     };
 
-    let background = |canvas: &mut IB, scale: Scale| {
+    let background = |canvas: &mut IB, _scale: Scale| {
         for x in 0..width {
             for y in 0..height {
                 let idx = x * width + y;
                 let color = iters_to_color(match background_state[idx as usize].get() {
                     BgElem::Unknown => None,
-                    BgElem::InSet => None,
+                    BgElem::_InSet => None,
                     BgElem::Escapes(iters) => Some(iters),
                 });
                 canvas.put_pixel(x, y, color);
@@ -131,14 +131,13 @@ fn main() {
         if args.is_some() {
             last_pos = args;
         }
-        if let Some(idle_args) = e.idle_args() {
+        if let Some(_) = e.idle_args() {
             process_results();
             background(&mut canvas, scale.clone());
             texture.update(&mut *e.factory.borrow_mut(), &canvas).unwrap();
         } else if let Some(s) = e.text_args() {
             match &s[..] {
                 "r" => {
-                    scale = orig_scale.clone();
                     redo_background(DrawSpec {
                         scale: scale.clone(),
                         width: width,
