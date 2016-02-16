@@ -7,11 +7,14 @@ use im::GenericImage;
 use piston_window::*;
 // use im::Pixel;
 
+use std::cell::Cell;
 use std::cmp;
+use std::thread;
+use std::sync::mpsc::channel;
 
 fn main() {
     let opengl = OpenGL::V3_2;
-    let (width, height) = (300, 300);
+    let (mut width, mut height) = (300, 300);
     let window: PistonWindow =
         WindowSettings::new("piston: mandelbrot", (width, height))
         .exit_on_esc(true)
@@ -33,24 +36,93 @@ fn main() {
     };
     let mut mode = Mode::Waiting;
 
-    type IB = im::ImageBuffer<im::Rgba<u8>, Vec<u8>>;
-    let background = |canvas: &mut IB, scale: Scale| {
-        for (x, y, p) in canvas.enumerate_pixels_mut() {
-            // p.blend(&im::Rgba([(x % 255) as u8, (y % 255) as u8, 0, 128]));
-            // *p = im::Rgba([(x % 255) as u8, (y % 255) as u8, 0, 128]);
-            *p = iters_to_color(mandelbrot(x, y, scale));
-        }
-    };
+    #[derive(Copy, Clone, Debug)]
+    struct DrawSpec {
+        scale: Scale,
+        width: u32,
+        height: u32,
+    }
 
-    let orig_scale = Scale {
+    type IB = im::ImageBuffer<im::Rgba<u8>, Vec<u8>>;
+
+    let mut orig_scale = Scale {
         x: [-2.5, 1.0], y: [-1.0, 1.0], width: width, height: height
         // x: [0.0, 1.0], y: [0.0, 1.0], width: width, height: height
     };
     let mut scale = orig_scale;
+
+    #[derive(Copy, Clone, Debug)]
+    enum BgElem { Unknown, InSet, Escapes(u32), }
+
+    let mut background_state: Vec<Cell<BgElem>> =
+        vec![Cell::new(BgElem::Unknown); (width * height) as usize];
+    const NUM_THREADS: u32 = 8;
+    let mut handles_and_ports = vec![];
+    let (tx, rx) = channel();
+
+    for i in 0..NUM_THREADS {
+        let (tx2, rx2) = channel();
+        let tx = tx.clone();
+        let handle = thread::spawn(move || {
+            let mut scale = scale;
+            let work_size = (height + NUM_THREADS - 1) / NUM_THREADS;
+            loop {
+                let start_y = i * work_size;
+                let limit_y = cmp::min(start_y + work_size, height);
+                for y in start_y..limit_y {
+                    for x in 0..width {
+                        let bg_elem = match mandelbrot(x, y, scale) {
+                            Some(iters) => BgElem::Escapes(iters),
+                            None => BgElem::Unknown,
+                        };
+                        tx.send((x, y, bg_elem));
+                    }
+                }
+                let spec: DrawSpec = rx2.recv().unwrap();
+                scale = spec.scale;
+                width = spec.width;
+                height = spec.height;
+            }
+        });
+        handles_and_ports.push((handle, tx2));
+    }
+
+    let mut process_results = || {
+        loop {
+            match rx.try_recv() {
+                Ok((x, y, bg_elem)) => {
+                    let idx = x * width + y;
+                    background_state[idx as usize].set(bg_elem);
+                }
+                Err(e) => break,
+            }
+        }
+    };
+
+    let background = |canvas: &mut IB, scale: Scale| {
+        for x in 0..width {
+            for y in 0..height {
+                let idx = x * width + y;
+                let color = iters_to_color(match background_state[idx as usize].get() {
+                    BgElem::Unknown => None,
+                    BgElem::InSet => None,
+                    BgElem::Escapes(iters) => Some(iters),
+                });
+                canvas.put_pixel(x, y, color);
+            }
+        }
+    };
+
+    process_results();
     background(&mut canvas, scale);
     let mut backup_canvas = canvas.clone();
 
     texture.update(&mut *window.factory.borrow_mut(), &canvas).unwrap();
+
+    let redo_background = |spec| {
+        for c in &background_state { c.set(BgElem::Unknown); }
+        for &(_, ref p) in &handles_and_ports { p.send(spec).unwrap(); }
+    };
 
     let mut last_pos = None;
     for e in window {
@@ -63,12 +135,19 @@ fn main() {
         if args.is_some() {
             last_pos = args;
         }
-        if let Some(s) = e.text_args() {
+        if let Some(idle_args) = e.idle_args() {
+            process_results();
+            background(&mut canvas, scale);
+            backup_canvas = canvas.clone();
+            texture.update(&mut *e.factory.borrow_mut(), &canvas).unwrap();
+        } else if let Some(s) = e.text_args() {
             if s == "r" {
                 scale = orig_scale;
-                background(&mut canvas, scale);
-                backup_canvas = canvas.clone();
-                texture.update(&mut *e.factory.borrow_mut(), &canvas).unwrap();
+                redo_background(DrawSpec {
+                    scale: scale,
+                    width: width,
+                    height: height,
+                });
             }
         } else if let Some(_button) = e.press_args() {
             mode = if let Some(pos) = args {
@@ -84,11 +163,13 @@ fn main() {
             }
         } else if let (Mode::NextDrawRect, Some(pos)) = (mode, args) {
             mode = Mode::DrawingRect(pos);
+        } else if let Some(resize) = e.resize_args() {
+            println!("window resized: {:?}", resize);
         }
 
         if let Mode::ZoomTo(p1, p2) = mode {
             scale.zoom_to(p1, p2);
-            background(&mut canvas, scale);
+            redo_background(DrawSpec { scale: scale, width: width, height: height, });
             backup_canvas = canvas.clone();
             texture.update(&mut *e.factory.borrow_mut(), &canvas).unwrap();
             mode = Mode::Waiting;
@@ -119,7 +200,7 @@ fn main() {
                 if min_x < width { canvas[(min_x, y)] = color; }
                 if max_x < width { canvas[(max_x, y)] = color; }
             }
-            texture.update(&mut*e.factory.borrow_mut(), &canvas).unwrap();
+            texture.update(&mut *e.factory.borrow_mut(), &canvas).unwrap();
         }
     }
 }
@@ -182,15 +263,32 @@ impl Scale {
     }
 }
 
+struct Complex(Frac, Frac);
+impl Complex {
+    #[inline]
+    fn mag_less_than(&self, mag: Frac) -> bool {
+        self.0 * self.0 + self.1 * self.1 < mag * mag
+    }
+    #[inline]
+    fn sqr(&self) -> Complex {
+        // (a + b*i)*(a + b*i) = a*a + 2*a*b*i - b*b = a*a - b*b + 2*a*b*i
+        let Complex(x,y) = *self;
+        Complex(x*x - y*y, 2.0 * x * y)
+    }
+    #[inline]
+    fn add(&self, other: &Complex) -> Complex {
+        Complex(self.0 + other.0, self.1 + other.1)
+    }
+}
+
 fn mandelbrot(x: u32, y: u32, scale: Scale) -> Option<u32> {
     let (x0, y0) = scale.from_display(x, y);
-    let (mut x, mut y) = (0.0, 0.0);
+    let c = Complex(x0, y0);
+    let mut z = Complex(0.0, 0.0);
     let mut iteration = 0;
     const MAX_ITERATION: u32 = 0xF_FF;
-    while x*x + y*y < 2.0*2.0 && iteration < MAX_ITERATION {
-        let x_temp = x*x - y*y + x0;
-        y = 2.0*x*y + y0;
-        x = x_temp;
+    while iteration < MAX_ITERATION && z.mag_less_than(2.0) {
+        z = z.sqr().add(&c);
         iteration += 1;
     }
     if iteration < MAX_ITERATION {
