@@ -170,8 +170,6 @@ fn main() {
         if let Mode::ZoomTo(p1, p2) = mode {
             scale.zoom_to(p1, p2);
             redo_background(DrawSpec { scale: scale, width: width, height: height, });
-            backup_canvas = canvas.clone();
-            texture.update(&mut *e.factory.borrow_mut(), &canvas).unwrap();
             mode = Mode::Waiting;
         }
 
@@ -180,28 +178,27 @@ fn main() {
             0f64 <= x && x < (width as f64) && 0f64 <= y && y < (height as f64)
         };
 
-        if let (Mode::DrawingRect(start), Some(curr)) = (mode, args) {
-            if !in_range(curr) { continue; }
-            canvas.copy_from(&backup_canvas, 0, 0);
+        if let (Mode::DrawingRect(start), Some(curr)) = (mode, last_pos) {
+            if in_range(curr) { 
+                let color = im::Rgba([0, 0, 0, 128]);
 
-            let color = im::Rgba([0, 0, 0, 128]);
+                let start = (start[0] as u32, start[1] as u32);
+                let curr = (curr[0] as u32, curr[1] as u32);
 
-            let start = (start[0] as u32, start[1] as u32);
-            let curr = (curr[0] as u32, curr[1] as u32);
+                let (min_x, max_x) = minmax(start.0, curr.0);
+                let (min_y, max_y) = minmax(start.1, curr.1);
 
-            let (min_x, max_x) = minmax(start.0, curr.0);
-            let (min_y, max_y) = minmax(start.1, curr.1);
-
-            for x in cmp::max(0, min_x)..cmp::min(width, max_x) {
-                if min_y < height { canvas[(x, min_y)] = color; }
-                if max_y < height { canvas[(x, max_y)] = color; }
+                for x in cmp::max(0, min_x)..cmp::min(width, max_x) {
+                    if min_y < height { canvas[(x, min_y)] = color; }
+                    if max_y < height { canvas[(x, max_y)] = color; }
+                }
+                for y in cmp::max(0, min_y)..cmp::min(height, max_y) {
+                    if min_x < width { canvas[(min_x, y)] = color; }
+                    if max_x < width { canvas[(max_x, y)] = color; }
+                }
             }
-            for y in cmp::max(0, min_y)..cmp::min(height, max_y) {
-                if min_x < width { canvas[(min_x, y)] = color; }
-                if max_x < width { canvas[(max_x, y)] = color; }
-            }
-            texture.update(&mut *e.factory.borrow_mut(), &canvas).unwrap();
         }
+        texture.update(&mut *e.factory.borrow_mut(), &canvas).unwrap();
     }
 }
 
