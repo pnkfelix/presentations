@@ -1,0 +1,33 @@
+[package]
+name = "qcon-london2016"
+version = "0.1.0"
+authors = ["Felix S. Klock II <pnkfelix@pnkfx.org>"]
+
+build = "build.rs"
+
+[dependencies]
+piston_window = "0.34.0"
+image = "0.6.0"
+vecmath = "0.2.0"
+
+# The preprocessor is the `tango` crate, so we need to add that
+# to the build-dependencies.
+
+[build-dependencies]
+tango = "^0.4.*"
+cmd-pandoc = "^0.2.*"
+
+# Since the lib may be a tango file stored in `src/lib.md`, we need to
+# explicitly specify that this is a library project with a `[lib]`
+# section, which then requires an explicit name.
+
+[lib]
+name = "lib"
+
+[[bin]]
+name = "paint"
+path = "src/paint.rs"
+
+[[bin]]
+name = "mandelbrot"
+path = "src/mandelbrot.rs"
