@@ -141,13 +141,44 @@ fn main() {
             backup_canvas = canvas.clone();
             texture.update(&mut *e.factory.borrow_mut(), &canvas).unwrap();
         } else if let Some(s) = e.text_args() {
-            if s == "r" {
-                scale = orig_scale;
-                redo_background(DrawSpec {
-                    scale: scale,
-                    width: width,
-                    height: height,
-                });
+            match &s[..] {
+                "r" => {
+                    scale = orig_scale;
+                    redo_background(DrawSpec {
+                        scale: scale,
+                        width: width,
+                        height: height,
+                    });
+                }
+                "-" => {
+                    let w_2 = (scale.x[1] - scale.x[0]) / 2.0;
+                    let h_2 = (scale.y[1] - scale.y[0]) / 2.0;
+                    scale = Scale {
+                        x: [scale.x[0] - w_2, scale.x[1] + w_2],
+                        y: [scale.y[0] - h_2, scale.y[1] + h_2],
+                        ..scale
+                    };
+                    redo_background(DrawSpec {
+                        scale: scale,
+                        width: width,
+                        height: height,
+                    })
+                }
+                "+" => {
+                    let w_4 = (scale.x[1] - scale.x[0]) / 4.0;
+                    let h_4 = (scale.y[1] - scale.y[0]) / 4.0;
+                    scale = Scale {
+                        x: [scale.x[0] + w_4, scale.x[1] - w_4],
+                        y: [scale.y[0] + h_4, scale.y[1] - h_4],
+                        ..scale
+                    };
+                    redo_background(DrawSpec {
+                        scale: scale,
+                        width: width,
+                        height: height,
+                    })
+                }
+                _ => {}
             }
         } else if let Some(_button) = e.press_args() {
             mode = if let Some(pos) = args {
