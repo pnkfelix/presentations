@@ -1,10 +1,12 @@
 ```rust
 #![feature(float_extras, augmented_assignments, op_assign_traits)]
+#![allow(dead_code)]
 
 extern crate piston_window;
 extern crate image as im;
 extern crate vecmath;
 extern crate ramp;
+extern crate num;
 
 use im::GenericImage;
 use piston_window::*;
@@ -74,7 +76,7 @@ fn main() {
 
     let background_state: Vec<Cell<BgElem>> =
         vec![Cell::new(BgElem::Unknown); (width * height) as usize];
-    const NUM_THREADS: u32 = 8;
+    const NUM_THREADS: u32 = 1;
     let mut handles_and_ports = vec![];
     let (tx, rx) = channel();
 
@@ -276,10 +278,562 @@ fn main() {
 }
 
 // use frac_type_f64::Frac;
-use frac_wrap_f64::Frac;
+// use frac_wrap_f64::Frac;
 // use frac_bigratio::Frac;
+// use frac_type_bigrat::Frac;
+use frac_dynamic::Frac;
+
+mod frac_dynamic {
+    use num::integer::Integer;
+    use ramp::Int;
+    use std::cmp;
+    use std::ops;
+    use self::MidInt::{A, B};
+
+    #[derive(Clone, Debug, PartialEq)]
+    enum MidInt { A(i64), B(Int), }
+
+    impl MidInt {
+        fn bit_length(&self) -> u32 {
+            match *self {
+                A(_) => 64,
+                B(ref i) => i.bit_length(),
+            }
+        }
+
+        fn gcd(&self, other: &MidInt) -> MidInt {
+            match (self, other) {
+                (&A(ref s), &A(ref o)) => A(s.gcd(&o)),
+                (&B(ref s), &B(ref o)) => B(s.gcd(&o)),
+                (&A(ref s), &B(ref o)) => B(Int::from(*s).gcd(&o)),
+                (&B(ref s), &A(ref o)) => B(s.gcd(&Int::from(*o))),
+            }
+        }
+
+        fn dsquare(self) -> MidInt {
+            match self {
+                B(ref s) => B(s * s),
+                A(s) => match s.overflowing_mul(s) {
+                    (prod, false) => MidInt::A(prod),
+                    (_, true) => MidInt::B(Int::from(s) * Int::from(s)),
+                },
+            }
+        }
+
+        fn lcm(&self, other: &MidInt) -> MidInt {
+            match (self, other) {
+                (&A(ref s), &A(ref o)) => A(super::lcm(*s, *o)),
+                (&B(ref s), &B(ref o)) => B(s.lcm(&o)),
+                (&A(ref s), &B(ref o)) => B(Int::from(*s).lcm(&o)),
+                (&B(ref s), &A(ref o)) => B(s.lcm(&Int::from(*o))),
+            }
+        }
+    }
+
+    impl From<i64> for MidInt {
+        fn from(x: i64) -> MidInt { A(x) }
+    }
+
+    impl From<u32> for MidInt {
+        fn from(x: u32) -> MidInt { A(x as i64) }
+    }
+
+    impl From<i32> for MidInt {
+        fn from(x: i32) -> MidInt { A(x as i64) }
+    }
+
+    impl cmp::PartialOrd for MidInt {
+        fn partial_cmp(&self, other: &MidInt) -> Option<cmp::Ordering> {
+            match (self, other) {
+                (&A(ref s), &A(ref o)) => s.partial_cmp(o),
+                (&B(ref s), &B(ref o)) => s.partial_cmp(o),
+                (&A(ref s), &B(ref o)) => Int::from(*s).partial_cmp(o),
+                (&B(ref s), &A(ref o)) => s.partial_cmp(&Int::from(*o)),
+            }
+        }
+    }
+
+    impl ops::ShrAssign<usize> for MidInt {
+        fn shr_assign(&mut self, o: usize) {
+            *self = match *self {
+                A(ref s) => A(s >> o),
+                B(ref s) => B(s >> o),
+            };
+        }
+    }
+
+    impl ops::Add<MidInt> for MidInt {
+        type Output = MidInt;
+        fn add(self, o: MidInt) -> MidInt {
+            match (self, o) {
+                (A(s), A(o)) => match s.overflowing_add(o) {
+                    (sum, false) => A(sum),
+                    (_, true) => B(Int::from(s) + Int::from(o)),
+                },
+                (B(s), B(o)) => B(s + o),
+                (A(s), B(o)) => B(Int::from(s) + o),
+                (B(s), A(o)) => B(s + Int::from(o)),
+            }
+        }
+    }
+
+    impl ops::Sub<MidInt> for MidInt {
+        type Output = MidInt;
+        fn sub(self, o: MidInt) -> MidInt {
+            match (self, o) {
+                (A(s), A(o)) => match s.overflowing_sub(o) {
+                    (sum, false) => A(sum),
+                    (_, true) => B(Int::from(s) - Int::from(o)),
+                },
+                (B(s), B(o)) => B(s - o),
+                (A(s), B(o)) => B(Int::from(s) - o),
+                (B(s), A(o)) => B(s - Int::from(o)),
+            }
+        }
+    }
+
+    impl ops::AddAssign<MidInt> for MidInt {
+        fn add_assign(&mut self, other: MidInt) {
+            use std::ptr;
+            let self_ = self as *mut _;
+            let sum = match (self, other) {
+                (&mut A(s), A(o)) => match s.overflowing_add(o) {
+                    (sum, false) => { A(sum) }
+                    (_, true) => { B(Int::from(s) + Int::from(o)) }
+                },
+                (&mut B(ref mut s), B(ref o)) => { *s += o; return; }
+                (&mut A(s), B(o)) => { B(Int::from(s) + o) },
+                (&mut B(ref mut s), A(o)) => { *s += Int::from(o); return; }
+            };
+            unsafe { ptr::write(self_, sum); }
+        }
+    }
+
+    impl ops::SubAssign<MidInt> for MidInt {
+        fn sub_assign(&mut self, other: MidInt) {
+            use std::ptr;
+            let self_ = self as *mut _;
+            let sum = match (self, other) {
+                (&mut A(s), A(o)) => match s.overflowing_sub(o) {
+                    (sum, false) => { A(sum) }
+                    (_, true) => { B(Int::from(s) - Int::from(o)) }
+                },
+                (&mut B(ref mut s), B(ref o)) => { *s -= o; return; }
+                (&mut A(s), B(o)) => { B(Int::from(s) - o) },
+                (&mut B(ref mut s), A(o)) => { *s -= Int::from(o); return; }
+            };
+            unsafe { ptr::write(self_, sum); }
+        }
+    }
+
+    impl ops::Mul<MidInt> for MidInt {
+        type Output = MidInt;
+        fn mul(self, o: MidInt) -> MidInt {
+            match (self, o) {
+                (A(s), A(o)) => match s.overflowing_mul(o) {
+                    (prod, false) => MidInt::A(prod),
+                    (_, true) => MidInt::B(Int::from(s) * Int::from(o)),
+                },
+                (B(s), B(o)) => B(s * o),
+                (A(s), B(o)) => B(Int::from(s) * o),
+                (B(s), A(o)) => B(s * Int::from(o)),
+            }
+        }
+    }
+
+    impl<'a> ops::Mul<&'a MidInt> for MidInt {
+        type Output = MidInt;
+        fn mul(self, o: &'a MidInt) -> MidInt {
+            match (self, o) {
+                (A(s), &A(ref o)) => match s.overflowing_mul(*o) {
+                    (prod, false) => MidInt::A(prod),
+                    (_, true) => MidInt::B(Int::from(s) * Int::from(*o)),
+                },
+                (B(ref s), &B(ref o)) => B(s * o),
+                (A(s), &B(ref o)) => B(Int::from(s) * o),
+                (B(ref s), &A(ref o)) => B(s * Int::from(*o)),
+            }
+        }
+    }
+
+    impl<'b> ops::Mul<MidInt> for &'b MidInt {
+        type Output = MidInt;
+        fn mul(self, o: MidInt) -> MidInt {
+            match (self, o) {
+                (&A(ref s), A(ref o)) => match s.overflowing_mul(*o) {
+                    (prod, false) => MidInt::A(prod),
+                    (_, true) => MidInt::B(Int::from(*s) * Int::from(*o)),
+                },
+                (&B(ref s), B(ref o)) => B(s * o),
+                (&A(ref s), B(ref o)) => B(Int::from(*s) * o),
+                (&B(ref s), A(ref o)) => B(s * Int::from(*o)),
+            }
+        }
+    }
+
+    impl<'a, 'b> ops::Mul<&'a MidInt> for &'b MidInt {
+        type Output = MidInt;
+        fn mul(self, o: &'a MidInt) -> MidInt {
+            match (self, o) {
+                (&A(ref s), &A(ref o)) => match s.overflowing_mul(*o) {
+                    (prod, false) => MidInt::A(prod),
+                    (_, true) => MidInt::B(Int::from(*s) * Int::from(*o)),
+                },
+                (&B(ref s), &B(ref o)) => B(s * o),
+                (&A(ref s), &B(ref o)) => B(Int::from(*s) * o),
+                (&B(ref s), &A(ref o)) => B(s * Int::from(*o)),
+            }
+        }
+    }
+
+    impl ops::Mul<u32> for MidInt {
+        type Output = MidInt;
+        fn mul(self, o: u32) -> MidInt {
+            match self {
+                A(s) => match s.overflowing_mul(o as i64) {
+                    (prod, false) => A(prod),
+                    (_, true) => B(Int::from(s) * Int::from(o))
+                },
+                B(s) => B(s * Int::from(o)),
+            }
+        }
+    }
+
+    impl ops::MulAssign<MidInt> for MidInt {
+        fn mul_assign(&mut self, o: MidInt) {
+            let self_ = self as *mut _;
+            let prod = match (self, o) {
+                (&mut A(ref mut s), A(o)) => match s.overflowing_mul(o) {
+                    (prod, false) => { *s = prod; return; }
+                    (_, true) => MidInt::B(Int::from(*s) * Int::from(o)),
+                },
+                (&mut B(ref mut s), B(ref o)) => { *s *= o; return; }
+                (&mut A(s), B(o)) => { B(Int::from(s) * o) }
+                (&mut B(ref mut s), A(o)) => { *s *= Int::from(o); return; }
+            };
+            unsafe { *self_ = prod; }
+        }
+    }
+
+    impl<'a> ops::MulAssign<&'a MidInt> for MidInt {
+        fn mul_assign(&mut self, o: &'a MidInt) {
+            use std::ptr;
+            let self_ = self as *mut _;
+            let prod = match (self, o) {
+                (&mut A(ref mut s), &A(o)) => match s.overflowing_mul(o) {
+                    (prod, false) => MidInt::A(prod),
+                    (_, true) => { MidInt::B(Int::from(*s) * Int::from(o)) }
+                },
+                (&mut B(ref mut s), &B(ref o)) => { *s *= o; return; }
+                (&mut A(s), &B(ref o)) => { B(Int::from(s) * o) }
+                (&mut B(ref mut s), &A(o)) => { *s *= Int::from(o); return; }
+            };
+            unsafe { ptr::write(self_, prod); }
+        }
+    }
+
+    impl ops::Div<MidInt> for MidInt {
+        type Output = MidInt;
+        fn div(self, o: MidInt) -> MidInt {
+            match (self, o) {
+                (A(s), A(o)) => A(s / o),
+                (B(s), B(o)) => B(s / o),
+                (A(s), B(o)) => B(Int::from(s) / o),
+                (B(s), A(o)) => B(s / Int::from(o)),
+            }
+        }
+    }
+
+    impl ops::DivAssign<MidInt> for MidInt {
+        fn div_assign(&mut self, o: MidInt) {
+            use std::ptr;
+            let self_ = self as *mut _;
+            let prod = match (self, o) {
+                (&mut A(ref mut s), A(o)) => { *s /= o; return; }
+                (&mut B(ref mut s), B(ref o)) => { *s /= o; return; }
+                (&mut A(s), B(ref o)) => { B(Int::from(s) / o) }
+                (&mut B(ref mut s), A(o)) => { *s /= Int::from(o); return; }
+            };
+            unsafe { ptr::write(self_, prod); }
+        }
+    }
+
+    impl<'a> ops::DivAssign<&'a MidInt> for MidInt {
+        fn div_assign(&mut self, o: &'a MidInt) {
+            use std::ptr;
+            let self_ = self as *mut _;
+            let prod = match (self, o) {
+                (&mut A(ref mut s), &A(o)) => { *s /= o; return; }
+                (&mut B(ref mut s), &B(ref o)) => { *s /= o; return; }
+                (&mut A(s), &B(ref o)) => { B(Int::from(s) / o) }
+                (&mut B(ref mut s), &A(o)) => { *s /= Int::from(o); return; }
+            };
+            unsafe { ptr::write(self_, prod); }
+        }
+    }
+
+    #[derive(Clone, Debug, PartialEq)]
+    pub struct Frac { numer: MidInt, denom: MidInt, }
+    impl Frac { pub fn bit_length(&self) -> u32 { self.numer.bit_length() + self.denom.bit_length() } }
+    impl Frac { pub fn divide_by_4(&mut self) { self.numer >>= 2 } }
+    use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div};
+
+    impl Frac {
+        fn reduce(self) -> Self {
+            let Frac { numer, denom } = self;
+            let gcd = numer.gcd(&denom);
+            Frac { numer: numer / gcd.clone(), denom: denom / gcd }
+            // self
+        }
+        pub fn sqr(self) -> Self {
+            let Frac { numer, denom } = self;
+            Frac { numer: numer.dsquare(), denom: denom.dsquare() }
+        }
+    }
+
+    impl Add<Frac> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn add(mut self, other: Frac) -> Frac {
+            let f = if self.denom == other.denom {
+                self.numer += other.numer;
+                self
+            } else if true {
+                // let denom = self.denom.clone() * other.denom.clone();
+                let denom = self.denom.lcm(&other.denom);
+                let mut a = denom.clone(); a /= self.denom;
+                let mut b = denom.clone(); b /= other.denom;
+
+                self.numer *= a;
+                self.numer += other.numer * b;
+                self.denom = denom;
+                self
+            } else {
+                Frac { numer: self.numer * other.denom.clone() + other.numer * self.denom.clone(),
+                       denom: self.denom * other.denom }
+            };
+            f.reduce()
+        }
+    }
+    impl Add<u32> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn add(self, other: u32) -> Frac {
+            let f = Frac { numer: self.numer + self.denom.clone() * other,
+                           denom: self.denom };
+            f.reduce()
+        }
+    }
+
+    impl<'a> AddAssign<&'a Frac> for Frac {
+        #[inline]
+        fn add_assign(&mut self, other: &'a Frac) {
+            if self.denom == other.denom {
+                self.numer += other.numer.clone();
+            } else if true {
+                let denom = self.denom.lcm(&other.denom);
+                let mut a = denom.clone(); a /= self.denom.clone();
+                let mut b = denom.clone(); b /= other.denom.clone();
+
+                self.numer *= a;
+                self.numer += other.numer.clone() * b;
+                self.denom = denom;
+            } else {
+                self.numer *= &other.denom;
+                self.numer += other.numer.clone() * &self.denom;
+                self.denom *= &other.denom;
+            }
+        }
+    }
+    impl Sub<Frac> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn sub(mut self, other: Frac) -> Frac {
+            let f = if self.denom == other.denom {
+                self.numer -= other.numer;
+                self
+            } else if true {
+                // let denom = self.denom.clone() * other.denom.clone();
+                let denom = self.denom.lcm(&other.denom);
+                let a = denom.clone() / self.denom;
+                let b = denom.clone() / other.denom;
+                self.numer *= a;
+                self.numer -= other.numer * b;
+                self.denom = denom;
+                self
+            } else {
+                Frac { numer: self.numer * other.denom.clone() - other.numer * self.denom.clone(),
+                       denom: self.denom * other.denom }
+            };
+            f.reduce()
+        }
+    }
+    impl Sub<u32> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn sub(self, other: u32) -> Frac {
+            let f = Frac { numer: self.numer - self.denom.clone() * other,
+                           denom: self.denom };
+            f.reduce()
+        }
+    }
+    impl<'a> SubAssign<&'a Frac> for Frac {
+        #[inline]
+        fn sub_assign(&mut self, other: &'a Frac) {
+            if self.denom == other.denom {
+                self.numer -= other.numer.clone();
+            } else if false {
+                let denom = self.denom.lcm(&other.denom);
+                let mut a = denom.clone(); a /= &self.denom;
+                let mut b = denom.clone(); b /= &other.denom;
+
+                self.numer *= a;
+                self.numer -= &other.numer * b;
+                self.denom = denom;
+            } else {
+                self.numer *= &other.denom;
+                self.numer -= other.numer.clone() * &self.denom;
+                self.denom *= &other.denom;
+            }
+        }
+    }
+    impl Mul<Frac> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn mul(self, other: Frac) -> Frac {
+            let f = Frac { numer: self.numer * other.numer, denom: self.denom * other.denom };
+            f.reduce()
+        }
+    }
+    impl Mul<u32> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn mul(self, other: u32) -> Frac {
+            let f = Frac { numer: self.numer * other, denom: self.denom };
+            f.reduce()
+        }
+    }
+    impl<'a> MulAssign<&'a Frac> for Frac {
+        #[inline]
+        fn mul_assign(&mut self, other: &'a Frac) {
+            self.numer *= other.numer.clone();
+            self.denom *= other.denom.clone();
+        }
+    }
+    impl Div<Frac> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn div(self, other: Frac) -> Frac {
+            let f = Frac { numer: self.numer * other.denom, denom: self.denom * other.numer };
+            f.reduce()
+        }
+    }
+    impl Div<u32> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn div(self, other: u32) -> Frac {
+            let f = Frac { numer: self.numer, denom: self.denom * other };
+            f.reduce()
+        }
+    }
+
+    impl PartialOrd for Frac {
+        #[inline]
+        fn partial_cmp(&self, other: &Frac) -> Option<cmp::Ordering> {
+            let lhs = self.numer.clone() * other.denom.clone();
+            let rhs = self.denom.clone() * other.numer.clone();
+            lhs.partial_cmp(&rhs)
+        }
+    }
+
+    impl From<u32> for Frac {
+        #[inline]
+        fn from(n: u32) -> Frac {
+            Frac { numer: From::from(n), denom: From::from(1) }
+        }
+    }
+    impl From<i32> for Frac {
+        #[inline]
+        fn from(n: i32) -> Frac {
+            Frac { numer: From::from(n), denom: From::from(1) }
+        }
+    }
+    impl From<f64> for Frac {
+        fn from(f: f64) -> Frac {
+            use ramp::Int;
+            let (mantissa, exponent, sign): (u64, i16, i8) = f.integer_decode();
+            let mantissa = mantissa as i64;
+            let mantissa = if sign < 0 { -mantissa } else { mantissa };
+            if exponent < 0 {
+                let e = -exponent as usize;
+                let (numer, denom) = (mantissa, Int::from(2).pow(e));
+                Frac { numer: MidInt::from(numer), denom: MidInt::B(denom) }
+            } else {
+                let e = exponent as usize;
+                let (numer, denom) = (Int::from(mantissa) * Int::from(2).pow(e), Int::from(1));
+                Frac { numer: MidInt::B(numer), denom: MidInt::B(denom) }
+            }
+        }
+    }
+}
 
 mod frac_type_f64 { pub type Frac = f64; }
+
+#[cfg(not_now)]
+mod frac_type_bigrat {
+    use num::bigint::{BigInt};
+    use num::integer::{Integer};
+    use num::rational::{Ratio, BigRational};
+    use num::traits::FromPrimitive;
+
+    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+    pub struct Frac(BigRational);
+
+    impl From<i32> for Frac {
+        fn from(x: i32) -> Self {
+            Frac(Ratio::from_integer(BigInt::from_i32(x).unwrap()))
+        }
+    }
+
+    impl From<f64> for Frac {
+        fn from(f: f64) -> Frac {
+            let (mantissa, exponent, sign): (u64, i16, i8) = f.integer_decode();
+            let mantissa = mantissa as i64;
+            let mantissa = if sign < 0 { -mantissa } else { mantissa };
+            let mantissa = BigInt::from_i64(mantissa);
+            let (numer, denom) = if exponent < 0 {
+                let e = -exponent as usize;
+                (mantissa, BigInt::from_i32(2).unwrap().pow(e))
+            } else {
+                let e = exponent as usize;
+                (mantissa * BigInt::from_i32(2).pow(e), BigInt::from_i32(1))
+            };
+            Frac { numer: numer, denom: denom }
+        }
+    }
+
+    use std::ops::{Add,Sub,Mul,Div};
+    impl Add<Frac> for Frac {
+        type Output = Frac;
+        fn add(self, other: Frac) -> Frac { Frac(self.0 + other.0) }
+    }
+    impl Sub<Frac> for Frac {
+        type Output = Frac;
+        fn sub(self, other: Frac) -> Frac { Frac(self.0 - other.0) }
+    }
+    impl Mul<Frac> for Frac {
+        type Output = Frac;
+        fn mul(self, other: Frac) -> Frac { Frac(self.0 * other.0) }
+    }
+    impl Div<Frac> for Frac {
+        type Output = Frac;
+        fn div(self, other: Frac) -> Frac { Frac(self.0 / other.0) }
+    }
+    impl Div<i32> for Frac {
+        type Output = Frac;
+        fn div(self, other: i32) -> Frac { self / Frac::from(other) }
+    }
+}
 
 mod frac_wrap_f64 {
     use std::cmp;
@@ -347,7 +901,7 @@ mod frac_bigratio {
     #[derive(Clone, Debug, PartialEq)]
     pub struct Frac { numer: ramp::Int, denom: ramp::Int, }
     impl Frac { pub fn bit_length(&self) -> u32 { self.numer.bit_length() + self.denom.bit_length() } }
-
+    impl Frac { pub fn divide_by_4(&mut self) { self.numer >>= 2 } }
     use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div};
 
     impl Frac {
@@ -402,7 +956,7 @@ mod frac_bigratio {
         fn add_assign(&mut self, other: &'a Frac) {
             if self.denom == other.denom {
                 self.numer += other.numer.clone();
-            } else if false {
+            } else if true {
                 let denom = self.denom.lcm(&other.denom);
                 let mut a = denom.clone(); a /= self.denom.clone();
                 let mut b = denom.clone(); b /= other.denom.clone();
@@ -547,7 +1101,7 @@ mod frac_bigratio {
             Frac { numer: numer, denom: denom }
         }
     }
-    }
+}
 
 
 #[derive(Debug)]
@@ -627,9 +1181,16 @@ struct Complex(Frac, Frac);
 impl Complex {
     pub fn bit_length(&self) -> u32 { self.0.bit_length() + self.1.bit_length() }
     #[inline]
+    fn mag_less_than_2(&self) -> bool {
+        let mut a = self.0.clone().sqr();
+        let b = self.1.clone().sqr();
+        a += &b;
+        a < Frac::from(4)
+    }
+    #[inline]
     fn mag_less_than(&self, mag: Frac) -> bool {
         let mut a = self.0.clone().sqr();
-        let mut b = self.1.clone().sqr();
+        let b = self.1.clone().sqr();
         a += &b;
         a < mag.sqr()
     }
@@ -660,7 +1221,9 @@ fn mandelbrot(mut z: Complex, x: u32, y: u32, scale: Scale, max_iters: u32) -> O
     let c = Complex(x0, y0);
     let mut iteration = 0;
     let mut sum_bit_lens = 0;
-    while iteration < max_iters && z.mag_less_than(Frac::from(2)) {
+    while iteration < max_iters &&
+        z.mag_less_than_2() // z.mag_less_than(Frac::from(2))
+    {
         sum_bit_lens += z.bit_length();
         z.dsquare();
         z.add_assign(&c);
@@ -685,5 +1248,18 @@ fn iters_to_color(iters: Option<u32>) -> im::Rgba<u8> {
             im::Rgba([lo as u8, mi as u8, (hi % 255) as u8, 255])
         }
     }
+}
+
+fn lcm(x: i64, y: i64) -> i64 {
+    use num::integer::Integer;
+    x * (y / x.gcd(&y))
+}
+
+#[test]
+fn demo_i64_lcm_problem() {
+    let x: i64 = 46656000000000000;
+    let y: i64 = 600;
+    let l = lcm(x, y);
+    println!("x: {} y: {} l: {}", x, y, l);
 }
 ```

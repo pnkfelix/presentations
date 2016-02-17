@@ -10,6 +10,7 @@ piston_window = "0.34.0"
 image = "0.6.0"
 vecmath = "0.2.0"
 ramp = "0.2.3"
+num = "0.1.30"
 
 # The preprocessor is the `tango` crate, so we need to add that
 # to the build-dependencies.
