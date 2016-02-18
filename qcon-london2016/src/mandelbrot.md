@@ -1,5 +1,5 @@
 ```rust
-#![feature(float_extras, augmented_assignments, op_assign_traits)]
+#![feature(augmented_assignments, op_assign_traits)]
 #![allow(dead_code)]
 
 extern crate piston_window;
@@ -7,10 +7,15 @@ extern crate image as im;
 extern crate vecmath;
 extern crate ramp;
 extern crate num;
+extern crate gmp;
+extern crate stopwatch;
+
+const REDUCE_VIA_LCM: bool = false;
 
 use im::GenericImage;
 use piston_window::*;
 // use im::Pixel;
+use stopwatch::Stopwatch;
 
 use std::cell::Cell;
 use std::cmp;
@@ -72,7 +77,7 @@ fn main() {
     };
 
     #[derive(Copy, Clone, Debug)]
-    enum BgElem { Unknown, _InSet, Escapes(u32), }
+    enum BgElem { Unknown, InSet, Escapes(u32), }
 
     let background_state: Vec<Cell<BgElem>> =
         vec![Cell::new(BgElem::Unknown); (width * height) as usize];
@@ -89,20 +94,23 @@ fn main() {
             'draw: loop {
                 const MAX_ITERATION: u32 = 0x1_00_00_00;
                 const ITER_INCR: u32 = 0x1_00;
-                // const ITER_INCR: u32 = 0x10;
+                // const ITER_INCR: u32 = 0x1;
 
                 let mut max_iters = 4;
                 while max_iters < MAX_ITERATION {
                     println!("thread: {} max_iters: 0x{:<8x} = {}", i, max_iters, max_iters);
                     let start_y = i * work_size;
                     let limit_y = cmp::min(start_y + work_size, height);
+
+                    let sw = Stopwatch::start_new();
                     for y in start_y..limit_y {
                         for x in 0..width {
-                            let z = Complex(Frac::from(0), Frac::from(0));
-
-                            let bg_elem = match mandelbrot(z, x, y, scale.clone(), max_iters) {
-                                Some(iters) => BgElem::Escapes(iters),
-                                None => BgElem::Unknown,
+                            let bg_elem = {
+                                let z = Complex(Frac::from(0), Frac::from(0));
+                                match mandelbrot(z, x, y, scale.clone(), max_iters) {
+                                    Some(iters) => BgElem::Escapes(iters),
+                                    None => BgElem::Unknown,
+                                }
                             };
                             tx.send((x, y, bg_elem)).unwrap();
                             if let Ok(spec) = rx2.try_recv() {
@@ -114,6 +122,8 @@ fn main() {
                             }
                         }
                     }
+
+                    println!("thread: {} iterations: {} time: {:?}", i, max_iters, sw.elapsed());
                     max_iters += ITER_INCR;
                 }
 
@@ -145,7 +155,7 @@ fn main() {
                 let idx = x * width + y;
                 let color = iters_to_color(match background_state[idx as usize].get() {
                     BgElem::Unknown => None,
-                    BgElem::_InSet => None,
+                    BgElem::InSet => None,
                     BgElem::Escapes(iters) => Some(iters),
                 });
                 canvas.put_pixel(x, y, color);
@@ -280,8 +290,560 @@ fn main() {
 // use frac_type_f64::Frac;
 // use frac_wrap_f64::Frac;
 // use frac_bigratio::Frac;
-// use frac_type_bigrat::Frac;
-use frac_dynamic::Frac;
+// use frac_dynamic::Frac;
+// use frac_mpq::Frac;
+// use frac_florat::Frac;
+// use frac_fixrat::Frac;
+use frac_limit_bigratio::Frac;
+
+mod frac_limit_bigratio {
+    use std::cmp;
+    use ramp;
+
+    #[derive(Clone, Debug, PartialEq)]
+    pub struct Frac { numer: ramp::Int, denom: ramp::Int, }
+    impl Frac { pub fn bit_length(&self) -> u32 { self.numer.bit_length() + self.denom.bit_length() } }
+    impl Frac { pub fn divide_by_4(&mut self) { self.numer >>= 2 } }
+    impl Frac {
+        pub fn drop_bits(&mut self, num_bits: usize) {
+            self.numer >>= num_bits;
+            self.denom >>= num_bits;
+        }
+    }
+    use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div};
+
+    impl Frac {
+        fn reduce(self) -> Self {
+            let bits = self.bit_length();
+            if bits > 24 {
+                println!("reduce self: {:?} bits: {}", self, bits);
+            }
+            self
+        }
+        pub fn sqr(self) -> Self {
+            let Frac { numer, denom } = self;
+            Frac { numer: numer.dsquare(), denom: denom.dsquare() }
+        }
+    }
+
+    impl Add<Frac> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn add(mut self, other : Frac) -> Frac {
+            let f = if self.denom == other .denom {
+                self.numer += other .numer;
+                self
+            } else if ::REDUCE_VIA_LCM {
+                // let denom = self.denom.clone() * other .denom.clone();
+                let denom = self.denom.lcm(&other .denom);
+                let mut a = denom.clone(); a /= self.denom;
+                let mut b = denom.clone(); b /= other .denom;
+
+                self.numer *= a;
+                self.numer += other .numer * b;
+                self.denom = denom;
+                self
+            } else {
+                Frac { numer: self.numer * other .denom.clone() + other .numer * self.denom.clone(),
+                       denom: self.denom * other .denom }
+            };
+            f.reduce()
+        }
+    }
+    impl Add<u32> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn add(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer + self.denom.clone() * (other  as usize),
+                           denom: self.denom };
+            f.reduce()
+        }
+    }
+
+    impl<'a> AddAssign<&'a Frac> for Frac {
+        #[inline]
+        fn add_assign(&mut self, other : &'a Frac) {
+            if self.denom == other .denom {
+                self.numer += other .numer.clone();
+            } else if ::REDUCE_VIA_LCM {
+                let denom = self.denom.lcm(&other .denom);
+                let mut a = denom.clone(); a /= self.denom.clone();
+                let mut b = denom.clone(); b /= other .denom.clone();
+
+                self.numer *= a;
+                self.numer += other .numer.clone() * b;
+                self.denom = denom;
+            } else {
+                self.numer *= &other .denom;
+                self.numer += other .numer.clone() * &self.denom;
+                self.denom *= &other .denom;
+            }
+        }
+    }
+    impl Sub<Frac> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn sub(mut self, other : Frac) -> Frac {
+            let f = if self.denom == other .denom {
+                self.numer -= other .numer;
+                self
+            } else if ::REDUCE_VIA_LCM {
+                // let denom = self.denom.clone() * other .denom.clone();
+                let denom = self.denom.lcm(&other .denom);
+                let a = denom.clone() / self.denom;
+                let b = denom.clone() / other .denom;
+                self.numer *= a;
+                self.numer -= other .numer * b;
+                self.denom = denom;
+                self
+            } else {
+                Frac { numer: self.numer * other .denom.clone() - other .numer * self.denom.clone(),
+                       denom: self.denom * other .denom }
+            };
+            f.reduce()
+        }
+    }
+    impl Sub<u32> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn sub(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer - self.denom.clone() * (other  as usize),
+                           denom: self.denom };
+            f.reduce()
+        }
+    }
+    impl<'a> SubAssign<&'a Frac> for Frac {
+        #[inline]
+        fn sub_assign(&mut self, other : &'a Frac) {
+            if self.denom == other .denom {
+                self.numer -= other .numer.clone();
+            } else if ::REDUCE_VIA_LCM {
+                let denom = self.denom.lcm(&other .denom);
+                let mut a = denom.clone(); a /= &self.denom;
+                let mut b = denom.clone(); b /= &other .denom;
+
+                self.numer *= a;
+                self.numer -= &other .numer * b;
+                self.denom = denom;
+            } else {
+                self.numer *= &other .denom;
+                self.numer -= other .numer.clone() * &self.denom;
+                self.denom *= &other .denom;
+            }
+        }
+    }
+    impl Mul<Frac> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn mul(self, other : Frac) -> Frac {
+            let f = Frac { numer: self.numer * other .numer, denom: self.denom * other .denom };
+            f.reduce()
+        }
+    }
+    impl Mul<u32> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn mul(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer * (other  as usize), denom: self.denom };
+            f.reduce()
+        }
+    }
+    impl<'a> MulAssign<&'a Frac> for Frac {
+        #[inline]
+        fn mul_assign(&mut self, other : &'a Frac) {
+            self.numer *= other .numer.clone();
+            self.denom *= other .denom.clone();
+        }
+    }
+    impl Div<Frac> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn div(self, other : Frac) -> Frac {
+            let f = Frac { numer: self.numer * other .denom, denom: self.denom * other .numer };
+            f.reduce()
+        }
+    }
+    impl Div<u32> for Frac {
+        type Output = Frac;
+        #[inline]
+        fn div(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer, denom: self.denom * (other  as usize) };
+            f.reduce()
+        }
+    }
+
+    impl PartialOrd for Frac {
+        #[inline]
+        fn partial_cmp(&self, other : &Frac) -> Option<cmp::Ordering> {
+            let lhs = self.numer.clone() * other .denom.clone();
+            let rhs = self.denom.clone() * other .numer.clone();
+            lhs.partial_cmp(&rhs)
+        }
+    }
+
+    impl From<u32> for Frac {
+        #[inline]
+        fn from(n: u32) -> Frac {
+            Frac { numer: From::from(n), denom: From::from(1) }
+        }
+    }
+    impl From<i32> for Frac {
+        #[inline]
+        fn from(n: i32) -> Frac {
+            Frac { numer: From::from(n), denom: From::from(1) }
+        }
+    }
+    impl From<i64> for Frac {
+        #[inline]
+        fn from(n: i64) -> Frac {
+            Frac { numer: From::from(n), denom: From::from(1) }
+        }
+    }
+}
+
+mod frac_fixrat {
+    use std::cmp;
+    use std::ops;
+    #[derive(Copy, Clone, PartialEq, Debug)]
+    pub struct Frac { numer: i64, denom: i64 }
+
+    use num::integer::Integer;
+
+    impl Frac {
+        pub fn bit_length(&self) -> u32 { 128 }
+        pub fn sqr(&self) -> Frac { *self * *self }
+    }
+
+    impl Frac {
+        #[inline]
+        fn reduce(self) -> Frac {
+            use num::integer::Integer;
+            let Frac { numer, denom } = self;
+            let g = numer.gcd(&denom);
+            if g != 0 {
+                Frac { numer: numer / g, denom: denom / g }
+            } else {
+                Frac { numer: numer, denom: denom }
+            }
+        }
+
+        #[inline]
+        fn drop_bits(&mut self, num_bits: usize) {
+            self.numer >>= num_bits;
+            self.denom >>= num_bits;
+        }
+    }
+
+    impl From<i32> for Frac { fn from(x: i32) -> Frac { Frac { numer: x as i64, denom: 1 } } }
+    impl From<i64> for Frac { fn from(x: i64) -> Frac { Frac { numer: x, denom: 1 } } }
+    impl From<u32> for Frac { fn from(x: u32) -> Frac { Frac { numer: x as i64, denom: 1 } } }
+
+    impl cmp::PartialOrd for Frac {
+        fn partial_cmp(&self, other: &Frac) -> Option<cmp::Ordering> {
+            // (self.numer / self.denom).partial_cmp(&(other.numer / other.denom))
+            (self.numer as f64 * other.denom as f64).partial_cmp(&(other.numer as f64 * self.denom as f64))
+        }
+    }
+
+    impl ops::Add<Frac> for Frac {
+        type Output = Frac;
+        fn add(mut self, mut other: Frac) -> Frac {
+            match (self.numer.overflowing_mul(other.denom),
+                   other.numer.overflowing_mul(self.denom),
+                   self.denom.overflowing_mul(other.denom)) {
+                ((n1, false), (n2, false), (d, false)) => {
+                    if let (sum, false) = n1.overflowing_add(n2) {
+                        return Frac { numer: sum, denom: d };
+                    }
+                }
+                _ => {}
+            }
+            self.drop_bits(32);
+            other.drop_bits(32);
+            (Frac { numer: self.numer * other.denom + other.numer*self.denom,
+                    denom: self.denom * other.denom }).reduce()
+        }
+    }
+    impl ops::Sub<Frac> for Frac {
+        type Output = Frac;
+        fn sub(mut self, mut other : Frac) -> Frac {
+            match (self.numer.overflowing_mul(other.denom),
+                   other.numer.overflowing_mul(self.denom),
+                   self.denom.overflowing_mul(other.denom)) {
+                ((n1, false), (n2, false), (d, false)) => return Frac { numer: n1 - n2, denom: d },
+                _ => {}
+            }
+            self.drop_bits(32);
+            other.drop_bits(32);
+            (Frac { numer: self.numer * other.denom - other.numer*self.denom,
+                    denom: self.denom * other.denom }).reduce()
+        }
+    }
+    impl ops::Mul<Frac> for Frac {
+        type Output = Frac;
+        fn mul(mut self, mut other: Frac) -> Frac {
+            match (self.numer.overflowing_mul(other.numer),
+                   self.denom.overflowing_mul(other.denom)) {
+                ((n, false), (d, false)) => return Frac { numer: n, denom: d },
+                _ => {}
+            }
+            self.drop_bits(33);
+            other.drop_bits(33);
+            (Frac { numer: self.numer * other.numer,
+                    denom: self.denom * other.denom }).reduce()
+        }
+    }
+    impl ops::Div<Frac> for Frac {
+        type Output = Frac;
+        fn div(self, other : Frac) -> Frac {
+            (Frac { numer: self.numer * other.denom,
+                    denom: self.denom * other.numer }).reduce()
+        }
+    }
+
+    impl ops::AddAssign<Frac> for Frac {
+        fn add_assign(&mut self, other: Frac) { *self = *self + other  }
+    }
+    impl<'a> ops::AddAssign<&'a Frac> for Frac {
+        fn add_assign(&mut self, other: &'a Frac) { *self = *self + *other  }
+    }
+    impl ops::SubAssign<Frac> for Frac {
+        fn sub_assign(&mut self, other: Frac) { *self = *self - other  }
+    }
+    impl<'a> ops::SubAssign<&'a Frac> for Frac {
+        fn sub_assign(&mut self, other: &'a Frac) { *self = *self - *other  }
+    }
+    impl ops::MulAssign<Frac> for Frac {
+        fn mul_assign(&mut self, other: Frac) { *self = *self * other  }
+    }
+    impl<'a> ops::MulAssign<&'a Frac> for Frac {
+        fn mul_assign(&mut self, other: &'a Frac) { *self = *self * *other  }
+    }
+    impl ops::DivAssign<Frac> for Frac {
+        fn div_assign(&mut self, other: Frac) { *self = *self / other  }
+    }
+    impl<'a> ops::DivAssign<&'a Frac> for Frac {
+        fn div_assign(&mut self, other: &'a Frac) { *self = *self / *other  }
+    }
+
+    impl<'a> ops::Add<&'a Frac> for Frac {
+        type Output = Frac;
+        fn add(self, other: &'a Frac) -> Frac { self + *other }
+    }
+
+    impl ops::Div<i32> for Frac {
+        type Output = Frac;
+        fn div(self, other: i32) -> Frac { self / Frac::from(other) }
+    }
+}
+
+mod frac_florat {
+    use std::cmp;
+    use std::ops;
+    #[derive(Copy, Clone, PartialEq, Debug)]
+    pub struct Frac { numer: f64, denom: f64 }
+
+    impl Frac {
+        pub fn bit_length(&self) -> u32 { 128 }
+        pub fn sqr(&self) -> Frac { *self * *self }
+    }
+
+    impl Frac {
+        #[inline]
+        fn reduce(self) -> Frac {
+            let Frac { mut numer, mut denom } = self;
+
+            let mut _saw_count = false;
+            let mut counts = [0; 9];
+            for &(i, red) in &[(1, (1024.0*1024.0*1024.0*1024.0*
+                                    1024.0*1024.0*1024.0*1024.0*
+                                    1024.0*1024.0*1024.0*1024.0*
+                                    1024.0*1024.0*1024.0*1024.0)),
+                               (2, (1024.0*1024.0*1024.0*1024.0*
+                                    1024.0*1024.0*1024.0*1024.0)),
+                               (3, 1024.0*1024.0*1024.0*1024.0),
+                               (4, 1024.0*1024.0),
+                               (5, 1024.0),
+                               (6, 128.0),
+                               (7, 16.0),
+                               (8, 2.0)]
+            {
+                while numer % red == 0.0 && denom % red == 0.0 {
+                    numer /= red;
+                    denom /= red;
+                    counts[i] += 1;
+                    _saw_count = true;
+                }
+            }
+            if counts[1] > 0 || counts[2] > 1 {
+                println!("counts: {:?}", &counts[1..]);
+            }
+            Frac { numer: numer, denom: denom }
+        }
+    }
+
+    impl From<i32> for Frac { fn from(x: i32) -> Frac { Frac { numer: x as f64, denom: 1.0 } } }
+    impl From<i64> for Frac { fn from(x: i64) -> Frac { Frac { numer: x as f64, denom: 1.0 } } }
+    impl From<u32> for Frac { fn from(x: u32) -> Frac { Frac { numer: x as f64, denom: 1.0 } } }
+
+    impl cmp::PartialOrd for Frac {
+        fn partial_cmp(&self, other: &Frac) -> Option<cmp::Ordering> {
+            // (self.numer / self.denom).partial_cmp(&(other.numer / other.denom))
+            (self.numer * other.denom).partial_cmp(&(other.numer * self.denom))
+        }
+    }
+
+    impl ops::Add<Frac> for Frac {
+        type Output = Frac;
+        fn add(self, other : Frac) -> Frac {
+            (Frac { numer: self.numer * other.denom + other.numer*self.denom,
+                    denom: self.denom * other.denom }).reduce()
+        }
+    }
+    impl ops::Sub<Frac> for Frac {
+        type Output = Frac;
+        fn sub(self, other : Frac) -> Frac {
+            (Frac { numer: self.numer * other.denom - other.numer*self.denom,
+                    denom: self.denom * other.denom }).reduce()
+        }
+    }
+    impl ops::Mul<Frac> for Frac {
+        type Output = Frac;
+        fn mul(self, other : Frac) -> Frac {
+            (Frac { numer: self.numer * other.numer,
+                    denom: self.denom * other.denom }).reduce()
+        }
+    }
+    impl ops::Div<Frac> for Frac {
+        type Output = Frac;
+        fn div(self, other : Frac) -> Frac {
+            (Frac { numer: self.numer * other.denom,
+                    denom: self.denom * other.numer }).reduce()
+        }
+    }
+
+    impl ops::AddAssign<Frac> for Frac {
+        fn add_assign(&mut self, other: Frac) { *self = *self + other  }
+    }
+    impl<'a> ops::AddAssign<&'a Frac> for Frac {
+        fn add_assign(&mut self, other: &'a Frac) { *self = *self + *other  }
+    }
+    impl ops::SubAssign<Frac> for Frac {
+        fn sub_assign(&mut self, other: Frac) { *self = *self - other  }
+    }
+    impl<'a> ops::SubAssign<&'a Frac> for Frac {
+        fn sub_assign(&mut self, other: &'a Frac) { *self = *self - *other  }
+    }
+    impl ops::MulAssign<Frac> for Frac {
+        fn mul_assign(&mut self, other: Frac) { *self = *self * other  }
+    }
+    impl<'a> ops::MulAssign<&'a Frac> for Frac {
+        fn mul_assign(&mut self, other: &'a Frac) { *self = *self * *other  }
+    }
+    impl ops::DivAssign<Frac> for Frac {
+        fn div_assign(&mut self, other: Frac) { *self = *self / other  }
+    }
+    impl<'a> ops::DivAssign<&'a Frac> for Frac {
+        fn div_assign(&mut self, other: &'a Frac) { *self = *self / *other  }
+    }
+
+    impl<'a> ops::Add<&'a Frac> for Frac {
+        type Output = Frac;
+        fn add(self, other: &'a Frac) -> Frac { self + *other }
+    }
+
+    impl ops::Div<i32> for Frac {
+        type Output = Frac;
+        fn div(self, other: i32) -> Frac { self / Frac::from(other) }
+    }
+}
+
+mod frac_mpq {
+    use gmp::mpq::Mpq;
+    use std::cmp;
+    use std::ops;
+    #[derive(Clone, Debug)]
+    pub struct Frac(Mpq);
+    impl Frac {
+        pub fn bit_length(&self) -> u32 { 0 }
+        #[cfg(not_now)]
+        pub fn bit_length(&self) -> u32 {
+            use std::mem;
+            use gmp::mpz::Mpz;
+            #[repr(C)]
+            struct mpq_struct {
+                _mp_num: Mpz,
+                _mp_den: Mpz,
+            }
+
+            let self_: &mpq_struct = unsafe { mem::transmute(self) };
+            (self_._mp_num.bit_length() + self_._mp_den.bit_length()) as u32
+        }
+        pub fn sqr(&self) -> Self {
+            self.clone() * self.clone()
+        }
+    }
+
+    impl From<u32> for Frac { fn from(x: u32) -> Frac { Frac(From::from(x as i64)) } }
+    impl From<i32> for Frac { fn from(x: i32) -> Frac { Frac(From::from(x as i64)) } }
+    impl From<i64> for Frac { fn from(x: i64) -> Frac { Frac(From::from(x)) } }
+
+    impl cmp::PartialEq for Frac {
+        fn eq(&self, other : &Frac) -> bool {
+            self.0.eq(&other .0)
+        }
+    }
+    impl cmp::PartialOrd for Frac {
+        fn partial_cmp(&self, other : &Frac) -> Option<cmp::Ordering> {
+            self.0.partial_cmp(&other .0)
+        }
+    }
+
+    impl ops::Add<Frac> for Frac {
+        type Output = Frac;
+        fn add(self, other : Frac) -> Frac { Frac(self.0 + other .0) }
+    }
+    impl ops::AddAssign<Frac> for Frac {
+        fn add_assign(&mut self, other : Frac) { *self = self.clone() + other ; }
+    }
+    impl<'a> ops::AddAssign<&'a Frac> for Frac {
+        fn add_assign(&mut self, other : &'a Frac) { *self = self.clone() + other .clone(); }
+    }
+    impl ops::Sub<Frac> for Frac {
+        type Output = Frac;
+        fn sub(self, other : Frac) -> Frac { Frac(self.0 - other .0) }
+    }
+    impl ops::SubAssign<Frac> for Frac {
+        fn sub_assign(&mut self, other : Frac) { *self = self.clone() - other ; }
+    }
+    impl<'a> ops::SubAssign<&'a Frac> for Frac {
+        fn sub_assign(&mut self, other : &'a Frac) { *self = self.clone() - other .clone(); }
+    }
+    impl ops::Mul<Frac> for Frac {
+        type Output = Frac;
+        fn mul(self, other : Frac) -> Frac { Frac(self.0 * other .0) }
+    }
+    impl ops::MulAssign<Frac> for Frac {
+        fn mul_assign(&mut self, other : Frac) { *self = self.clone() * other ; }
+    }
+    impl<'a> ops::MulAssign<&'a Frac> for Frac {
+        fn mul_assign(&mut self, other : &'a Frac) { *self = self.clone() * other .clone(); }
+    }
+    impl ops::Div<Frac> for Frac {
+        type Output = Frac;
+        fn div(self, other : Frac) -> Frac { Frac(self.0 / other .0) }
+    }
+    impl ops::DivAssign<Frac> for Frac {
+        fn div_assign(&mut self, other : Frac) { *self = self.clone() / other ; }
+    }
+    impl<'a> ops::DivAssign<&'a Frac> for Frac {
+        fn div_assign(&mut self, other : &'a Frac) { *self = self.clone() / other .clone(); }
+    }
+    impl ops::Div<i32> for Frac {
+        type Output = Frac;
+        fn div(self, other : i32) -> Frac { Frac(self.0 / Mpq::from(other  as i64)) }
+    }
+}
 
 mod frac_dynamic {
     use num::integer::Integer;
@@ -301,8 +863,8 @@ mod frac_dynamic {
             }
         }
 
-        fn gcd(&self, other: &MidInt) -> MidInt {
-            match (self, other) {
+        fn gcd(&self, other : &MidInt) -> MidInt {
+            match (self, other ) {
                 (&A(ref s), &A(ref o)) => A(s.gcd(&o)),
                 (&B(ref s), &B(ref o)) => B(s.gcd(&o)),
                 (&A(ref s), &B(ref o)) => B(Int::from(*s).gcd(&o)),
@@ -320,8 +882,8 @@ mod frac_dynamic {
             }
         }
 
-        fn lcm(&self, other: &MidInt) -> MidInt {
-            match (self, other) {
+        fn lcm(&self, other : &MidInt) -> MidInt {
+            match (self, other ) {
                 (&A(ref s), &A(ref o)) => A(super::lcm(*s, *o)),
                 (&B(ref s), &B(ref o)) => B(s.lcm(&o)),
                 (&A(ref s), &B(ref o)) => B(Int::from(*s).lcm(&o)),
@@ -343,8 +905,8 @@ mod frac_dynamic {
     }
 
     impl cmp::PartialOrd for MidInt {
-        fn partial_cmp(&self, other: &MidInt) -> Option<cmp::Ordering> {
-            match (self, other) {
+        fn partial_cmp(&self, other : &MidInt) -> Option<cmp::Ordering> {
+            match (self, other ) {
                 (&A(ref s), &A(ref o)) => s.partial_cmp(o),
                 (&B(ref s), &B(ref o)) => s.partial_cmp(o),
                 (&A(ref s), &B(ref o)) => Int::from(*s).partial_cmp(o),
@@ -393,10 +955,10 @@ mod frac_dynamic {
     }
 
     impl ops::AddAssign<MidInt> for MidInt {
-        fn add_assign(&mut self, other: MidInt) {
+        fn add_assign(&mut self, other : MidInt) {
             use std::ptr;
             let self_ = self as *mut _;
-            let sum = match (self, other) {
+            let sum = match (self, other ) {
                 (&mut A(s), A(o)) => match s.overflowing_add(o) {
                     (sum, false) => { A(sum) }
                     (_, true) => { B(Int::from(s) + Int::from(o)) }
@@ -410,10 +972,10 @@ mod frac_dynamic {
     }
 
     impl ops::SubAssign<MidInt> for MidInt {
-        fn sub_assign(&mut self, other: MidInt) {
+        fn sub_assign(&mut self, other : MidInt) {
             use std::ptr;
             let self_ = self as *mut _;
-            let sum = match (self, other) {
+            let sum = match (self, other ) {
                 (&mut A(s), A(o)) => match s.overflowing_sub(o) {
                     (sum, false) => { A(sum) }
                     (_, true) => { B(Int::from(s) - Int::from(o)) }
@@ -594,23 +1156,23 @@ mod frac_dynamic {
     impl Add<Frac> for Frac {
         type Output = Frac;
         #[inline]
-        fn add(mut self, other: Frac) -> Frac {
-            let f = if self.denom == other.denom {
-                self.numer += other.numer;
+        fn add(mut self, other : Frac) -> Frac {
+            let f = if self.denom == other .denom {
+                self.numer += other .numer;
                 self
-            } else if true {
-                // let denom = self.denom.clone() * other.denom.clone();
-                let denom = self.denom.lcm(&other.denom);
+            } else if ::REDUCE_VIA_LCM {
+                // let denom = self.denom.clone() * other .denom.clone();
+                let denom = self.denom.lcm(&other .denom);
                 let mut a = denom.clone(); a /= self.denom;
-                let mut b = denom.clone(); b /= other.denom;
+                let mut b = denom.clone(); b /= other .denom;
 
                 self.numer *= a;
-                self.numer += other.numer * b;
+                self.numer += other .numer * b;
                 self.denom = denom;
                 self
             } else {
-                Frac { numer: self.numer * other.denom.clone() + other.numer * self.denom.clone(),
-                       denom: self.denom * other.denom }
+                Frac { numer: self.numer * other .denom.clone() + other .numer * self.denom.clone(),
+                       denom: self.denom * other .denom }
             };
             f.reduce()
         }
@@ -618,8 +1180,8 @@ mod frac_dynamic {
     impl Add<u32> for Frac {
         type Output = Frac;
         #[inline]
-        fn add(self, other: u32) -> Frac {
-            let f = Frac { numer: self.numer + self.denom.clone() * other,
+        fn add(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer + self.denom.clone() * other ,
                            denom: self.denom };
             f.reduce()
         }
@@ -627,43 +1189,43 @@ mod frac_dynamic {
 
     impl<'a> AddAssign<&'a Frac> for Frac {
         #[inline]
-        fn add_assign(&mut self, other: &'a Frac) {
-            if self.denom == other.denom {
-                self.numer += other.numer.clone();
-            } else if true {
-                let denom = self.denom.lcm(&other.denom);
+        fn add_assign(&mut self, other : &'a Frac) {
+            if self.denom == other .denom {
+                self.numer += other .numer.clone();
+            } else if ::REDUCE_VIA_LCM {
+                let denom = self.denom.lcm(&other .denom);
                 let mut a = denom.clone(); a /= self.denom.clone();
-                let mut b = denom.clone(); b /= other.denom.clone();
+                let mut b = denom.clone(); b /= other .denom.clone();
 
                 self.numer *= a;
-                self.numer += other.numer.clone() * b;
+                self.numer += other .numer.clone() * b;
                 self.denom = denom;
             } else {
-                self.numer *= &other.denom;
-                self.numer += other.numer.clone() * &self.denom;
-                self.denom *= &other.denom;
+                self.numer *= &other .denom;
+                self.numer += other .numer.clone() * &self.denom;
+                self.denom *= &other .denom;
             }
         }
     }
     impl Sub<Frac> for Frac {
         type Output = Frac;
         #[inline]
-        fn sub(mut self, other: Frac) -> Frac {
-            let f = if self.denom == other.denom {
-                self.numer -= other.numer;
+        fn sub(mut self, other : Frac) -> Frac {
+            let f = if self.denom == other .denom {
+                self.numer -= other .numer;
                 self
-            } else if true {
-                // let denom = self.denom.clone() * other.denom.clone();
-                let denom = self.denom.lcm(&other.denom);
+            } else if ::REDUCE_VIA_LCM {
+                // let denom = self.denom.clone() * other .denom.clone();
+                let denom = self.denom.lcm(&other .denom);
                 let a = denom.clone() / self.denom;
-                let b = denom.clone() / other.denom;
+                let b = denom.clone() / other .denom;
                 self.numer *= a;
-                self.numer -= other.numer * b;
+                self.numer -= other .numer * b;
                 self.denom = denom;
                 self
             } else {
-                Frac { numer: self.numer * other.denom.clone() - other.numer * self.denom.clone(),
-                       denom: self.denom * other.denom }
+                Frac { numer: self.numer * other .denom.clone() - other .numer * self.denom.clone(),
+                       denom: self.denom * other .denom }
             };
             f.reduce()
         }
@@ -671,77 +1233,77 @@ mod frac_dynamic {
     impl Sub<u32> for Frac {
         type Output = Frac;
         #[inline]
-        fn sub(self, other: u32) -> Frac {
-            let f = Frac { numer: self.numer - self.denom.clone() * other,
+        fn sub(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer - self.denom.clone() * other ,
                            denom: self.denom };
             f.reduce()
         }
     }
     impl<'a> SubAssign<&'a Frac> for Frac {
         #[inline]
-        fn sub_assign(&mut self, other: &'a Frac) {
-            if self.denom == other.denom {
-                self.numer -= other.numer.clone();
-            } else if false {
-                let denom = self.denom.lcm(&other.denom);
+        fn sub_assign(&mut self, other : &'a Frac) {
+            if self.denom == other .denom {
+                self.numer -= other .numer.clone();
+            } else if ::REDUCE_VIA_LCM {
+                let denom = self.denom.lcm(&other .denom);
                 let mut a = denom.clone(); a /= &self.denom;
-                let mut b = denom.clone(); b /= &other.denom;
+                let mut b = denom.clone(); b /= &other .denom;
 
                 self.numer *= a;
-                self.numer -= &other.numer * b;
+                self.numer -= &other .numer * b;
                 self.denom = denom;
             } else {
-                self.numer *= &other.denom;
-                self.numer -= other.numer.clone() * &self.denom;
-                self.denom *= &other.denom;
+                self.numer *= &other .denom;
+                self.numer -= other .numer.clone() * &self.denom;
+                self.denom *= &other .denom;
             }
         }
     }
     impl Mul<Frac> for Frac {
         type Output = Frac;
         #[inline]
-        fn mul(self, other: Frac) -> Frac {
-            let f = Frac { numer: self.numer * other.numer, denom: self.denom * other.denom };
+        fn mul(self, other : Frac) -> Frac {
+            let f = Frac { numer: self.numer * other .numer, denom: self.denom * other .denom };
             f.reduce()
         }
     }
     impl Mul<u32> for Frac {
         type Output = Frac;
         #[inline]
-        fn mul(self, other: u32) -> Frac {
-            let f = Frac { numer: self.numer * other, denom: self.denom };
+        fn mul(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer * other , denom: self.denom };
             f.reduce()
         }
     }
     impl<'a> MulAssign<&'a Frac> for Frac {
         #[inline]
-        fn mul_assign(&mut self, other: &'a Frac) {
-            self.numer *= other.numer.clone();
-            self.denom *= other.denom.clone();
+        fn mul_assign(&mut self, other : &'a Frac) {
+            self.numer *= other .numer.clone();
+            self.denom *= other .denom.clone();
         }
     }
     impl Div<Frac> for Frac {
         type Output = Frac;
         #[inline]
-        fn div(self, other: Frac) -> Frac {
-            let f = Frac { numer: self.numer * other.denom, denom: self.denom * other.numer };
+        fn div(self, other : Frac) -> Frac {
+            let f = Frac { numer: self.numer * other .denom, denom: self.denom * other .numer };
             f.reduce()
         }
     }
     impl Div<u32> for Frac {
         type Output = Frac;
         #[inline]
-        fn div(self, other: u32) -> Frac {
-            let f = Frac { numer: self.numer, denom: self.denom * other };
+        fn div(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer, denom: self.denom * other  };
             f.reduce()
         }
     }
 
     impl PartialOrd for Frac {
         #[inline]
-        fn partial_cmp(&self, other: &Frac) -> Option<cmp::Ordering> {
-            let lhs = self.numer.clone() * other.denom.clone();
-            let rhs = self.denom.clone() * other.numer.clone();
+        fn partial_cmp(&self, other : &Frac) -> Option<cmp::Ordering> {
+            let lhs = self.numer.clone() * other .denom.clone();
+            let rhs = self.denom.clone() * other .numer.clone();
             lhs.partial_cmp(&rhs)
         }
     }
@@ -758,82 +1320,15 @@ mod frac_dynamic {
             Frac { numer: From::from(n), denom: From::from(1) }
         }
     }
-    impl From<f64> for Frac {
-        fn from(f: f64) -> Frac {
-            use ramp::Int;
-            let (mantissa, exponent, sign): (u64, i16, i8) = f.integer_decode();
-            let mantissa = mantissa as i64;
-            let mantissa = if sign < 0 { -mantissa } else { mantissa };
-            if exponent < 0 {
-                let e = -exponent as usize;
-                let (numer, denom) = (mantissa, Int::from(2).pow(e));
-                Frac { numer: MidInt::from(numer), denom: MidInt::B(denom) }
-            } else {
-                let e = exponent as usize;
-                let (numer, denom) = (Int::from(mantissa) * Int::from(2).pow(e), Int::from(1));
-                Frac { numer: MidInt::B(numer), denom: MidInt::B(denom) }
-            }
+    impl From<i64> for Frac {
+        #[inline]
+        fn from(n: i64) -> Frac {
+            Frac { numer: From::from(n), denom: From::from(1) }
         }
     }
 }
 
 mod frac_type_f64 { pub type Frac = f64; }
-
-#[cfg(not_now)]
-mod frac_type_bigrat {
-    use num::bigint::{BigInt};
-    use num::integer::{Integer};
-    use num::rational::{Ratio, BigRational};
-    use num::traits::FromPrimitive;
-
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
-    pub struct Frac(BigRational);
-
-    impl From<i32> for Frac {
-        fn from(x: i32) -> Self {
-            Frac(Ratio::from_integer(BigInt::from_i32(x).unwrap()))
-        }
-    }
-
-    impl From<f64> for Frac {
-        fn from(f: f64) -> Frac {
-            let (mantissa, exponent, sign): (u64, i16, i8) = f.integer_decode();
-            let mantissa = mantissa as i64;
-            let mantissa = if sign < 0 { -mantissa } else { mantissa };
-            let mantissa = BigInt::from_i64(mantissa);
-            let (numer, denom) = if exponent < 0 {
-                let e = -exponent as usize;
-                (mantissa, BigInt::from_i32(2).unwrap().pow(e))
-            } else {
-                let e = exponent as usize;
-                (mantissa * BigInt::from_i32(2).pow(e), BigInt::from_i32(1))
-            };
-            Frac { numer: numer, denom: denom }
-        }
-    }
-
-    use std::ops::{Add,Sub,Mul,Div};
-    impl Add<Frac> for Frac {
-        type Output = Frac;
-        fn add(self, other: Frac) -> Frac { Frac(self.0 + other.0) }
-    }
-    impl Sub<Frac> for Frac {
-        type Output = Frac;
-        fn sub(self, other: Frac) -> Frac { Frac(self.0 - other.0) }
-    }
-    impl Mul<Frac> for Frac {
-        type Output = Frac;
-        fn mul(self, other: Frac) -> Frac { Frac(self.0 * other.0) }
-    }
-    impl Div<Frac> for Frac {
-        type Output = Frac;
-        fn div(self, other: Frac) -> Frac { Frac(self.0 / other.0) }
-    }
-    impl Div<i32> for Frac {
-        type Output = Frac;
-        fn div(self, other: i32) -> Frac { self / Frac::from(other) }
-    }
-}
 
 mod frac_wrap_f64 {
     use std::cmp;
@@ -850,48 +1345,43 @@ mod frac_wrap_f64 {
     use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div};
 
     impl Add<Frac> for Frac {
-        type Output = Frac; fn add(self, other: Frac) -> Frac { Frac(self.0 + other.0) }
+        type Output = Frac; fn add(self, other : Frac) -> Frac { Frac(self.0 + other .0) }
     }
     impl<'a> AddAssign<&'a Frac> for Frac {
-        fn add_assign(&mut self, other: &'a Frac) { self.0 += other.0; }
+        fn add_assign(&mut self, other : &'a Frac) { self.0 += other .0; }
     }
     impl Sub<Frac> for Frac {
-        type Output = Frac; fn sub(self, other: Frac) -> Frac { Frac(self.0 - other.0) }
+        type Output = Frac; fn sub(self, other : Frac) -> Frac { Frac(self.0 - other .0) }
     }
     impl<'a> SubAssign<&'a Frac> for Frac {
-        fn sub_assign(&mut self, other: &'a Frac) { self.0 -= other.0; }
+        fn sub_assign(&mut self, other : &'a Frac) { self.0 -= other .0; }
     }
     impl Mul<Frac> for Frac {
-        type Output = Frac; fn mul(self, other: Frac) -> Frac { Frac(self.0 * other.0) }
+        type Output = Frac; fn mul(self, other : Frac) -> Frac { Frac(self.0 * other .0) }
     }
     impl<'a> MulAssign<&'a Frac> for Frac {
-        fn mul_assign(&mut self, other: &'a Frac) { self.0 *= other.0; }
+        fn mul_assign(&mut self, other : &'a Frac) { self.0 *= other .0; }
     }
     impl Mul<f64> for Frac {
-        type Output = Frac; fn mul(self, other: f64) -> Frac { Frac(self.0 * other) }
+        type Output = Frac; fn mul(self, other : f64) -> Frac { Frac(self.0 * other ) }
     }
     impl Div<Frac> for Frac {
-        type Output = Frac; fn div(self, other: Frac) -> Frac { Frac(self.0 / other.0) }
+        type Output = Frac; fn div(self, other : Frac) -> Frac { Frac(self.0 / other .0) }
     }
     impl Div<f64> for Frac {
-        type Output = Frac; fn div(self, other: f64) -> Frac { Frac(self.0 / other) }
+        type Output = Frac; fn div(self, other : f64) -> Frac { Frac(self.0 / other ) }
     }
     impl Div<i32> for Frac {
-        type Output = Frac; fn div(self, other: i32) -> Frac { Frac(self.0 / other as f64) }
+        type Output = Frac; fn div(self, other : i32) -> Frac { Frac(self.0 / other  as f64) }
     }
 
     impl PartialOrd for Frac {
-        fn partial_cmp(&self, other: &Frac) -> Option<cmp::Ordering> { self.0.partial_cmp(&other.0) }
+        fn partial_cmp(&self, other : &Frac) -> Option<cmp::Ordering> { self.0.partial_cmp(&other .0) }
     }
 
     impl From<u32> for Frac { fn from(n: u32) -> Frac { Frac(n as f64) } }
     impl From<i32> for Frac { fn from(n: i32) -> Frac { Frac(n as f64) } }
-
-    impl From<f64> for Frac {
-        fn from(f: f64) -> Frac {
-            Frac(f)
-        }
-    }
+    impl From<i64> for Frac { fn from(n: i64) -> Frac { Frac(n as f64) } }
 }
 
 mod frac_bigratio {
@@ -920,23 +1410,23 @@ mod frac_bigratio {
     impl Add<Frac> for Frac {
         type Output = Frac;
         #[inline]
-        fn add(mut self, other: Frac) -> Frac {
-            let f = if self.denom == other.denom {
-                self.numer += other.numer;
+        fn add(mut self, other : Frac) -> Frac {
+            let f = if self.denom == other .denom {
+                self.numer += other .numer;
                 self
-            } else if true {
-                // let denom = self.denom.clone() * other.denom.clone();
-                let denom = self.denom.lcm(&other.denom);
+            } else if ::REDUCE_VIA_LCM {
+                // let denom = self.denom.clone() * other .denom.clone();
+                let denom = self.denom.lcm(&other .denom);
                 let mut a = denom.clone(); a /= self.denom;
-                let mut b = denom.clone(); b /= other.denom;
+                let mut b = denom.clone(); b /= other .denom;
 
                 self.numer *= a;
-                self.numer += other.numer * b;
+                self.numer += other .numer * b;
                 self.denom = denom;
                 self
             } else {
-                Frac { numer: self.numer * other.denom.clone() + other.numer * self.denom.clone(),
-                       denom: self.denom * other.denom }
+                Frac { numer: self.numer * other .denom.clone() + other .numer * self.denom.clone(),
+                       denom: self.denom * other .denom }
             };
             f.reduce()
         }
@@ -944,8 +1434,8 @@ mod frac_bigratio {
     impl Add<u32> for Frac {
         type Output = Frac;
         #[inline]
-        fn add(self, other: u32) -> Frac {
-            let f = Frac { numer: self.numer + self.denom.clone() * (other as usize),
+        fn add(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer + self.denom.clone() * (other  as usize),
                            denom: self.denom };
             f.reduce()
         }
@@ -953,43 +1443,43 @@ mod frac_bigratio {
 
     impl<'a> AddAssign<&'a Frac> for Frac {
         #[inline]
-        fn add_assign(&mut self, other: &'a Frac) {
-            if self.denom == other.denom {
-                self.numer += other.numer.clone();
-            } else if true {
-                let denom = self.denom.lcm(&other.denom);
+        fn add_assign(&mut self, other : &'a Frac) {
+            if self.denom == other .denom {
+                self.numer += other .numer.clone();
+            } else if ::REDUCE_VIA_LCM {
+                let denom = self.denom.lcm(&other .denom);
                 let mut a = denom.clone(); a /= self.denom.clone();
-                let mut b = denom.clone(); b /= other.denom.clone();
+                let mut b = denom.clone(); b /= other .denom.clone();
 
                 self.numer *= a;
-                self.numer += other.numer.clone() * b;
+                self.numer += other .numer.clone() * b;
                 self.denom = denom;
             } else {
-                self.numer *= &other.denom;
-                self.numer += other.numer.clone() * &self.denom;
-                self.denom *= &other.denom;
+                self.numer *= &other .denom;
+                self.numer += other .numer.clone() * &self.denom;
+                self.denom *= &other .denom;
             }
         }
     }
     impl Sub<Frac> for Frac {
         type Output = Frac;
         #[inline]
-        fn sub(mut self, other: Frac) -> Frac {
-            let f = if self.denom == other.denom {
-                self.numer -= other.numer;
+        fn sub(mut self, other : Frac) -> Frac {
+            let f = if self.denom == other .denom {
+                self.numer -= other .numer;
                 self
-            } else if true {
-                // let denom = self.denom.clone() * other.denom.clone();
-                let denom = self.denom.lcm(&other.denom);
+            } else if ::REDUCE_VIA_LCM {
+                // let denom = self.denom.clone() * other .denom.clone();
+                let denom = self.denom.lcm(&other .denom);
                 let a = denom.clone() / self.denom;
-                let b = denom.clone() / other.denom;
+                let b = denom.clone() / other .denom;
                 self.numer *= a;
-                self.numer -= other.numer * b;
+                self.numer -= other .numer * b;
                 self.denom = denom;
                 self
             } else {
-                Frac { numer: self.numer * other.denom.clone() - other.numer * self.denom.clone(),
-                       denom: self.denom * other.denom }
+                Frac { numer: self.numer * other .denom.clone() - other .numer * self.denom.clone(),
+                       denom: self.denom * other .denom }
             };
             f.reduce()
         }
@@ -997,77 +1487,77 @@ mod frac_bigratio {
     impl Sub<u32> for Frac {
         type Output = Frac;
         #[inline]
-        fn sub(self, other: u32) -> Frac {
-            let f = Frac { numer: self.numer - self.denom.clone() * (other as usize),
+        fn sub(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer - self.denom.clone() * (other  as usize),
                            denom: self.denom };
             f.reduce()
         }
     }
     impl<'a> SubAssign<&'a Frac> for Frac {
         #[inline]
-        fn sub_assign(&mut self, other: &'a Frac) {
-            if self.denom == other.denom {
-                self.numer -= other.numer.clone();
-            } else if false {
-                let denom = self.denom.lcm(&other.denom);
+        fn sub_assign(&mut self, other : &'a Frac) {
+            if self.denom == other .denom {
+                self.numer -= other .numer.clone();
+            } else if ::REDUCE_VIA_LCM {
+                let denom = self.denom.lcm(&other .denom);
                 let mut a = denom.clone(); a /= &self.denom;
-                let mut b = denom.clone(); b /= &other.denom;
+                let mut b = denom.clone(); b /= &other .denom;
 
                 self.numer *= a;
-                self.numer -= &other.numer * b;
+                self.numer -= &other .numer * b;
                 self.denom = denom;
             } else {
-                self.numer *= &other.denom;
-                self.numer -= other.numer.clone() * &self.denom;
-                self.denom *= &other.denom;
+                self.numer *= &other .denom;
+                self.numer -= other .numer.clone() * &self.denom;
+                self.denom *= &other .denom;
             }
         }
     }
     impl Mul<Frac> for Frac {
         type Output = Frac;
         #[inline]
-        fn mul(self, other: Frac) -> Frac {
-            let f = Frac { numer: self.numer * other.numer, denom: self.denom * other.denom };
+        fn mul(self, other : Frac) -> Frac {
+            let f = Frac { numer: self.numer * other .numer, denom: self.denom * other .denom };
             f.reduce()
         }
     }
     impl Mul<u32> for Frac {
         type Output = Frac;
         #[inline]
-        fn mul(self, other: u32) -> Frac {
-            let f = Frac { numer: self.numer * (other as usize), denom: self.denom };
+        fn mul(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer * (other  as usize), denom: self.denom };
             f.reduce()
         }
     }
     impl<'a> MulAssign<&'a Frac> for Frac {
         #[inline]
-        fn mul_assign(&mut self, other: &'a Frac) {
-            self.numer *= other.numer.clone();
-            self.denom *= other.denom.clone();
+        fn mul_assign(&mut self, other : &'a Frac) {
+            self.numer *= other .numer.clone();
+            self.denom *= other .denom.clone();
         }
     }
     impl Div<Frac> for Frac {
         type Output = Frac;
         #[inline]
-        fn div(self, other: Frac) -> Frac {
-            let f = Frac { numer: self.numer * other.denom, denom: self.denom * other.numer };
+        fn div(self, other : Frac) -> Frac {
+            let f = Frac { numer: self.numer * other .denom, denom: self.denom * other .numer };
             f.reduce()
         }
     }
     impl Div<u32> for Frac {
         type Output = Frac;
         #[inline]
-        fn div(self, other: u32) -> Frac {
-            let f = Frac { numer: self.numer, denom: self.denom * (other as usize) };
+        fn div(self, other : u32) -> Frac {
+            let f = Frac { numer: self.numer, denom: self.denom * (other  as usize) };
             f.reduce()
         }
     }
 
     impl PartialOrd for Frac {
         #[inline]
-        fn partial_cmp(&self, other: &Frac) -> Option<cmp::Ordering> {
-            let lhs = self.numer.clone() * other.denom.clone();
-            let rhs = self.denom.clone() * other.numer.clone();
+        fn partial_cmp(&self, other : &Frac) -> Option<cmp::Ordering> {
+            let lhs = self.numer.clone() * other .denom.clone();
+            let rhs = self.denom.clone() * other .numer.clone();
             lhs.partial_cmp(&rhs)
         }
     }
@@ -1082,23 +1572,6 @@ mod frac_bigratio {
         #[inline]
         fn from(n: i32) -> Frac {
             Frac { numer: From::from(n), denom: From::from(1) }
-        }
-    }
-    impl From<f64> for Frac {
-        fn from(f: f64) -> Frac {
-            use ramp::Int;
-            let (mantissa, exponent, sign): (u64, i16, i8) = f.integer_decode();
-            let mantissa = mantissa as i64;
-            let mantissa = if sign < 0 { -mantissa } else { mantissa };
-            let mantissa = Int::from(mantissa);
-            let (numer, denom) = if exponent < 0 {
-                let e = -exponent as usize;
-                (mantissa, Int::from(2).pow(e))
-            } else {
-                let e = exponent as usize;
-                (mantissa * Int::from(2).pow(e), Int::from(1))
-            };
-            Frac { numer: numer, denom: denom }
         }
     }
 }
@@ -1137,10 +1610,14 @@ impl Scale {
         let (disp_x1, disp_x2) = minmax(p1[0], p2[0]);
         let (disp_y1, disp_y2) = minmax(p1[1], p2[1]);
 
-        let disp_x1 = Frac::from(disp_x1);
-        let disp_x2 = Frac::from(disp_x2);
-        let disp_y1 = Frac::from(disp_y1);
-        let disp_y2 = Frac::from(disp_y2);
+        // assert!(disp_x1.fract() <= 1e-10, "x1 frac: {}", disp_x1.fract());
+        // assert!(disp_x2.fract() <= 1e-10, "x2 frac: {}", disp_x2.fract());
+        // assert!(disp_y1.fract() <= 1e-10, "y1 frac: {}", disp_y1.fract());
+        // assert!(disp_y2.fract() <= 1e-10, "y2 frac: {}", disp_y2.fract());
+        let disp_x1 = Frac::from(disp_x1.trunc() as i64);
+        let disp_x2 = Frac::from(disp_x2.trunc() as i64);
+        let disp_y1 = Frac::from(disp_y1.trunc() as i64);
+        let disp_y2 = Frac::from(disp_y2.trunc() as i64);
         let disp_width = Frac::from(self.width);
         let disp_height = Frac::from(self.height);
         let old_x1 = self.x[0].clone();
@@ -1180,6 +1657,10 @@ impl Scale {
 struct Complex(Frac, Frac);
 impl Complex {
     pub fn bit_length(&self) -> u32 { self.0.bit_length() + self.1.bit_length() }
+    pub fn drop_bits(&mut self, num_bits: usize) {
+        self.0.drop_bits((num_bits + 1) / 2);
+        self.1.drop_bits((num_bits + 1) / 2);
+    }
     #[inline]
     fn mag_less_than_2(&self) -> bool {
         let mut a = self.0.clone().sqr();
@@ -1205,13 +1686,13 @@ impl Complex {
         self.1 *= &Frac::from(2);
     }
     #[inline]
-    fn add(&self, other: &Complex) -> Complex {
-        Complex(self.0.clone() + other.0.clone(), self.1.clone() + other.1.clone())
+    fn add(&self, other : &Complex) -> Complex {
+        Complex(self.0.clone() + other .0.clone(), self.1.clone() + other .1.clone())
     }
     #[inline]
-    fn add_assign(&mut self, other: &Complex) {
-        self.0 += &other.0;
-        self.1 += &other.1;
+    fn add_assign(&mut self, other : &Complex) {
+        self.0 += &other .0;
+        self.1 += &other .1;
     }
 }
 
@@ -1220,17 +1701,18 @@ fn mandelbrot(mut z: Complex, x: u32, y: u32, scale: Scale, max_iters: u32) -> O
     let (x0, y0) = scale.from_display(x, y);
     let c = Complex(x0, y0);
     let mut iteration = 0;
-    let mut sum_bit_lens = 0;
     while iteration < max_iters &&
         z.mag_less_than_2() // z.mag_less_than(Frac::from(2))
     {
-        sum_bit_lens += z.bit_length();
-        z.dsquare();
+    z.dsquare();
         z.add_assign(&c);
         // if z.mag_less_than(Frac::from(1) / Frac::from(2)) { return None; }
         iteration += 1;
     }
-    // println!("iterations: {} sum_bit_lens: {}", iteration, sum_bit_lens);
+    let bits = z.bit_length();
+    if bits > 10000 {
+        println!("iterations: {} bits: {}", iteration, bits);
+    }
     if iteration < max_iters {
         Some(iteration)
     } else {
