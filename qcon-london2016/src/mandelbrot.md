@@ -94,6 +94,7 @@ fn main() {
             'draw: loop {
                 const MAX_ITERATION: u32 = 0x1_00_00_00;
                 const ITER_INCR: u32 = 0x1_00;
+                const ITER_FACTOR: u32 = 4;
                 // const ITER_INCR: u32 = 0x1;
 
                 let mut max_iters = 4;
@@ -101,6 +102,7 @@ fn main() {
                     println!("thread: {} max_iters: 0x{:<8x} = {}", i, max_iters, max_iters);
                     let start_y = i * work_size;
                     let limit_y = cmp::min(start_y + work_size, height);
+                    let mut saw_content = false;
 
                     let sw = Stopwatch::start_new();
                     for y in start_y..limit_y {
@@ -108,7 +110,10 @@ fn main() {
                             let bg_elem = {
                                 let z = Complex(Frac::from(0), Frac::from(0));
                                 match mandelbrot(z, x, y, scale.clone(), max_iters) {
-                                    Some(iters) => BgElem::Escapes(iters),
+                                    Some(iters) => {
+                                        saw_content = true;
+                                        BgElem::Escapes(iters)
+                                    }
                                     None => BgElem::Unknown,
                                 }
                             };
@@ -124,7 +129,11 @@ fn main() {
                     }
 
                     println!("thread: {} iterations: {} time: {:?}", i, max_iters, sw.elapsed());
-                    max_iters += ITER_INCR;
+                    if !saw_content {
+                        max_iters *= ITER_FACTOR;
+                    } else {
+                        max_iters += ITER_INCR;
+                    }
                 }
 
                 // if we finish, then just wait for a new command to come in.
@@ -187,13 +196,24 @@ fn main() {
             texture.update(&mut *e.factory.borrow_mut(), &canvas).unwrap();
         } else if let Some(s) = e.text_args() {
             match &s[..] {
-                "r" => {
-                    println!("reseting to mode: {:?}", mode);
-                    redo_background(DrawSpec {
-                        scale: orig_scale.clone(),
+                "r" | "z" => {
+                    scale = if &s[..] == "z" {
+                        Scale {
+                            x: [Frac::from(-0.7387733983830036),  Frac::from(-0.7387733983830016)],
+                            y: [Frac::from(-0.13407787050277506), Frac::from(-0.13407787050277412)],
+                            width: width,
+                            height: height
+                        }
+                    } else {
+                        orig_scale.clone()
+                    };
+                    let spec = DrawSpec {
+                        scale: scale.clone(),
                         width: width,
                         height: height,
-                    });
+                    };
+                    println!("resetting to spec: {:?} under mode: {:?}", spec, mode);
+                    redo_background(spec);
                 }
                 "-" => {
                     let x0 = scale.x[0].clone();
@@ -288,13 +308,13 @@ fn main() {
 }
 
 // use frac_type_f64::Frac;
-// use frac_wrap_f64::Frac;
+use frac_wrap_f64::Frac;
 // use frac_bigratio::Frac;
 // use frac_dynamic::Frac;
 // use frac_mpq::Frac;
 // use frac_florat::Frac;
 // use frac_fixrat::Frac;
-use frac_limit_bigratio::Frac;
+// use frac_limit_bigratio::Frac;
 
 mod frac_limit_bigratio {
     use std::cmp;
@@ -1341,7 +1361,9 @@ mod frac_wrap_f64 {
             Frac(self.0 * self.0)
         }
     }
-
+    impl Frac {
+        pub fn drop_bits(&mut self, _: usize) { /* no op for f64 rep. */ }
+    }
     use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div};
 
     impl Add<Frac> for Frac {
@@ -1382,6 +1404,7 @@ mod frac_wrap_f64 {
     impl From<u32> for Frac { fn from(n: u32) -> Frac { Frac(n as f64) } }
     impl From<i32> for Frac { fn from(n: i32) -> Frac { Frac(n as f64) } }
     impl From<i64> for Frac { fn from(n: i64) -> Frac { Frac(n as f64) } }
+    impl From<f64> for Frac { fn from(n: f64) -> Frac { Frac(n) } }
 }
 
 mod frac_bigratio {
