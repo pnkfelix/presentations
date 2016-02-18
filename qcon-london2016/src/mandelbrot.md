@@ -1,5 +1,5 @@
 ```rust
-#![feature(augmented_assignments, op_assign_traits)]
+#![feature(float_extras, augmented_assignments, op_assign_traits)]
 #![allow(dead_code)]
 
 extern crate piston_window;
@@ -308,13 +308,214 @@ fn main() {
 }
 
 // use frac_type_f64::Frac;
-use frac_wrap_f64::Frac;
+// use frac_wrap_f64::Frac;
 // use frac_bigratio::Frac;
 // use frac_dynamic::Frac;
 // use frac_mpq::Frac;
 // use frac_florat::Frac;
 // use frac_fixrat::Frac;
 // use frac_limit_bigratio::Frac;
+use frac_bamf::Frac;
+
+mod frac_bamf {
+    use std::cmp;
+    use std::ops;
+
+    /// The Frac here represents the number `x_man * num`.
+    /// Thus the `x_man` is acting as extra bits of mantissaa.
+    ///
+    /// The components of the product are not guaranteed to be
+    /// normalized; thus two Frac's with distinct values for `x_man`
+    /// and `num` may actually represent the same number (at least up
+    /// to the error tolerance levels permitted by the floating-point
+    /// component.)
+    ///
+    /// However, we *do* guarantee in this representation that
+    /// `x_man` is non-zero.
+    #[derive(Copy, Clone, Debug)]
+    pub struct Frac { x_man: u64, num: f64 }
+    impl Frac { pub fn bit_length(&self) -> u32 { 128 } }
+    impl Frac { pub fn drop_bits(&mut self, _: usize) { /* no op */ } }
+    impl Frac { pub fn sqr(self) -> Self { self * self } }
+    use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div};
+
+    impl Frac {
+        fn move_down_bits(&mut self, bits: u32) {
+            // N * F
+            // = (H * 2^bits + L) * F
+            // = H * F * (2^bits + L/H)
+            // = H * (F * 2^bits + F*L/H)
+
+            // ... however, we also must ensure that to never let H go
+            // to zero.
+            debug_assert!(self.x_man != 0);
+            let lz = self.x_man.leading_zeros();
+            let bits = cmp::min(63 - lz, bits);
+
+            let low_mask = !(!0 << bits);
+            let low = self.x_man & low_mask;
+            let high = self.x_man >> bits;
+            let two_to_bits = (1 << bits) as f64;
+            self.x_man = high;
+            self.num *= two_to_bits as f64 + low as f64 / high as f64;
+            debug_assert!(self.x_man != 0);
+        }
+    }
+
+    impl cmp::PartialEq for Frac {
+        fn eq(&self, other: &Frac) -> bool {
+            use std::u64;
+            //      N * F == N' * F'
+            // <==> N * F/F' == N'
+            let lhs = (self.x_man as f64 * (self.num / other.num));
+            if lhs > (u64::MAX as f64) { return false; }
+            if lhs < (u64::MIN as f64) { return false; }
+            (lhs as u64).eq(&other.x_man)
+        }
+    }
+
+    impl cmp::PartialOrd for Frac {
+        fn partial_cmp(&self, other: &Frac) -> Option<cmp::Ordering> {
+            use std::u64;
+            //      N * F < N' * F'
+            // <==> N * F/F' < N'
+            let lhs = (self.x_man as f64 * (self.num / other.num));
+            if lhs > (u64::MAX as f64) { return Some(cmp::Ordering::Greater); }
+            if lhs < (u64::MIN as f64) { return Some(cmp::Ordering::Less); }
+            (lhs as u64).partial_cmp(&other.x_man)
+        }
+    }
+
+    impl Add for Frac {
+        type Output = Frac;
+        fn add(mut self, mut other: Frac) -> Frac {
+            // N * F + N' * F'
+            //
+            // assume w.l.o.g that F > F'
+            //
+            // = N * (F + N'/N * F')
+            // = N * (F + (floor(N'/N) + N' % N * 1/N) * F')
+            // = N * (F + floor(N'/N) * F' + N' % N * 1/N * F')
+
+            if other.num > self.num { return other + self }
+            let n = self.x_man;
+            let s_f = self.num;
+            let o_f = other.num;
+            let div = n / other.x_man;
+            let rem = n % other.x_man;
+            Frac { x_man: n,
+                   num: s_f + (div as f64 * o_f) + rem as f64 * (o_f / n as f64) }
+        }
+    }
+
+    impl Sub for Frac {
+        type Output = Frac;
+        fn sub(mut self, mut other: Frac) -> Frac {
+            self + Frac { x_man: other.x_man, num: -other.num }
+        }
+    }
+
+    impl Mul for Frac {
+        type Output = Frac;
+        fn mul(mut self, mut other: Frac) -> Frac {
+            // N * F * N' * F'
+            // = N * N' * F * F'
+            if let (prod, false) = self.x_man.overflowing_mul(other.x_man) {
+                return Frac { x_man: prod, num: self.num * other.num }
+            }
+            // otherwise x_man overflows; move half the bits of
+            // each into the corresponding float to ensure that
+            // next multiplication will succeed.
+            self.move_down_bits(32);
+            other.move_down_bits(32);
+
+            let (prod, oflow) = self.x_man.overflowing_mul(other.x_man);
+            assert!(!oflow);
+            return Frac { x_man: prod, num: self.num * other.num }
+        }
+    }
+
+    impl Div for Frac {
+        type Output = Frac;
+        fn div(mut self, mut other: Frac) -> Frac {
+            // N * F / N' * F'
+            // = N / N' * F / F'
+            //
+            // but note that integer division would throw away bits.
+            // we can do better via div rem:
+            //
+            // = (floor(N / N') + N % N' * 1/N') * F / F'
+            // = (floor(N / N') * F / F' + (N % N' * 1/N') * F / F')
+            // = floor(N / N') * (F / F' + (N % N' * 1/N') * F / F' / floor(N/N'))
+
+            let div = self.x_man / other.x_man;
+            let rem = self.x_man % other.x_man;
+            let f_over_f = self.num / other.num;
+            // ensure x_man does not go to zero
+            if div == 0 { return Frac { x_man: rem, num: f_over_f }; }
+
+            Frac { x_man: div,
+                   num: (f_over_f + ((rem as f64 * (f_over_f / other.x_man as f64)) / div as f64)) }
+        }
+    }
+
+    impl Div<i32> for Frac {
+        type Output = Frac;
+        fn div(self, other: i32) -> Frac { self / Frac::from(other) }
+    }
+
+
+    impl From<u32> for Frac { fn from(n: u32) -> Frac { Frac { x_man: 1, num: n as f64 } } }
+    impl From<i32> for Frac { fn from(n: i32) -> Frac { Frac { x_man: 1, num: n as f64 } } }
+    impl From<f64> for Frac { fn from(n: f64) -> Frac { Frac { x_man: 1, num: n as f64 } } }
+    impl From<u64> for Frac {
+        fn from(n: u64) -> Frac {
+            if n == 0 { Frac { x_man: 1, num: n as f64 } } else { Frac { x_man: n, num: 1.0 } }
+        }
+    }
+    impl From<i64> for Frac {
+        fn from(n: i64) -> Frac {
+            if n == 0 {
+                Frac { x_man: 1, num: n as f64 }
+            }
+            else if n < 0 {
+                Frac { x_man: -n as u64, num: -1.0 }
+            } else {
+                Frac { x_man: n as u64, num: 1.0 }
+            }
+        }
+    }
+
+    impl ops::AddAssign<Frac> for Frac {
+        fn add_assign(&mut self, other: Frac) { *self = *self + other  }
+    }
+    impl<'a> ops::AddAssign<&'a Frac> for Frac {
+        fn add_assign(&mut self, other: &'a Frac) { *self = *self + *other  }
+    }
+    impl ops::SubAssign<Frac> for Frac {
+        fn sub_assign(&mut self, other: Frac) { *self = *self - other  }
+    }
+    impl<'a> ops::SubAssign<&'a Frac> for Frac {
+        fn sub_assign(&mut self, other: &'a Frac) { *self = *self - *other  }
+    }
+    impl ops::MulAssign<Frac> for Frac {
+        fn mul_assign(&mut self, other: Frac) { *self = *self * other  }
+    }
+    impl<'a> ops::MulAssign<&'a Frac> for Frac {
+        fn mul_assign(&mut self, other: &'a Frac) { *self = *self * *other  }
+    }
+    impl ops::DivAssign<Frac> for Frac {
+        fn div_assign(&mut self, other: Frac) { *self = *self / other  }
+    }
+    impl<'a> ops::DivAssign<&'a Frac> for Frac {
+        fn div_assign(&mut self, other: &'a Frac) { *self = *self / *other  }
+    }
+
+    impl<'a> ops::Add<&'a Frac> for Frac {
+        type Output = Frac;
+        fn add(self, other: &'a Frac) -> Frac { self + *other }
+    }
+}
 
 mod frac_limit_bigratio {
     use std::cmp;
@@ -323,7 +524,6 @@ mod frac_limit_bigratio {
     #[derive(Clone, Debug, PartialEq)]
     pub struct Frac { numer: ramp::Int, denom: ramp::Int, }
     impl Frac { pub fn bit_length(&self) -> u32 { self.numer.bit_length() + self.denom.bit_length() } }
-    impl Frac { pub fn divide_by_4(&mut self) { self.numer >>= 2 } }
     impl Frac {
         pub fn drop_bits(&mut self, num_bits: usize) {
             self.numer >>= num_bits;
@@ -1157,7 +1357,6 @@ mod frac_dynamic {
     #[derive(Clone, Debug, PartialEq)]
     pub struct Frac { numer: MidInt, denom: MidInt, }
     impl Frac { pub fn bit_length(&self) -> u32 { self.numer.bit_length() + self.denom.bit_length() } }
-    impl Frac { pub fn divide_by_4(&mut self) { self.numer >>= 2 } }
     use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div};
 
     impl Frac {
@@ -1414,7 +1613,6 @@ mod frac_bigratio {
     #[derive(Clone, Debug, PartialEq)]
     pub struct Frac { numer: ramp::Int, denom: ramp::Int, }
     impl Frac { pub fn bit_length(&self) -> u32 { self.numer.bit_length() + self.denom.bit_length() } }
-    impl Frac { pub fn divide_by_4(&mut self) { self.numer >>= 2 } }
     use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div};
 
     impl Frac {
