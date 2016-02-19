@@ -99,14 +99,18 @@ fn main() {
         let mut scale = scale.clone();
         let handle = thread::spawn(move || {
             let work_size = (height + NUM_THREADS - 1) / NUM_THREADS;
-            'draw: loop {
-                const MAX_ITERATION: u32 = 0x1_00_00_00;
-                const ITER_INCR: u32 = 0x1_00;
-                const ITER_FACTOR: u32 = 4;
-                // const ITER_INCR: u32 = 0x1;
 
-                // let mut max_iters = 65536;
-                let mut max_iters = 0x1_00;
+            const MAX_ITERATION: u32 = 0x1_00_00_00;
+            const ITER_INCR: u32 = 0x1_00;
+            const ITER_FACTOR: u32 = 4;
+            const ITER_START: u32 = 0x10_00;
+            // const ITER_INCR: u32 = 0x1;
+
+            // let mut max_iters = 65536;
+            let mut reset_min = ITER_START;
+            let mut max_iters = ITER_START;
+
+            'draw: loop {
 
                 while max_iters < MAX_ITERATION {
                     println!("thread: {} max_iters: 0x{:<8x} = {}", i, max_iters, max_iters);
@@ -130,6 +134,23 @@ fn main() {
                             tx.send((x, y, bg_elem)).unwrap();
                             if let Ok(spec) = rx2.try_recv() {
                                 let spec: DrawSpec = spec;
+
+                                // FIXME: move to top of 'draw: loop
+                                println!("switching from scale: {:?} to scale: {:?}", scale, spec.scale);
+
+                                let lo_x = spec.scale.x[0] >= scale.x[0];
+                                let hi_x = spec.scale.x[1] <= scale.x[1];
+                                let lo_y = spec.scale.y[0] >= scale.y[0];
+                                let hi_y = spec.scale.y[1] <= scale.y[1];
+                                let in_bounds = lo_x && hi_x && lo_y && hi_y;
+                                if in_bounds {
+                                    println!("in bounds");
+                                } else {
+                                    println!("!in bounds; resetting reset_min from {} to {}", reset_min, ITER_START);
+                                    reset_min = ITER_START;
+                                }
+
+                                max_iters = reset_min;
                                 scale = spec.scale;
                                 width = spec.width;
                                 height = spec.height;
@@ -141,6 +162,7 @@ fn main() {
                     println!("thread: {} iterations: {} time: {:?}", i, max_iters, sw.elapsed());
                     if !saw_content {
                         max_iters *= ITER_FACTOR;
+                        reset_min = max_iters;
                     } else {
                         max_iters += ITER_INCR;
                     }
@@ -148,6 +170,22 @@ fn main() {
 
                 // if we finish, then just wait for a new command to come in.
                 let spec: DrawSpec = rx2.recv().unwrap();
+
+                // FIXME: move to top of 'draw: loop
+                println!("switching from scale: {:?} to scale: {:?}", scale, spec.scale);
+
+                let in_bounds =
+                    spec.scale.x[0] >= scale.x[0] && spec.scale.x[1] <= scale.x[0] &&
+                    spec.scale.y[0] >= scale.y[0] && spec.scale.y[1] <= scale.y[0];
+
+                if in_bounds {
+                    println!("in bounds");
+                } else {
+                    println!("!in bounds; resetting reset_min from {} to {}", reset_min, ITER_START);
+                    reset_min = ITER_START;
+                }
+
+                max_iters = reset_min;
                 scale = spec.scale;
                 width = spec.width;
                 height = spec.height;
