@@ -11,6 +11,7 @@ extern crate gmp;
 extern crate stopwatch;
 
 const REDUCE_VIA_LCM: bool = false;
+const TOLERANCE: f64 = 0.0000000001;
 
 use im::GenericImage;
 use piston_window::*;
@@ -63,6 +64,13 @@ fn main() {
         // x: [0.0, 1.0], y: [0.0, 1.0], width: width, height: height
     };
 
+    let zoom_scale = Scale {
+        x: [Frac::from(-0.7387733983830036),  Frac::from(-0.7387733983830016)],
+        y: [Frac::from(-0.13407787050277506), Frac::from(-0.13407787050277412)],
+        width: width,
+        height: height
+    };
+
     let mut scale = {
         // let zoomed_scale = Scale {
         //     // x: [Frac::from(-2.5), Frac::from(1)],
@@ -72,7 +80,7 @@ fn main() {
         //     height: height
         //     // x: [0.0, 1.0], y: [0.0, 1.0], width: width, height: height
         // };
-        orig_scale.clone()
+        zoom_scale.clone()
         // zoomed_scale
     };
 
@@ -81,7 +89,7 @@ fn main() {
 
     let background_state: Vec<Cell<BgElem>> =
         vec![Cell::new(BgElem::Unknown); (width * height) as usize];
-    const NUM_THREADS: u32 = 1;
+    const NUM_THREADS: u32 = 8;
     let mut handles_and_ports = vec![];
     let (tx, rx) = channel();
 
@@ -97,7 +105,9 @@ fn main() {
                 const ITER_FACTOR: u32 = 4;
                 // const ITER_INCR: u32 = 0x1;
 
-                let mut max_iters = 4;
+                // let mut max_iters = 65536;
+                let mut max_iters = 0x1_00;
+
                 while max_iters < MAX_ITERATION {
                     println!("thread: {} max_iters: 0x{:<8x} = {}", i, max_iters, max_iters);
                     let start_y = i * work_size;
@@ -198,12 +208,7 @@ fn main() {
             match &s[..] {
                 "r" | "z" => {
                     scale = if &s[..] == "z" {
-                        Scale {
-                            x: [Frac::from(-0.7387733983830036),  Frac::from(-0.7387733983830016)],
-                            y: [Frac::from(-0.13407787050277506), Frac::from(-0.13407787050277412)],
-                            width: width,
-                            height: height
-                        }
+                        zoom_scale.clone()
                     } else {
                         orig_scale.clone()
                     };
@@ -308,16 +313,16 @@ fn main() {
 }
 
 // use frac_type_f64::Frac;
-// use frac_wrap_f64::Frac;
+use frac_wrap_f64::Frac as FFrac;
 // use frac_bigratio::Frac;
 // use frac_dynamic::Frac;
 // use frac_mpq::Frac;
 // use frac_florat::Frac;
 // use frac_fixrat::Frac;
 // use frac_limit_bigratio::Frac;
-use frac_bamf::Frac;
+use frac_bampf::Frac;
 
-mod frac_bamf {
+mod frac_bampf {
     use std::cmp;
     use std::ops;
 
@@ -334,35 +339,24 @@ mod frac_bamf {
     /// `x_man` is non-zero.
     #[derive(Copy, Clone, Debug)]
     pub struct Frac { x_man: u64, num: f64 }
+    impl Frac {
+        fn new(x: u64, n: f64) -> Frac {
+            assert!(x > 0);
+            Frac { x_man: x, num: n }
+        }
+    }
     impl Frac { pub fn bit_length(&self) -> u32 { 128 } }
     impl Frac { pub fn drop_bits(&mut self, _: usize) { /* no op */ } }
     impl Frac { pub fn sqr(self) -> Self { self * self } }
     use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div};
 
-    impl Frac {
-        fn move_down_bits(&mut self, bits: u32) {
-            // N * F
-            // = (H * 2^bits + L) * F
-            // = H * F * (2^bits + L/H)
-            // = H * (F * 2^bits + F*L/H)
-
-            // ... however, we also must ensure that to never let H go
-            // to zero.
-            debug_assert!(self.x_man != 0);
-            let lz = self.x_man.leading_zeros();
-            let bits = cmp::min(63 - lz, bits);
-
-            let low_mask = !(!0 << bits);
-            let low = self.x_man & low_mask;
-            let high = self.x_man >> bits;
-            let two_to_bits = (1 << bits) as f64;
-            self.x_man = high;
-            self.num *= two_to_bits as f64 + low as f64 / high as f64;
-            debug_assert!(self.x_man != 0);
-        }
-    }
+    impl Frac { pub fn to_f64(&self) -> f64 { self.x_man as f64 * self.num } }
 
     impl cmp::PartialEq for Frac {
+        fn eq(&self, other: &Frac) -> bool {
+            self.to_f64().eq(&other.to_f64())
+        }
+        #[cfg(v1)]
         fn eq(&self, other: &Frac) -> bool {
             use std::u64;
             //      N * F == N' * F'
@@ -375,6 +369,10 @@ mod frac_bamf {
     }
 
     impl cmp::PartialOrd for Frac {
+        fn partial_cmp(&self, other: &Frac) -> Option<cmp::Ordering> {
+            self.to_f64().partial_cmp(&other.to_f64())
+        }
+        #[cfg(v1)]
         fn partial_cmp(&self, other: &Frac) -> Option<cmp::Ordering> {
             use std::u64;
             //      N * F < N' * F'
@@ -391,20 +389,35 @@ mod frac_bamf {
         fn add(mut self, mut other: Frac) -> Frac {
             // N * F + N' * F'
             //
-            // assume w.l.o.g that F > F'
+            // assume w.l.o.g that abs(F) > abs(F')
             //
+            // = N * F + N * (N'/N * F')
             // = N * (F + N'/N * F')
-            // = N * (F + (floor(N'/N) + N' % N * 1/N) * F')
-            // = N * (F + floor(N'/N) * F' + N' % N * 1/N * F')
+            // = N * (F + (floor(N'/N) + (N' % N) * 1/N) * F')
+            // = N * (F + floor(N'/N) * F' + (N' % N) * 1/N * F')
 
-            if other.num > self.num { return other + self }
+            // Goal: preserve the x_man with more significant digits
+            if other.x_man.leading_zeros() < self.x_man.leading_zeros() {
+                return other + self;
+            }
+
             let n = self.x_man;
             let s_f = self.num;
             let o_f = other.num;
-            let div = n / other.x_man;
-            let rem = n % other.x_man;
-            Frac { x_man: n,
-                   num: s_f + (div as f64 * o_f) + rem as f64 * (o_f / n as f64) }
+            let div = other.x_man / n;
+            let rem = other.x_man % n;
+            let ret = Frac { x_man: n,
+                             num: s_f + (div as f64 * o_f) + rem as f64 * (o_f / n as f64) };
+            let ret_alt = self.to_f64() + other.to_f64();
+
+            // if (ret.to_f64() - ret_alt).abs() > ::TOLERANCE {
+            //     println!("ADD {:?} TO {:?} => {:?} (VERSUS {})",
+            //              self, other, ret, ret_alt);
+            // } else {
+            //     println!("add {:?} to {:?} => {:?} (versus {})",
+            //              self, other, ret, ret_alt);
+            // }
+            ret
         }
     }
 
@@ -415,29 +428,79 @@ mod frac_bamf {
         }
     }
 
+    impl Frac {
+        fn half_precision(self) -> Frac {
+            // (N * 2^32 + N2) * F
+            // = N * 2^32 * F + N2 * F
+            // = N * 2^32 * F * (1 + N2/(N * 2^32))
+            // = N * (2^32 * F + 2^32 * F * N2/(N * 2^32))
+            // = N * (2^32 * F + F * N2/N)
+
+            let hi = self.x_man >> 32;
+            let lo = self.x_man & !(!0 << 32);
+            let two_to_32 = (1u64 << 32) as f64;
+            let f = self.num;
+            assert!(hi > 0);
+            let new = Frac { x_man: hi,
+                             num: two_to_32 * f + (f * lo as f64) / hi as f64 };
+            // println!("half_precision of {:?} is {:?}",
+            //          self, new);
+            return new;
+        }
+    }
+
     impl Mul for Frac {
         type Output = Frac;
         fn mul(mut self, mut other: Frac) -> Frac {
+            let ret;
+
+            if other.num == 0.0 || self.num == 0.0 {
+                ret = Frac { x_man: 1, num: 0.0 };
+            }
             // N * F * N' * F'
             // = N * N' * F * F'
-            if let (prod, false) = self.x_man.overflowing_mul(other.x_man) {
-                return Frac { x_man: prod, num: self.num * other.num }
-            }
-            // otherwise x_man overflows; move half the bits of
-            // each into the corresponding float to ensure that
-            // next multiplication will succeed.
-            self.move_down_bits(32);
-            other.move_down_bits(32);
+            else if let (prod, false) = self.x_man.overflowing_mul(other.x_man) {
+                ret = Frac { x_man: prod, num: self.num * other.num }
+            } else {
 
-            let (prod, oflow) = self.x_man.overflowing_mul(other.x_man);
-            assert!(!oflow);
-            return Frac { x_man: prod, num: self.num * other.num }
+                // otherwise x_man overflows; move half the bits of
+                // each into the corresponding float to ensure that
+                // next multiplication will succeed.
+
+                match (self.x_man >> 32, other.x_man >> 32) {
+                    (s_high, o_high) if s_high != 0 && o_high != 0 => {
+                        ret = self.half_precision() * other.half_precision();
+                    }
+                    (s_high, 0) if s_high != 0 => {
+                        ret =self.half_precision() * other;
+                    }
+                    (0, o_high) if o_high != 0 => {
+                        ret = self * other.half_precision();
+                    }
+                    (_, _) => {
+                        panic!("how could we have overflowed in this case?");
+                    }
+                }
+            }
+
+            let ret_alt = self.to_f64() * other.to_f64();
+
+            // if (ret.to_f64() - ret_alt).abs() > ::TOLERANCE {
+            //     println!("MUL {:?} BY {:?} => {:?} (VERSUS {})",
+            //              self, other, ret, ret_alt);
+            // } else {
+            //     println!("mul {:?} by {:?} => {:?} (versus {})",
+            //              self, other, ret, ret_alt);
+            // }
+            return ret;
         }
     }
 
     impl Div for Frac {
         type Output = Frac;
         fn div(mut self, mut other: Frac) -> Frac {
+            let ret;
+
             // N * F / N' * F'
             // = N / N' * F / F'
             //
@@ -451,11 +514,28 @@ mod frac_bamf {
             let div = self.x_man / other.x_man;
             let rem = self.x_man % other.x_man;
             let f_over_f = self.num / other.num;
-            // ensure x_man does not go to zero
-            if div == 0 { return Frac { x_man: rem, num: f_over_f }; }
 
-            Frac { x_man: div,
-                   num: (f_over_f + ((rem as f64 * (f_over_f / other.x_man as f64)) / div as f64)) }
+            if other.num != 0.0 && self.num == 0.0 {
+                ret = Frac { x_man: 1, num: 0.0 };
+            } else if div == 0 {
+                // ensure x_man does not go to zero
+                ret = Frac { x_man: rem, num: f_over_f / other.x_man as f64 };
+            } else {
+                ret = Frac {
+                    x_man: div,
+                    num: (f_over_f + ((rem as f64 * (f_over_f / other.x_man as f64)) / div as f64))
+                };
+            }
+
+            // let ret_alt = self.to_f64() / self.to_f64();
+            // if (ret.to_f64() - ret_alt).abs() > ::TOLERANCE {
+            //     println!("DIV {:?} BY {:?} => {:?} (VERSUS {})",
+            //              self, other, ret, ret_alt);
+            // } else {
+            //     println!("div {:?} by {:?} => {:?} (versus {})",
+            //              self, other, ret, ret_alt);
+            // }
+            return ret;
         }
     }
 
@@ -465,9 +545,34 @@ mod frac_bamf {
     }
 
 
-    impl From<u32> for Frac { fn from(n: u32) -> Frac { Frac { x_man: 1, num: n as f64 } } }
-    impl From<i32> for Frac { fn from(n: i32) -> Frac { Frac { x_man: 1, num: n as f64 } } }
-    impl From<f64> for Frac { fn from(n: f64) -> Frac { Frac { x_man: 1, num: n as f64 } } }
+    impl From<u32> for Frac {
+        fn from(n: u32) -> Frac {
+            if n == 0 {
+                Frac { x_man: 1, num: n as f64 }
+            } else {
+                Frac { x_man: n as u64, num: 1.0 }
+            }
+        }
+    }
+    impl From<i32> for Frac {
+        fn from(n: i32) -> Frac {
+            if n == 0 {
+                Frac { x_man: 1, num: n as f64 }
+            } else if n < 0 {
+                Frac { x_man: -n as u64, num: -1.0 }
+            } else {
+                Frac { x_man: n as u64, num: 1.0 }
+            }
+        }
+    }
+    impl From<f64> for Frac {
+        fn from(f: f64) -> Frac {
+            let (mant, exp, sign) = f.integer_decode();
+            let num = 2.0f64;
+            let frac = num.powi(exp as i32);
+            Frac { x_man: mant, num: if sign < 0 { -frac } else { frac } }
+        }
+    }
     impl From<u64> for Frac {
         fn from(n: u64) -> Frac {
             if n == 0 { Frac { x_man: 1, num: n as f64 } } else { Frac { x_man: n, num: 1.0 } }
@@ -477,8 +582,7 @@ mod frac_bamf {
         fn from(n: i64) -> Frac {
             if n == 0 {
                 Frac { x_man: 1, num: n as f64 }
-            }
-            else if n < 0 {
+            } else if n < 0 {
                 Frac { x_man: -n as u64, num: -1.0 }
             } else {
                 Frac { x_man: n as u64, num: 1.0 }
@@ -1867,14 +1971,14 @@ impl Scale {
         debug_assert!(x < self.width);
         debug_assert!(y < self.height);
         let x_delta = self.x[1].clone() - self.x[0].clone();
-        let x_offset = x_delta * Frac::from(x) / Frac::from(self.width);
+        let x_offset = x_delta * (Frac::from(x) / Frac::from(self.width));
         let y_delta = self.y[1].clone() - self.y[0].clone();
-        let y_offset = y_delta * Frac::from(y) / Frac::from(self.height);
+        let y_offset = y_delta * (Frac::from(y) / Frac::from(self.height));
         (self.x[0].clone() + x_offset, self.y[0].clone() + y_offset)
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Complex(Frac, Frac);
 impl Complex {
     pub fn bit_length(&self) -> u32 { self.0.bit_length() + self.1.bit_length() }
@@ -1920,20 +2024,23 @@ impl Complex {
 #[inline]
 fn mandelbrot(mut z: Complex, x: u32, y: u32, scale: Scale, max_iters: u32) -> Option<u32> {
     let (x0, y0) = scale.from_display(x, y);
+
     let c = Complex(x0, y0);
     let mut iteration = 0;
     while iteration < max_iters &&
         z.mag_less_than_2() // z.mag_less_than(Frac::from(2))
     {
-    z.dsquare();
+        z.dsquare();
         z.add_assign(&c);
-        // if z.mag_less_than(Frac::from(1) / Frac::from(2)) { return None; }
         iteration += 1;
     }
-    let bits = z.bit_length();
-    if bits > 10000 {
-        println!("iterations: {} bits: {}", iteration, bits);
-    }
+    // let bits = z.bit_length();
+    // if bits > 10000 {
+    //     println!("iterations: {} bits: {}", iteration, bits);
+    // }
+
+    // println!("mandelbrot: x: {} y: {} => (x0, y0): {:?} iters: {}", x, y, c, iteration);
+
     if iteration < max_iters {
         Some(iteration)
     } else {
