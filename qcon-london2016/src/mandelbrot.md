@@ -320,7 +320,7 @@ fn main() {
 }
 
 // use frac_type_f64::Frac;
-use frac_wrap_f64::Frac as FFrac;
+// use frac_wrap_f64::Frac;
 // use frac_bigratio::Frac;
 // use frac_dynamic::Frac;
 // use frac_mpq::Frac;
@@ -355,7 +355,7 @@ mod frac_bampf {
     impl Frac { pub fn bit_length(&self) -> u32 { 128 } }
     impl Frac { pub fn drop_bits(&mut self, _: usize) { /* no op */ } }
     impl Frac { pub fn sqr(self) -> Self { self * self } }
-    use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div};
+    use std::ops::{Add, Sub, Mul, Div};
 
     impl Frac { pub fn to_f64(&self) -> f64 { self.x_man as f64 * self.num } }
 
@@ -393,7 +393,7 @@ mod frac_bampf {
 
     impl Add for Frac {
         type Output = Frac;
-        fn add(mut self, mut other: Frac) -> Frac {
+        fn add(self, other: Frac) -> Frac {
             // N * F + N' * F'
             //
             // assume w.l.o.g that abs(F) > abs(F')
@@ -415,8 +415,8 @@ mod frac_bampf {
             let rem = other.x_man % n;
             let ret = Frac { x_man: n,
                              num: s_f + (div as f64 * o_f) + rem as f64 * (o_f / n as f64) };
-            let ret_alt = self.to_f64() + other.to_f64();
-
+            // let ret_alt = self.to_f64() + other.to_f64();
+            //
             // if (ret.to_f64() - ret_alt).abs() > ::TOLERANCE {
             //     println!("ADD {:?} TO {:?} => {:?} (VERSUS {})",
             //              self, other, ret, ret_alt);
@@ -430,7 +430,7 @@ mod frac_bampf {
 
     impl Sub for Frac {
         type Output = Frac;
-        fn sub(mut self, mut other: Frac) -> Frac {
+        fn sub(self, other: Frac) -> Frac {
             self + Frac { x_man: other.x_man, num: -other.num }
         }
     }
@@ -458,7 +458,7 @@ mod frac_bampf {
 
     impl Mul for Frac {
         type Output = Frac;
-        fn mul(mut self, mut other: Frac) -> Frac {
+        fn mul(self, other: Frac) -> Frac {
             let ret;
 
             if other.num == 0.0 || self.num == 0.0 {
@@ -490,8 +490,8 @@ mod frac_bampf {
                 }
             }
 
-            let ret_alt = self.to_f64() * other.to_f64();
-
+            // let ret_alt = self.to_f64() * other.to_f64();
+            //
             // if (ret.to_f64() - ret_alt).abs() > ::TOLERANCE {
             //     println!("MUL {:?} BY {:?} => {:?} (VERSUS {})",
             //              self, other, ret, ret_alt);
@@ -505,7 +505,7 @@ mod frac_bampf {
 
     impl Div for Frac {
         type Output = Frac;
-        fn div(mut self, mut other: Frac) -> Frac {
+        fn div(self, other: Frac) -> Frac {
             let ret;
 
             // N * F / N' * F'
