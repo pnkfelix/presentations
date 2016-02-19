@@ -264,12 +264,19 @@ fn main() {
             } else {
                 Mode::NextDrawRect
             };
+            println!("press yields mode: {:?}", mode);
         } else if let Some(_button) = e.release_args() {
             if let (Mode::DrawingRect(last), Some(last_pos)) = (mode, last_pos) {
-                mode = Mode::ZoomTo(last, last_pos);
+                if last_pos[0] < 0.0 || last_pos[1] < 0.0 {
+                    println!("ignore release due to negative values in last_pos");
+                    mode = Mode::Waiting;
+                } else {
+                    mode = Mode::ZoomTo(last, last_pos);
+                }
             } else {
                 mode = Mode::Waiting;
             }
+            println!("release yields mode: {:?}", mode);
         } else if let (Mode::NextDrawRect, Some(pos)) = (mode, args) {
             mode = Mode::DrawingRect(pos);
         } else if let Some(resize) = e.resize_args() {
