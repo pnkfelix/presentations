@@ -830,6 +830,27 @@ mod frac_limit_bigratio {
             Frac { numer: From::from(n), denom: From::from(1) }
         }
     }
+    impl From<f64> for Frac {
+        #[inline]
+        fn from(f: f64) -> Frac {
+            let (mant, mut exp, sign) = f.integer_decode();
+            let mut num = Frac::from(1 as i32);
+            while exp > 0 {
+                if exp % 2 == 0 {
+                    num = num.clone() * num;
+                    exp /= 2;
+                } else {
+                    num = num * Frac::from(2 as i32);
+                    exp -= 1;
+                }
+            }
+            if sign < 0 {
+                num = Frac::from(0) - num;
+            }
+            num = num * Frac::from(mant as i64);
+            num
+        }
+    }
 }
 
 mod frac_fixrat {
@@ -1924,6 +1945,33 @@ mod frac_bigratio {
         #[inline]
         fn from(n: i32) -> Frac {
             Frac { numer: From::from(n), denom: From::from(1) }
+        }
+    }
+    impl From<i64> for Frac {
+        #[inline]
+        fn from(n: i64) -> Frac {
+            Frac { numer: From::from(n), denom: From::from(1) }
+        }
+    }
+    impl From<f64> for Frac {
+        #[inline]
+        fn from(f: f64) -> Frac {
+            let (mant, mut exp, sign) = f.integer_decode();
+            let mut num = Frac::from(1 as i32);
+            while exp > 0 {
+                if exp % 2 == 0 {
+                    num = num.clone() * num;
+                    exp /= 2;
+                } else {
+                    num = num * Frac::from(2 as i32);
+                    exp -= 1;
+                }
+            }
+            if sign < 0 {
+                num = Frac::from(0) - num;
+            }
+            num = num * Frac::from(mant as i64);
+            num
         }
     }
 }
