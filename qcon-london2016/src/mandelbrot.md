@@ -1118,6 +1118,26 @@ mod frac_mpq {
     impl From<u32> for Frac { fn from(x: u32) -> Frac { Frac(From::from(x as i64)) } }
     impl From<i32> for Frac { fn from(x: i32) -> Frac { Frac(From::from(x as i64)) } }
     impl From<i64> for Frac { fn from(x: i64) -> Frac { Frac(From::from(x)) } }
+    impl From<f64> for Frac {
+        fn from(f: f64) -> Frac {
+            let (mant, mut exp, sign) = f.integer_decode();
+            let mut num = Mpq::from(1 as i64);
+            while exp > 0 {
+                if exp % 2 == 0 {
+                    num = num.clone() * num;
+                    exp /= 2;
+                } else {
+                    num = num * Mpq::from(2 as i64);
+                    exp -= 1;
+                }
+            }
+            if sign < 0 {
+                num = -num;
+            }
+            num = num * Mpq::from(mant as i64);
+            Frac(num)
+        }
+    }
 
     impl cmp::PartialEq for Frac {
         fn eq(&self, other : &Frac) -> bool {
@@ -1989,10 +2009,6 @@ impl Scale {
 struct Complex(Frac, Frac);
 impl Complex {
     pub fn bit_length(&self) -> u32 { self.0.bit_length() + self.1.bit_length() }
-    pub fn drop_bits(&mut self, num_bits: usize) {
-        self.0.drop_bits((num_bits + 1) / 2);
-        self.1.drop_bits((num_bits + 1) / 2);
-    }
     #[inline]
     fn mag_less_than_2(&self) -> bool {
         let mut a = self.0.clone().sqr();
