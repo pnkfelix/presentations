@@ -23,6 +23,9 @@ use std::cmp;
 use std::thread;
 use std::sync::mpsc::channel;
 
+// macro_rules! db { ($($e:expr),*) => { println!($($e),*) } }
+macro_rules! db { ($($e:expr),*) => { } }
+
 fn main() {
     let opengl = OpenGL::V3_2;
     let (mut width, mut height) = (300, 300);
@@ -113,7 +116,7 @@ fn main() {
             'draw: loop {
 
                 while max_iters < MAX_ITERATION {
-                    println!("thread: {} max_iters: 0x{:<8x} = {}", i, max_iters, max_iters);
+                    db!("thread: {} max_iters: 0x{:<8x} = {}", i, max_iters, max_iters);
                     let start_y = i * work_size;
                     let limit_y = cmp::min(start_y + work_size, height);
                     let mut saw_content = false;
@@ -136,7 +139,7 @@ fn main() {
                                 let spec: DrawSpec = spec;
 
                                 // FIXME: move to top of 'draw: loop
-                                println!("switching from scale: {:?} to scale: {:?}", scale, spec.scale);
+                                db!("switching from scale: {:?} to scale: {:?}", scale, spec.scale);
 
                                 let lo_x = spec.scale.x[0] >= scale.x[0];
                                 let hi_x = spec.scale.x[1] <= scale.x[1];
@@ -144,9 +147,9 @@ fn main() {
                                 let hi_y = spec.scale.y[1] <= scale.y[1];
                                 let in_bounds = lo_x && hi_x && lo_y && hi_y;
                                 if in_bounds {
-                                    println!("in bounds");
+                                    db!("in bounds");
                                 } else {
-                                    println!("!in bounds; resetting reset_min from {} to {}", reset_min, ITER_START);
+                                    db!("!in bounds; resetting reset_min from {} to {}", reset_min, ITER_START);
                                     reset_min = ITER_START;
                                 }
 
@@ -159,7 +162,7 @@ fn main() {
                         }
                     }
 
-                    println!("thread: {} iterations: {} time: {:?}", i, max_iters, sw.elapsed());
+                    db!("thread: {} iterations: {} time: {:?}", i, max_iters, sw.elapsed());
                     if !saw_content {
                         max_iters *= ITER_FACTOR;
                         reset_min = max_iters;
@@ -172,16 +175,16 @@ fn main() {
                 let spec: DrawSpec = rx2.recv().unwrap();
 
                 // FIXME: move to top of 'draw: loop
-                println!("switching from scale: {:?} to scale: {:?}", scale, spec.scale);
+                db!("switching from scale: {:?} to scale: {:?}", scale, spec.scale);
 
                 let in_bounds =
                     spec.scale.x[0] >= scale.x[0] && spec.scale.x[1] <= scale.x[0] &&
                     spec.scale.y[0] >= scale.y[0] && spec.scale.y[1] <= scale.y[0];
 
                 if in_bounds {
-                    println!("in bounds");
+                    db!("in bounds");
                 } else {
-                    println!("!in bounds; resetting reset_min from {} to {}", reset_min, ITER_START);
+                    db!("!in bounds; resetting reset_min from {} to {}", reset_min, ITER_START);
                     reset_min = ITER_START;
                 }
 
@@ -255,7 +258,7 @@ fn main() {
                         width: width,
                         height: height,
                     };
-                    println!("resetting to spec: {:?} under mode: {:?}", spec, mode);
+                    db!("resetting to spec: {:?} under mode: {:?}", spec, mode);
                     redo_background(spec);
                 }
                 "-" => {
@@ -302,11 +305,11 @@ fn main() {
             } else {
                 Mode::NextDrawRect
             };
-            println!("press yields mode: {:?}", mode);
+            db!("press yields mode: {:?}", mode);
         } else if let Some(_button) = e.release_args() {
             if let (Mode::DrawingRect(last), Some(last_pos)) = (mode, last_pos) {
                 if last_pos[0] < 0.0 || last_pos[1] < 0.0 {
-                    println!("ignore release due to negative values in last_pos");
+                    db!("ignore release due to negative values in last_pos");
                     mode = Mode::Waiting;
                 } else {
                     mode = Mode::ZoomTo(last, last_pos);
@@ -314,15 +317,15 @@ fn main() {
             } else {
                 mode = Mode::Waiting;
             }
-            println!("release yields mode: {:?}", mode);
+            db!("release yields mode: {:?}", mode);
         } else if let (Mode::NextDrawRect, Some(pos)) = (mode, args) {
             mode = Mode::DrawingRect(pos);
         } else if let Some(resize) = e.resize_args() {
-            println!("window resized: {:?}", resize);
+            db!("window resized: {:?}", resize);
         }
 
         if let Mode::ZoomTo(p1, p2) = mode {
-            println!("zooming to mode: {:?}", mode);
+            db!("zooming to mode: {:?}", mode);
             scale.zoom_to(p1, p2);
             redo_background(DrawSpec { scale: scale.clone(), width: width, height: height, });
             mode = Mode::Waiting;
@@ -456,10 +459,10 @@ mod frac_bampf {
             // let ret_alt = self.to_f64() + other.to_f64();
             //
             // if (ret.to_f64() - ret_alt).abs() > ::TOLERANCE {
-            //     println!("ADD {:?} TO {:?} => {:?} (VERSUS {})",
+            //     db!("ADD {:?} TO {:?} => {:?} (VERSUS {})",
             //              self, other, ret, ret_alt);
             // } else {
-            //     println!("add {:?} to {:?} => {:?} (versus {})",
+            //     db!("add {:?} to {:?} => {:?} (versus {})",
             //              self, other, ret, ret_alt);
             // }
             ret
@@ -488,7 +491,7 @@ mod frac_bampf {
             assert!(hi > 0);
             let new = Frac { x_man: hi,
                              num: two_to_32 * f + (f * lo as f64) / hi as f64 };
-            // println!("half_precision of {:?} is {:?}",
+            // db!("half_precision of {:?} is {:?}",
             //          self, new);
             return new;
         }
@@ -531,10 +534,10 @@ mod frac_bampf {
             // let ret_alt = self.to_f64() * other.to_f64();
             //
             // if (ret.to_f64() - ret_alt).abs() > ::TOLERANCE {
-            //     println!("MUL {:?} BY {:?} => {:?} (VERSUS {})",
+            //     db!("MUL {:?} BY {:?} => {:?} (VERSUS {})",
             //              self, other, ret, ret_alt);
             // } else {
-            //     println!("mul {:?} by {:?} => {:?} (versus {})",
+            //     db!("mul {:?} by {:?} => {:?} (versus {})",
             //              self, other, ret, ret_alt);
             // }
             return ret;
@@ -574,10 +577,10 @@ mod frac_bampf {
 
             // let ret_alt = self.to_f64() / self.to_f64();
             // if (ret.to_f64() - ret_alt).abs() > ::TOLERANCE {
-            //     println!("DIV {:?} BY {:?} => {:?} (VERSUS {})",
+            //     db!("DIV {:?} BY {:?} => {:?} (VERSUS {})",
             //              self, other, ret, ret_alt);
             // } else {
-            //     println!("div {:?} by {:?} => {:?} (versus {})",
+            //     db!("div {:?} by {:?} => {:?} (versus {})",
             //              self, other, ret, ret_alt);
             // }
             return ret;
@@ -685,7 +688,7 @@ mod frac_limit_bigratio {
         fn reduce(self) -> Self {
             let bits = self.bit_length();
             if bits > 24 {
-                println!("reduce self: {:?} bits: {}", self, bits);
+                db!("reduce self: {:?} bits: {}", self, bits);
             }
             self
         }
@@ -1066,7 +1069,7 @@ mod frac_florat {
                 }
             }
             if counts[1] > 0 || counts[2] > 1 {
-                println!("counts: {:?}", &counts[1..]);
+                db!("counts: {:?}", &counts[1..]);
             }
             Frac { numer: numer, denom: denom }
         }
@@ -2074,7 +2077,7 @@ impl Scale {
         self.y[0] = new_y1;
         self.y[1] = new_y2;
 
-        println!("zoom {:?} via {:?} {:?} yields {:?}",
+        db!("zoom {:?} via {:?} {:?} yields {:?}",
                  old_scale, p1, p2, self);
     }
 }
@@ -2145,10 +2148,10 @@ fn mandelbrot(mut z: Complex, x: u32, y: u32, scale: Scale, max_iters: u32) -> O
     }
     // let bits = z.bit_length();
     // if bits > 10000 {
-    //     println!("iterations: {} bits: {}", iteration, bits);
+    //     db!("iterations: {} bits: {}", iteration, bits);
     // }
 
-    // println!("mandelbrot: x: {} y: {} => (x0, y0): {:?} iters: {}", x, y, c, iteration);
+    // db!("mandelbrot: x: {} y: {} => (x0, y0): {:?} iters: {}", x, y, c, iteration);
 
     if iteration < max_iters {
         Some(iteration)
