@@ -121,7 +121,7 @@ fn main() {
                     let limit_y = cmp::min(start_y + work_size, height);
                     let mut saw_content = false;
 
-                    let sw = Stopwatch::start_new();
+                    let _sw = Stopwatch::start_new();
                     for y in start_y..limit_y {
                         for x in 0..width {
                             let bg_elem = {
@@ -162,7 +162,7 @@ fn main() {
                         }
                     }
 
-                    db!("thread: {} iterations: {} time: {:?}", i, max_iters, sw.elapsed());
+                    db!("thread: {} iterations: {} time: {:?}", i, max_iters, _sw.elapsed());
                     if !saw_content {
                         max_iters *= ITER_FACTOR;
                         reset_min = max_iters;
@@ -320,8 +320,8 @@ fn main() {
             db!("release yields mode: {:?}", mode);
         } else if let (Mode::NextDrawRect, Some(pos)) = (mode, args) {
             mode = Mode::DrawingRect(pos);
-        } else if let Some(resize) = e.resize_args() {
-            db!("window resized: {:?}", resize);
+        } else if let Some(_resize) = e.resize_args() {
+            db!("window resized: {:?}", _resize);
         }
 
         if let Mode::ZoomTo(p1, p2) = mode {
@@ -2047,7 +2047,7 @@ fn minmax<O:PartialOrd>(a: O, b: O) -> (O, O) {
 
 impl Scale {
     fn zoom_to(&mut self, p1: [f64; 2], p2: [f64; 2]) {
-        let old_scale = self.clone();
+        let _old_scale = self.clone();
         let (disp_x1, disp_x2) = minmax(p1[0], p2[0]);
         let (disp_y1, disp_y2) = minmax(p1[1], p2[1]);
 
@@ -2078,7 +2078,7 @@ impl Scale {
         self.y[1] = new_y2;
 
         db!("zoom {:?} via {:?} {:?} yields {:?}",
-                 old_scale, p1, p2, self);
+            _old_scale, p1, p2, self);
     }
 }
 
