@@ -7,6 +7,7 @@ extern crate image as im;
 extern crate vecmath;
 extern crate ramp;
 extern crate num;
+#[cfg(feature = "gmp")]
 extern crate gmp;
 extern crate stopwatch;
 
@@ -1151,6 +1152,7 @@ mod frac_florat {
     }
 }
 
+#[cfg(feature = "gmp")]
 mod frac_mpq {
     use gmp::mpq::Mpq;
     use std::cmp;

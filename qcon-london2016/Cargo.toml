@@ -11,7 +11,6 @@ image = "0.6.0"
 vecmath = "0.2.0"
 ramp = "0.2.3"
 num = "0.1.30"
-rust-gmp = "0.2.10"
 stopwatch = "0.0.6"
 
 # The preprocessor is the `tango` crate, so we need to add that
@@ -27,6 +26,13 @@ cmd-pandoc = "^0.2.*"
 
 [lib]
 name = "lib"
+
+[features]
+gmp = ["rust-gmp"]
+
+[dependencies.rust-gmp]
+version = "0.2.10"
+optional = true
 
 [[bin]]
 name = "paint"
