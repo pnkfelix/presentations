@@ -28,6 +28,8 @@ We list all the source we want included as part of the build / test process here
 ```rust
 pub mod a00_title;
 pub mod a01_opening;
+pub mod a02_ownership;
+pub mod a03_sharing;
 pub mod b01_concurrency_demos;
 pub mod z99_closing;
 ```

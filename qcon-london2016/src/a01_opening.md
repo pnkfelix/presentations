@@ -1,10 +1,10 @@
 # Why Rust {.center}
 
-## Why Rust { .big_text }
+## Why Rust { .big_text data-transition="fade-out" }
 
 > - Fast code, low memory footprint
-> - Choose your level of abstraction: bare metal ...
-  <div class="fragment">... or higher-order functional combinators</div>
+> - Go from bare metal (assembly; C FFI) ...
+  <div class="fragment">... to high-level (closures, generic containers) ...</div>
   <div class="fragment">with *zero cost*</div>
 > - *Safety*
 > - *Parallelism*
@@ -77,7 +77,19 @@ impl ::std::ops::Index<(usize, usize)> for Matrix {
 ```
 -->
 
-## Demo: `for` and indexing { data-transition="fade-out" }
+## Talk plan
+
+>- "Why Rust" Demonstration
+>- "Ownership is easy"
+   ... or is it?
+>- ___Sharing
+   -----------------------------  --------------------------------
+   Sharing *capabilities*         (PL stuff)
+   Sharing computational *work*   (Parallelism stuff)
+   Shared *code*                  (Open source distribution stuff)
+   -----------------------------  --------------------------------
+
+## Demo: `for` and indexing { data-transition="fade" }
 
 ```rust
 // Matrix multiply
@@ -455,7 +467,3 @@ fn bench_par_iter(b: &mut ::test::Bencher) {
 ```
 
 -->
-
-# "Rust is about ownership" { .center }
-
-# "Rust is about ownership and sharing" { .center }
