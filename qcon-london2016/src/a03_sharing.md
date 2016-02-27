@@ -2,6 +2,7 @@
 
 <!--
 ```rust
+#[derive(Copy, Clone)]
 enum Color { Red, Black }
 enum Engine { BrokenV8, VintageV8 }
 struct Apartment;
@@ -12,7 +13,11 @@ type Home = Apartment;
 
 ## Rust types
 
-Basic data types (`T`): `String`, `Vec<T>`, `i32`
+Move                     Copy               Copy if `T:Copy`
+-----------------------  ------------------ -------------------------
+`Vec<T>`, `String`, ...  `i32`, `char`, ... `[T; n]`, `(T1, T2, ...)`
+
+. . .
 
 ```rust
 struct Car { color: Color, engine: Engine }
@@ -25,12 +30,11 @@ fn demo_ownership() {
 
 . . .
 
-Primitive references to data (`&T`, `&mut T`):
+references to data (`&mut T`, `&T`):
 
 ```rust
     let my_home: &Home;
     let christine: &mut Car;
-
     my_home = &apartments[6];
     let neighbors_home = &apartments[5];
     christine = &mut used_car;
@@ -62,7 +66,9 @@ If I own a car, and I lend the keys to Arnie, I *still* own the car
 
 <!--
 ```rust
-fn invite_friend_over() -> Arnie { Arnie { partner: NoGirlfriend } }
+fn invite_friend_over() -> Arnie {
+    Arnie { fav_color: Color::Black, partner: NoGirlfriend }
+}
 type Location = ();
 static work: Location = ();
 impl Car {
@@ -106,7 +112,7 @@ fn borrow_the_car_2() {
 ```rust
 use std::rc::Rc;
 use std::cell::RefCell;
-struct Arnie<GF=NoGirlfriend> { partner: GF }
+struct Arnie<GF=NoGirlfriend> { fav_color: Color, partner: GF }
 struct ArnieLongTermRelationship<'a> { partner: &'a Leigh<'a> }
 struct NoGirlfriend;
 struct Leigh<'a> { car: RefCell<Option<&'a mut Car>> }
@@ -120,40 +126,38 @@ impl<'a> Partner<'a> for Leigh<'a> {
         *self.car.borrow_mut() = Some(c);
     }
 }
-impl Arnie { fn lend(&self, c: &mut Car) { self.lend_1(c); } }
+impl Arnie { fn lend(&self, c: &mut Car) { lend_1(self, c); lend_2(self, c); } }
 ```
 -->
 
-Possessing the keys, Arnie can take car for a new paint job.
+Possessing the keys, Arnie could take the car for a new paint job.
 
 ```rust
-impl Arnie { fn lend_1(&self, k: &mut Car) { k.color = Color::Black; } }
+fn lend_1(arnie: &Arnie, k: &mut Car) { k.color = arnie.fav_color; }
 ```
 
-Or he can lend keys to someone else (*reborrowing*) before paint job
+Or lend keys to someone else (*reborrowing*) before paint job
 
 ```rust
-impl Arnie {
-    fn lend_2(&self, k: &mut Car) {
-        self.partner.lend(k); k.color = Color::Black;
-    }
+fn lend_2(arnie: &Arnie, k: &mut Car) {
+    arnie.partner.lend(k); k.color = arnie.fav_color;
 }
 ```
 
-(Can even *transfer* exclusive access; *Arnie* never gets keys back!)
+*Transfer* access; *Arnie* never gets keys back! (details at linked code)
 
 ``` {.rust .compile_error}
-        self.partner.take(k); k.color = Color::Black;
-        //                    ~~~~~~~~~~~~~~~~~~~~~~
-        // error: cannot assign to `k.color` because it is borrowed
+    arnie.partner.take(k); k.color = arnie.fav_color;
+    //                     ~~~~~~~~~~~~~~~~~~~~~~~~~
+    // error: cannot assign to `k.color` because it is borrowed
 ```
 
 <!-- Not sure this snippet pays for itself so commenting out for now
 
 ``` {.rust .compile_error}
 impl<'b> ArnieLongTermRelationship<'b> {
-    fn lend_3(&self, k: &'b mut Car) {
-        self.partner.take(k); k.color = Color::Black;
+    fn lend_3<'b>(&self, k: &'b mut Car) {
+        self.partner.take(k); k.color = arnie.fav_color;
         // error: cannot assign to `k.color` because it is borrowed
     }
 }
@@ -187,7 +191,7 @@ fn borrow_the_car_3() {
 }
 ```
 
-(*): Sadly, return of "car keys" only a Rust guarantee, not physical world
+(*): "Car keys" return guaranteed by Rust; sadly, not by physical world
 
 ## Shared Access {.center}
 
@@ -195,7 +199,7 @@ fn borrow_the_car_3() {
 
 ## Shared Access with `&T`
 
-Many consumers do not require exclusive access to referenced data
+Many consumers do not require *exclusive* access to referenced data
 
  * validate a string input
 
@@ -205,7 +209,7 @@ Many consumers do not require exclusive access to referenced data
 
  * update some state *explicitly exposed* for shared mutation
 
-Such cases are what `&T` is for
+Shared references `&T` are for such cases
 
 ## `&T` example: string validation
 
@@ -235,11 +239,10 @@ fn validate(s: &str) -> Result<(), ValidationError> {
 
 ## `&T` example: exposed mutable state
 
-Test-driven demonstration:
+Test-driven demonstration
 
 ```rust
 use std::cell::Cell;
-use std::ops::Range;
 
 struct TrackMaxSeen {
     v: Vec<i64>,
@@ -247,22 +250,73 @@ struct TrackMaxSeen {
 }
 
 #[test]
-fn demo_sum_range() {
-    let tms = TrackMaxSeen::new(vec![1, 2, 3, 4]);
+fn demo_tms_sum_range() {
+    let tms = TrackMaxSeen { v: vec![1, 2, 3, 4],
+                             last_read: Cell::new(None) };
+    assert_eq!(tms.last_read.get(), None);
     assert_eq!(sum_range(&tms, 2..4), 7);
     assert_eq!(sum_range(&tms, 0..2), 3);
     assert_eq!(tms.last_read.get(), Some(2));
 }
 ```
 
-----
+No `mut` in sight! (We will revisit this in a moment.)
+
+## Ownership patterns
+
+Single owner: `T`, `Box<T>`, collections, arenas
 
 ```rust
-impl TrackMaxSeen {
-    fn new(v: Vec<i64>) -> Self {
-        TrackMaxSeen { v: v, last_read: Cell::new(None) }
-    }
+fn single_owner_demo() {
+    let data = ['h','e','l','l','o'];           // ⇐ stack-allocated
+    let boxed: Box<[char; 5]> = Box::new(data); // ⇐ heap reference
+    let vector: Vec<char> = vec!['h','e','l','l','o'];
+    // Heap storage automaticaly deallocated at end of owner's scope
 }
+```
+
+## Ownership patterns II
+
+Shared ownership: `Rc<T>`
+
+<!--
+```rust
+fn helper<T>(x: T) {}
+```
+-->
+
+```rust
+#[test]
+fn shared_owner_demo_1() {
+    let r_one = Rc::new(vec!['h','e','l','l','o']);
+    let r_two = r_one.clone();
+    assert_eq!(r_one[0], 'h'); // ⇐ &-access is allowed
+    helper(r_two.clone()); // ⇐ re-share ownership with helpers
+}
+```
+
+Since ownership is shared, once we have an `Rc<T>`, mus conservatively
+assume it is shared; implies we cannot get `&mut`-ref out of an `Rc`.
+
+## Ownership patterns III
+
+```rust
+#[test]
+fn shared_owner_demo_2() {
+    let data = [Cell::new('h'), Cell::new('o')];
+    let r_one: Rc<[Cell<char>; 2]> = Rc::new(data);
+    let r_two = r_one.clone();
+    assert_eq!(r_one[0].get(), 'h'); // ⇐ &-access is allowed
+    r_two[0].set('a');               // thus we can set `Cell` elements
+    assert_eq!(r_one[0].get(), 'a'); // ⇐ and observe it via other owners
+}
+```
+
+... again no `mut` in sight!
+
+<!--
+```rust
+use std::ops::Range;
 
 fn sum_range(tms: &TrackMaxSeen, range: Range<usize>) -> i64 {
     let mut sum = 0;
@@ -277,7 +331,7 @@ fn sum_range(tms: &TrackMaxSeen, range: Range<usize>) -> i64 {
     return sum;
 }
 ```
-
+-->
 
 
 
