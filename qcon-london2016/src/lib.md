@@ -30,6 +30,8 @@ pub mod a00_title;
 pub mod a01_opening;
 pub mod a02_ownership;
 pub mod a03_sharing;
+pub mod a04_parallelism;
+pub mod a05_cargo;
 pub mod b01_concurrency_demos;
 pub mod z99_closing;
 ```
