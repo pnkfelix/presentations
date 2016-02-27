@@ -31,7 +31,9 @@ let my_car = garage.unpark();
 my_car.drive_to(work);
 ```
 
-## Corrected: Ownership is intuitive, except for programmers ... { .center }
+## Correction: Ownership is intuitive, except for programmers ...  { .center }
+
+(copying data like integers and characters is free)
 
 . . .
 
@@ -41,7 +43,7 @@ my_car.drive_to(work);
 
 ("On sense and reference" -- Gottlob Frege, 1892)
 
-If ownership was all we had, details of prior slide seem nonsensical
+If ownership were all we had, car-purchase slide seems nonsensical
 
 ``` {.rust}
 my_new_car.drive_to(home);
@@ -61,6 +63,12 @@ We must distinguish an object itself from ways to name that object
 
  * `home` must instead be some kind of *reference* to a `Home`
 
+## So we will need references {.center}
+
+> We can solve any problem by introducing an extra level of indirection
+
+-- David J. Wheeler
+
 ## a truth: Ownership *is* important {.center}
 
 ## Ownership is important
@@ -74,16 +82,17 @@ no data races            many multithreading heisenbugs
 
 . . .
 
-Ownership also forces one to answer questions like:
-
 > Do I need to take ownership here, accepting the associated
 > resource management responsibility? Would temporary
 > access suffice?
 
+. . .
+
 Good developers ask this already!
 
-Rust forces function signatures to encode explicit answers,
-(and they are checked by the compiler).
+Rust forces function signatures to encode the answers
+
+(and they are checked by the compiler)
 
 <div class="notes">
 Its worth pointing out that the encoded answer can
