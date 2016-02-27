@@ -37,8 +37,8 @@ optional = true
 
 [[bin]]
 name = "paint"
-path = "src/paint.rs"
+path = "src/demos/paint.rs"
 
 [[bin]]
 name = "mandelbrot"
-path = "src/mandelbrot.rs"
+path = "src/demos/mandelbrot.rs"
