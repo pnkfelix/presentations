@@ -1,4 +1,4 @@
-# Ownership and sharing { .center }
+# Sharing Data: Ownership and References { .center }
 
 <!--
 ```rust
