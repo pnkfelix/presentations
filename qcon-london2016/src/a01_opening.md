@@ -1,6 +1,6 @@
-# Why Rust {.center}
+# Why ...? {.center}
 
-## Why Rust { .big_text data-transition="fade-out" }
+## Why use Rust? { .big_text data-transition="fade-out" }
 
 > - Fast code, low memory footprint
 > - Go from bare metal (assembly; C FFI) ...
@@ -13,6 +13,22 @@
  * So far, sounds like C++
  * "the UB stops here"
 </div>
+
+## Why would you work on Rust?  { .big_text data-transition="fade" }
+
+. . .
+
+Was the previous slide an insufficient answer?
+
+## Why would Mozilla sponsor Rust?   { data-transition="fade" }
+
+>- Hard to prototype research atop C++ code base
+
+>- Rust ⇒ Servo, WebRender
+
+>- Want Rust for next-gen infrastructure (services, IoT)
+
+>- > "Our mission is to ensure the Internet is a global public resource, open and accessible to all. An Internet that truly puts people first, where individuals can shape their own experience and are empowered, safe and independent."
 
 <!-- Abstract Demo Support Code
 
@@ -99,7 +115,6 @@ fn sequential_web_fetch() {
     let sites = &["http://www.eff.org/", "http://rust-lang.org/",
         "http://imgur.com", "http://mozilla.org"];
 
-
     for site_ref in sites {
         let site = *site_ref; // (separated for expository purposes)
 
@@ -118,13 +133,12 @@ fn sequential_web_fetch() {
 ## Demo: concurrent web page fetch { data-transition="fade-in" }
 
 ```rust
-fn concurrent_web_fetch() {
+fn concurrent_web_fetch() -> Vec<::std::thread::JoinHandle<()>> {
     use hyper::{self, Client};
     use std::io::Read; // pulls in `chars` method
 
     let sites = &["http://www.eff.org/", "http://rust-lang.org/",
         "http://imgur.com", "http://mozilla.org"];
-
     let mut handles = Vec::new();
     for site_ref in sites {
         let site = *site_ref;
@@ -141,7 +155,7 @@ fn concurrent_web_fetch() {
         handles.push(handle);
     }
 
-    for handle in handles { handle.join(); }
+    return handles;
 }
 ```
 
@@ -170,17 +184,17 @@ site: http://www.eff.org/ chars: 42425
 
 <!--
 ```rust
-// #[should_panic]
+#[should_panic]
 #[test]
 fn web_fetch() {
-    concurrent_web_fetch();
+    for j in concurrent_web_fetch() { j.join(); }
     sequential_web_fetch();
     panic!("want to see output");
 }
 ```
 -->
 
-## what is this you say of "soundness"? {.center}
+## "what is this 'soundness' of which you speak?" {.center}
 
 ## Demo: soundness I  { data-transition="fade-out" }
 
@@ -192,7 +206,6 @@ fn sequential_web_fetch_2() {
     let sites = &["http://www.eff.org/", "http://rust-lang.org/",
     //  ~~~~~ `sites`, an array (slice) of strings, is stack-local
         "http://imgur.com", "http://mozilla.org"];
-
 
     for site_ref in sites {
     //  ~~~~~~~~ `site_ref` is a *reference to* elem of array.
@@ -209,15 +222,14 @@ fn sequential_web_fetch_2() {
 ## Demo: soundness II  { data-transition="fade-in" }
 
 ```{.rust .compile_error}
-fn concurrent_web_fetch_2() {
+fn concurrent_web_fetch_2() -> Vec<::std::thread::JoinHandle<()>> {
     use hyper::{self, Client};
     use std::io::Read; // pulls in `chars` method
 
     let sites = &["http://www.eff.org/", "http://rust-lang.org/",
     //  ~~~~~ `sites`, an array (slice) of strings, is stack-local
         "http://imgur.com", "http://mozilla.org"];
-
-
+    let mut handles = Vec::new();
     for site_ref in sites {
     //  ~~~~~~~~ `site_ref` still a *reference* into an array
         let handle = ::std::thread::spawn(move || {
@@ -227,9 +239,11 @@ fn concurrent_web_fetch_2() {
             assert_eq!(res.status, hyper::Ok);
             let char_count = res.chars().count();
             println!("site: {} chars: {}", site_ref, char_count);
-            // will that array still be around when above runs?
+            // Q: will `sites` array still be around when above runs?
         });
+        handles.push(handle);
     }
+    return handles;
 }
 ```
 
