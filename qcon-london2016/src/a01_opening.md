@@ -47,6 +47,8 @@ oh, maybe you meant ...
    Sharing *code*                 (Open source distribution stuff)
    -----------------------------  --------------------------------
 
+# Lightning Demo
+
 ## Demo: sequential web page fetch  { data-transition="fade-out" }
 
 ``` {.rust}
