@@ -15,6 +15,22 @@
 
 ## Safety and Parallelism {.center}
 
+### Safety
+
+* No segmentation faults
+
+* No undefined behavior
+
+* No data races
+
+### (Multi-paradigm) Parallelism
+
+  * msg passing via channels
+
+  * shared state via `Arc` and atomics, `Mutex`, etc
+
+  * use native threads... or scoped threads... or work-stealing...
+
 ## Why would you (Felix) work on Rust?  { .big_text data-transition="fade" }
 
 . . .
