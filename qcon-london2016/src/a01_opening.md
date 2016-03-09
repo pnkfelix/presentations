@@ -1,3 +1,7 @@
+## Slides online
+
+### `http://bit.ly/1LQM3PS`
+
 # Why ...? {.center}
 
 ## Why use Rust? { .big_text data-transition="fade-out" }
