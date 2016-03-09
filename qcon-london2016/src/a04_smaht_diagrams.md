@@ -247,8 +247,7 @@ You then might spend much less time wrestling with Rust's type (+borrow) checker
 
 . . .
 
-The point: `Rc<RefCell<T>>` is nearly an anti-pattern. It limits you
-in ways we will see. You should avoid it if you can.
+The point: `Rc<RefCell<T>>` is nearly an anti-pattern. It limits static reasoning. You should avoid it if you can.
 
 ## Other kinds of shared ownership
 
