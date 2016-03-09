@@ -36,6 +36,16 @@ oh, maybe you meant ...
 
 >- > "Our mission is to ensure the Internet is a global public resource, open and accessible to all. An Internet that truly puts people first, where individuals can shape their own experience and are empowered, safe and independent."
 
+>- "accessible to all"
+
+## Where is Rust now?
+
+ * 1.0 release back in May 2015
+
+ * Rolling release cycle (up to Rust 1.7 as of March 2nd 2016)
+
+ * Awesome developer community
+
 ## Talk plan
 
 >- "Why Rust" Demonstration
@@ -59,7 +69,7 @@ fn sequential_web_fetch() {
     let sites = &["http://www.eff.org/", "http://rust-lang.org/",
         "http://imgur.com", "http://mozilla.org"];
 
-    for &site in sites {
+    for &site in sites { // step through the array...
         let client = Client::new();
         let res = client.get(site).send().unwrap();
         assert_eq!(res.status, hyper::Ok);
@@ -68,6 +78,10 @@ fn sequential_web_fetch() {
     }
 }
 ```
+
+. . .
+
+(lets get rid of the Rust-specific pattern binding in `for`; this is not a tutorial)
 
 ## Demo: sequential web page fetch  { data-transition="fade" }
 
@@ -79,7 +93,7 @@ fn sequential_web_fetch() {
     let sites = &["http://www.eff.org/", "http://rust-lang.org/",
         "http://imgur.com", "http://mozilla.org"];
 
-    for site_ref in sites {
+    for site_ref in sites { // step through the array...
         let site = *site_ref; // (separated for expository purposes)
 
         { // (and a separate block, again for expository purposes)

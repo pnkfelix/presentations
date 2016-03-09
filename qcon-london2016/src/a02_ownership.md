@@ -38,7 +38,7 @@ garage.park(my_new_car);
 ```
 
 ``` {.rust .compile_error}
-my_new_car.drive_to(...) now doesn't work
+my_new_car.drive_to(...) // now doesn't work
 ```
 
 (can't drive car without access to it, e.g. taking it
@@ -61,7 +61,7 @@ and car transferred to us.
 ``` {.rust}
 my_new_car.drive_to(home);
 garage.park(my_new_car);
-// my_new_car.drive_to(...) now doesn't work
+// my_new_car.drive_to(...) // now doesn't work
 ```
 
 (can't drive car without access to it, e.g. taking it

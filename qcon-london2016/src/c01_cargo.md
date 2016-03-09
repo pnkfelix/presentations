@@ -1,6 +1,52 @@
 # Sharing Code: Cargo {.center}
 
+## Sharing Code
+
+`std::thread` is provided with std lib
+
+. . .
+
+But `dispatch`, `crossbeam`, and `rayon` are 3rd party
+
+(not to mention `hyper` and a host of other crates used in this talk's construction)
+
+. . .
+
+What is Rust's code distribution story?
+
 ## Cargo
+
+`cargo` is really simple to use
+
+. . .
+
+```
+cargo new     -- create a project
+cargo test    -- run project's unit tests
+cargo run     -- run binaries associated with project
+cargo publish -- push project up to crates.io
+```
+
+. . .
+
+Edit the associated `Cargo.toml` file to:
+
+ * add dependencies
+ * specify version / licensing info
+ * conditionally compiled features
+ * add build-time behaviors (e.g. code generation)
+
+. . .
+
+"What's this about `crates.io`?"
+
+## crates.io
+
+Open-source crate distribution site
+
+Has every version of every crate
+
+Cargo adheres to *semver*
 
 ## Semver
 
@@ -40,8 +86,17 @@ used *simultaneously* in the same program.
 
 This is important when pulling in third party libraries.
 
-The compiler ensures that you never mistakenly pass a struct defined
-in version 2 of library X to a function that is expecting the struct
-to match that of X version 1.
+## Crate dependency graph
+
+Compiler ensures one cannot pass struct defined
+via `X` version 2.x.y into function expecting
+`X` version 1.m.n, or vice versa.
 
 [Semantic Versioning]: http://semver.org/
+
+![](crate_dep_graph.png)
+
+------------------------ --------------------- -------------------
+`A`: Graph Structure       `B`: Token API
+`C`: Lexical Scanner       `D`: GLL Parser     `P`: Linked Program
+------------------------ --------------------- -------------------

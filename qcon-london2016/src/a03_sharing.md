@@ -14,8 +14,8 @@ type Home = Apartment;
 ## Rust types
 
 Move                     Copy               Copy if `T:Copy`
------------------------  ------------------ -------------------------
-`Vec<T>`, `String`, ...  `i32`, `char`, ... `[T; n]`, `(T1, T2, ...)`
+-----------------------  ------------------ ----------------------------
+`Vec<T>`, `String`, ...  `i32`, `char`, ... `[T; n]`, `(T1,T2,T3)`, ...
 
 . . .
 
@@ -33,9 +33,9 @@ fn demo_ownership() {
 references to data (`&mut T`, `&T`):
 
 ```rust
-    let my_home: &Home;
-    let christine: &mut Car;
-    my_home = &apartments[6];
+    let my_home: &Home;      // <-- an "immutable" borrow
+    let christine: &mut Car; // <-- a "mutable" borrow
+    my_home = &apartments[6]; //      (read `mut` as "exclusive")
     let neighbors_home = &apartments[5];
     christine = &mut used_car;
     christine.engine = Engine::VintageV8;
@@ -81,6 +81,8 @@ let read_only_borrow = &christine;
 ```
 
 ![single inspector (immutable borrow)](christine_car_single_inspector.png)
+
+(apologies to Randall Munroe))
 
 ----
 
@@ -172,7 +174,7 @@ fn borrow_the_car_2() {
 }
 ```
 
-## Todo Code Link
+## Extending the metaphor
 
 <!--
 ```rust
@@ -210,193 +212,7 @@ fn lend_2(arnie: &Arnie, k: &mut Car) {
 }
 ```
 
-*Transfer* access; *Arnie* never gets keys back! (details at linked code)
 
-``` {.rust .compile_error}
-    arnie.partner.take(k); k.color = arnie.fav_color;
-    //                     ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // error: cannot assign to `k.color` because it is borrowed
-```
+## End of metaphor
 
-<!-- Not sure this snippet pays for itself so commenting out for now
-
-``` {.rust .compile_error}
-impl<'b> ArnieLongTermRelationship<'b> {
-    fn lend_3<'b>(&self, k: &'b mut Car) {
-        self.partner.take(k); k.color = arnie.fav_color;
-        // error: cannot assign to `k.color` because it is borrowed
-    }
-}
-```
--->
-
-----
-
-Owner loses capabilities attached to `&mut`-borrows only
-*temporarily* (*)
-
-<div class="notes">
-Keys *will* return after `&mut`-borrow ends; I, the owner, will regain
-exclusive access (and the ability to lend out the keys again, or
-transfer ownership elsewhere, or even destroy Christine).
-</div>
-
-```rust
-fn borrow_the_car_3() {
-    let mut christine = Car::new();
-    {
-        let car_keys = &mut christine;
-        let arnie = invite_friend_over();
-        arnie.lend(car_keys);
-
-        // Cannot use `christine` while mutably borrowed.
-
-    } // end of scope for `arnie` and `car_keys`
-
-    // We can again access `christine` here
-}
-```
-
-(*): "Car keys" return guaranteed by Rust; sadly, not by physical world
-
-# Shared Access
-
-## Shared Access {.center}
-
-### Back to the world of computers
-
-## Shared Access with `&T`
-
-Many consumers do not require *exclusive* access to referenced data
-
- * validate a string input
-
- * search a table for the entry for some key
-
- * allocate new (unbalanced) tree from references to children
-
- * update some state *explicitly exposed* for shared mutation
-
-Shared references `&T` are for such cases
-
-## `&T` example: string validation
-
-Problem: validate a string input to ensure it is a "good" password.
-
-```rust
-enum ValidationError { NeedDigit, NeedNonAlphaNum }
-
-fn validate(s: &str) -> Result<(), ValidationError> {
-    let has_digit = s.chars()
-        .any(|c| match c { '0'...'9' => true, _ => false });
-    let has_nonalnum = s.chars()
-        .any(|c| match c { '0'...'9' |
-                           'a'...'z' |
-                           'A'...'Z' => false,
-                           _ => true });
-
-    if !has_digit {
-        Err(ValidationError::NeedDigit)
-    } else if !has_nonalnum {
-        Err(ValidationError::NeedNonAlphaNum)
-    } else {
-        Ok(())
-    }
-}
-```
-
-## `&T` example: exposed mutable state
-
-Test-driven demonstration
-
-```rust
-use std::cell::Cell;
-
-struct TrackMaxSeen {
-    v: Vec<i64>,
-    last_read: Cell<Option<i64>>,
-}
-
-#[test]
-fn demo_tms_sum_range() {
-    let tms = TrackMaxSeen { v: vec![1, 2, 3, 4],
-                             last_read: Cell::new(None) };
-    assert_eq!(tms.last_read.get(), None);
-    assert_eq!(sum_range(&tms, 2..4), 7);
-    assert_eq!(sum_range(&tms, 0..2), 3);
-    assert_eq!(tms.last_read.get(), Some(2));
-}
-```
-
-No `mut` in sight! (We will revisit this in a moment.)
-
-## Ownership patterns
-
-Single owner: `T`, `Box<T>`, collections, arenas
-
-```rust
-fn single_owner_demo() {
-    let data = ['h','e','l','l','o'];           // ⇐ stack-allocated
-    let boxed: Box<[char; 5]> = Box::new(data); // ⇐ heap reference
-    let vector: Vec<char> = vec!['h','e','l','l','o'];
-    // Heap storage automaticaly deallocated at end of owner's scope
-}
-```
-
-## Ownership patterns II
-
-Shared ownership: `Rc<T>`
-
-<!--
-```rust
-fn helper<T>(x: T) {}
-```
--->
-
-```rust
-#[test]
-fn shared_owner_demo_1() {
-    let r_one = Rc::new(vec!['h','e','l','l','o']);
-    let r_two = r_one.clone();
-    assert_eq!(r_one[0], 'h'); // ⇐ &-access is allowed
-    helper(r_two.clone()); // ⇐ re-share ownership with helpers
-}
-```
-
-Since ownership is shared, once we have an `Rc<T>`, mus conservatively
-assume it is shared; implies we cannot get `&mut`-ref out of an `Rc`.
-
-## Ownership patterns III
-
-```rust
-#[test]
-fn shared_owner_demo_2() {
-    let data = [Cell::new('h'), Cell::new('o')];
-    let r_one: Rc<[Cell<char>; 2]> = Rc::new(data);
-    let r_two = r_one.clone();
-    assert_eq!(r_one[0].get(), 'h'); // ⇐ &-access is allowed
-    r_two[0].set('a');               // thus we can set `Cell` elements
-    assert_eq!(r_one[0].get(), 'a'); // ⇐ and observe it via other owners
-}
-```
-
-... again no `mut` in sight!
-
-<!--
-```rust
-use std::ops::Range;
-
-fn sum_range(tms: &TrackMaxSeen, range: Range<usize>) -> i64 {
-    let mut sum = 0;
-    let mut local_last_read = None;
-    for &elem in &tms.v[range] {
-        sum += elem;
-        local_last_read = Some(elem);
-    }
-    if local_last_read.is_some() {
-        tms.last_read.set(local_last_read);
-    }
-    return sum;
-}
-```
--->
+### (on to models)

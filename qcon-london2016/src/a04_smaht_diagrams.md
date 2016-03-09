@@ -205,6 +205,24 @@ let w = rc2.borrow_mut();
 
 ![there can be only one!](rc_refcell_w.png)
 
+## What static guarantees does `Rc<RefCell<T>>` have?
+
+. . .
+
+Not much!
+
+. . .
+
+If you want to port an existing *imperative* algorithm with all sorts of
+sharing, you *could* try using `Rc<RefCell<T>>`.
+
+You then might spend much less time wrestling with Rust's type (+borrow) checker.
+
+. . .
+
+The point: `Rc<RefCell<T>>` is nearly an anti-pattern. It limits you
+in ways we will see. You should avoid it if you can.
+
 ## Other kinds of shared ownership
 
  * `TypedArena<T>`
