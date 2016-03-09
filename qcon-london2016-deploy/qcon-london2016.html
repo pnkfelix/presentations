@@ -95,6 +95,18 @@ with <em>zero cost</em> (no GC, unboxed closures, monomorphization of generics)
 </aside>
 </section><section id="safety-and-parallelism" class="slide level2 center">
 <h1>Safety and Parallelism</h1>
+<h3 id="safety">Safety</h3>
+<ul>
+<li><p>No segmentation faults</p></li>
+<li><p>No undefined behavior</p></li>
+<li><p>No data races</p></li>
+</ul>
+<h3 id="multi-paradigm-parallelism">(Multi-paradigm) Parallelism</h3>
+<ul>
+<li><p>msg passing via channels</p></li>
+<li><p>shared state via <code>Arc</code> and atomics, <code>Mutex</code>, etc</p></li>
+<li><p>use native threads... or scoped threads... or work-stealing...</p></li>
+</ul>
 </section><section id="why-would-you-felix-work-on-rust" class="slide level2 big_text" data-transition="fade">
 <h1>Why would you (Felix) work on Rust?</h1>
 <div class="fragment">
