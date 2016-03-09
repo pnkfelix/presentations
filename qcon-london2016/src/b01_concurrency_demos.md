@@ -10,6 +10,8 @@
 
  * `rayon` : Scoped Fork-join "Maybe" Parallelism (inspired by Cilk)
 
+(Only the *first* comes with Rust out of the box)
+
 ## std::thread { data-transition="fade-out" }
 
 ```rust
@@ -83,9 +85,11 @@ fn gcd_web_fetch() {
 
 ## crossbeam {.big_text .center}
 
-### lock-free data structures
+* lock-free data structures
 
-### scoped threading abstraction
+* scoped threading abstraction
+
+* upholds Rust's safety (data-race freedom) guarantees
 
 ## lock-free data structures {.big_text .center}
 

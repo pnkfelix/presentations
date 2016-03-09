@@ -146,7 +146,7 @@ provide `&mut` borrows without assistance.)
 
 ## Dynamic Exclusivity {.center}
 
-## Dynamic Exclusivity
+## `RefCell<T>`: Dynamic Exclusivity
 
 ``` {.rust}
 let b = Box::new(RefCell::new(B::new()));
@@ -157,7 +157,7 @@ let r2: &RefCell<B> = &b;
 
 ![box of refcell](box_refcell_borrows.png)
 
-----
+## `RefCell<T>`: Dynamic Exclusivity
 
 ``` {.rust}
 let b = Box::new(RefCell::new(B::new()));
@@ -175,7 +175,7 @@ let w2 = b.borrow_mut();
 
 ## Previous generalizes to shared ownership {.big_text .center}
 
-----
+## `Rc<RefCell<T>>`
 
 ``` {.rust}
 let rc1 = Rc::new(RefCell::new(B::new()));
@@ -184,7 +184,7 @@ let rc2 = rc1.clone(); // increments ref-count on heap-alloc'd value
 
 ![shared ownership of refcell](rc_refcell_baseline.png)
 
-----
+## `Rc<RefCell<T>>`
 
 ``` {.rust}
 let rc1 = Rc::new(RefCell::new(B::new()));
@@ -195,7 +195,7 @@ let r2: &RefCell<B> = &rc2; // (or even just `r1`)
 
 ![borrows of refcell can alias](rc_refcell_readers.png)
 
-----
+## `Rc<RefCell<T>>`
 
 ``` {.rust}
 let rc1 = Rc::new(RefCell::new(B::new()));
