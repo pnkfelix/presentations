@@ -97,17 +97,36 @@ before                                                    after
 
 ## Basic `Vec<B>`
 
+``` {.rust}
+let mut a = Vec::new();
+for i in 0..n { a.push(B::new()); }
+```
+
 ![pristine unborrowed vec](vec_baseline_rw0.png)
 
 (`a` has read and write capabilities)
 
 ## Immutable borrowed slices
 
+``` {.rust}
+let mut a = Vec::new();
+for i in 0..n { a.push(B::new()); }
+let r1 = &a[0..3];
+let r2 = &a[7..n-4];
+```
+
 ![mutiple borrowed slices vec](vec_slices.png)
 
 (`a` has only read capability now; shares it with `r1` and `r2`)
 
-## Immutable borrows can safely overlap
+## Safe overlap between `&[..]`
+
+``` {.rust}
+let mut a = Vec::new();
+for i in 0..n { a.push(B::new()); }
+let r1 = &a[0..7];
+let r2 = &a[3..n-4];
+```
 
 ![overlapping slices](vec_slices_overlapping.png)
 
@@ -119,11 +138,19 @@ before                                                    after
 
 ## Mutable slice of whole vec
 
+```rust
+let w = &mut a[0..n];
+```
+
 ![mutable slice of vec](vec_slice_mut.png)
 
 (`a` has *no* capabilities; `w` now has read and write capability)
 
 ## Mutable disjoint slices
+
+```rust
+let (w1,w2) = a.split_at_mut(n-4);
+```
 
 ![disjoint mutable borrows](vec_split_mut_at.png)
 
