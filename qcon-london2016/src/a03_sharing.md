@@ -58,6 +58,68 @@ Exclusive access  `&mut T` ("mutable")
 Shared access     `&T`     ("read-only")
 ----------------- -------- -------------
 
+# A Metaphor {.center}
+
+## (reminder: metaphors never work 100%) {.big_text .center}
+
+----
+
+``` {.rust}
+let christine = Car::new();
+```
+
+This is "Christine"
+
+![pristine unborrowed car](christine_car_pristine.png)
+
+(apologies to Stephen King)
+
+----
+
+``` {.rust}
+let read_only_borrow = &christine;
+```
+
+![single inspector (immutable borrow)](christine_car_single_inspector.png)
+
+----
+
+``` {.rust}
+read_only_borrows[2] = &christine;
+read_only_borrows[3] = &christine;
+read_only_borrows[4] = &christine;
+```
+
+![many inspectors (immutable borrows)](christine_car_many_inspectors.png)
+
+----
+
+When inspectors are finished, we are left again with:
+
+![pristine unborrowed car](christine_car_pristine.png)
+
+----
+
+``` {.rust}
+let mutable_borrow = &mut christine;
+give_arnie(mutable_borrow);
+```
+
+![driven car (mutably borrowed)](christine_car_driven.png)
+
+## Can't mix the two in safe code! {.center}
+
+----
+
+``` {.rust .compile_error}
+read_only_borrows[2] = &christine;
+let mutable_borrow = &mut christine;
+read_only_borrows[3] = &christine;
+// ⇒ CHAOS!
+```
+
+![mixing mutable and immutable is illegal](christine_car_driving_over_inspectors.png)
+
 # Exclusive access
 
 ## `&mut`: can I borrow the car?
@@ -336,9 +398,3 @@ fn sum_range(tms: &TrackMaxSeen, range: Range<usize>) -> i64 {
 }
 ```
 -->
-
-
-
-## TODO
-
-Library "smart-pointer" types
