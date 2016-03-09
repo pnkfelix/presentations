@@ -1,0 +1,74 @@
+table.bustimes { 
+  float: left;
+  font: 70% sans-serif; 
+}
+table.bustimes_vert { 
+  font: 70% sans-serif; 
+}
+
+p { clear: left; }
+
+body {
+    background-color: #D3D3D3;
+}
+
+#contents {
+    width: 62%;
+    margin: 20px auto;
+    padding-right: 200px;
+    /* font: serif; */
+}
+
+.box {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: white;
+}
+
+.boxtitle {
+    text-align: right;
+    padding-right: 0px;
+}
+
+
+ul { padding-left: 1em; }
+li { margin-bottom: 1ex; }
+img.validator { border: none; }
+.clear { clear: both; }
+.pub .title { font-weight: bold; }
+#name #photo { float: right; }
+
+/*
+h1 {
+    margin: 0px;
+    font: 160% serif;
+
+}
+*/
+/*
+img.new {
+    position: relative;
+    left: -38px;
+    top: -1px;
+    vertical-align: middle;
+    margin-right: -38px;
+    padding-right: 0px;
+}
+*/
+
+.bibtex {
+    display: none;
+    border: dotted 1px lightgray;
+    padding: 5px;
+}
+/*
+.refType {
+    font-weight: bold;
+    color: gray;
+}
+
+a:link { color : #0000FF; text-decoration : none; }
+a:visited { color : #0000FF; text-decoration : none; }
+a:hover { color : #FF0000; text-decoration : none; }
+a:active { color : #FF0000; text-decoration : none; }
+*/

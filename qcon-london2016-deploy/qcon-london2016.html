@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Felix Klock (@pnkfelix), Mozilla" />
+  <title>Rust: Systems Programming for Everyone</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css"/>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/mozilla-sandstone.css" id="theme">
+  <link rel="stylesheet" href="slide-style.css"/>
+  <link rel="stylesheet" href="code-style.css"/>
+  <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+  <script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = 'reveal.js/css/print/pdf.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+    <h1 class="title">Rust: Systems Programming for Everyone</h1>
+    <h2 class="author">Felix Klock (<code>@pnkfelix</code>), Mozilla</h2>
+    <h3 class="date"><kbd class="key">space</kbd>: next slide; <kbd class="key">esc</kbd>: overview; arrows navigate</h3>
+</section>
+
+<section><section id="why-..." class="titleslide slide level1 center"><h1>Why ...?</h1></section><section id="why-use-rust" class="slide level2 big_text" data-transition="fade-out">
+<h1>Why use Rust?</h1>
+<ul>
+<li class="fragment">Fast code, low memory footprint</li>
+<li class="fragment">Go from bare metal (assembly; C FFI) ...
+<div class="fragment">
+... to high-level (collections, closures, generic containers) ...
+</div>
+<div class="fragment">
+with <em>zero cost</em> (no GC, unboxed closures, monomorphization of generics)
+</div></li>
+<li class="fragment"><em>Safety</em> and <em>Parallelism</em></li>
+</ul>
+<aside class="notes">
+<ul>
+<li>So far, sounds like C++</li>
+<li>&quot;the UB stops here&quot;</li>
+</ul>
+</aside>
+</section><section id="safety-and-parallelism" class="slide level2 center">
+<h1>Safety and Parallelism</h1>
+</section><section id="why-would-you-felix-work-on-rust" class="slide level2 big_text" data-transition="fade">
+<h1>Why would you (Felix) work on Rust?</h1>
+<div class="fragment">
+<p>It's awesome!</p>
+<p>(Were prior slides really not a sufficient answer?)</p>
+</div>
+<div class="fragment">
+<p>oh, maybe you meant ...</p>
+</div>
+</section><section id="why-would-mozilla-sponsor-rust" class="slide level2" data-transition="fade">
+<h1>Why would Mozilla sponsor Rust?</h1>
+<ul>
+<li class="fragment">Hard to prototype research-y browser changes atop C++ code base</li>
+</ul>
+<ul>
+<li class="fragment">Rust ⇒ Servo, WebRender</li>
+</ul>
+<ul>
+<li class="fragment">Want Rust for next-gen infrastructure (services, IoT)</li>
+</ul>
+<ul>
+<li class="fragment"><blockquote>
+<p>&quot;Our mission is to ensure the Internet is a global public resource, open and accessible to all. An Internet that truly puts people first, where individuals can shape their own experience and are empowered, safe and independent.&quot;</p>
+</blockquote></li>
+</ul>
+<ul>
+<li class="fragment">&quot;accessible to all&quot;</li>
+</ul>
+</section><section id="where-is-rust-now" class="slide level2">
+<h1>Where is Rust now?</h1>
+<ul>
+<li><p>1.0 release was back in May 2015</p></li>
+<li><p>Rolling release cycle (up to Rust 1.7 as of March 2nd 2016)</p></li>
+<li><p>Open source from the begining <code>https://github.com/rust-lang/rust/</code></p></li>
+<li><p>Open model for future change (RFC process) <code>https://github.com/rust-lang/rfcs/</code></p></li>
+<li><p>Awesome developer community (~1,000 people in <code>#rust</code>, ~250 people in <code>#rust-internals</code>, ~1,300 unique commiters to rust.git)</p></li>
+</ul>
+</section><section id="talk-plan" class="slide level2">
+<h1>Talk plan</h1>
+<ul>
+<li class="fragment">&quot;Why Rust&quot; Demonstration</li>
+<li class="fragment">&quot;Ownership is easy&quot; (... or is it?)</li>
+<li class="fragment"><table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Sharing</th>
+<th style="text-align: left;">Stuff</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Sharing <em>capabilities</em></td>
+<td style="text-align: left;">(Language stuff)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sharing <em>work</em></td>
+<td style="text-align: left;">(Parallelism stuff)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sharing <em>code</em></td>
+<td style="text-align: left;">(Open source distribution stuff)</td>
+</tr>
+</tbody>
+</table></li>
+</ul>
+</section></section>
+<section><section id="lightning-demo" class="titleslide slide level1"><h1>Lightning Demo</h1></section><section id="demo-sequential-web-page-fetch" class="slide level2" data-transition="fade-out">
+<h1>Demo: sequential web page fetch</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> sequential_web_fetch() {
+    <span class="kw">use</span> hyper::{<span class="kw">self</span>, Client};
+    <span class="kw">use</span> std::io::Read; <span class="co">// pulls in `chars` method</span>
+
+    <span class="kw">let</span> sites = &amp;[<span class="st">&quot;http://www.eff.org/&quot;</span>, <span class="st">&quot;http://rust-lang.org/&quot;</span>,
+        <span class="st">&quot;http://imgur.com&quot;</span>, <span class="st">&quot;http://mozilla.org&quot;</span>];
+
+    <span class="kw">for</span> &amp;site <span class="kw">in</span> sites { <span class="co">// step through the array...</span>
+        <span class="kw">let</span> client = Client::new();
+        <span class="kw">let</span> res = client.get(site).send().unwrap();
+        <span class="pp">assert_eq!</span>(res.status, hyper::<span class="cn">Ok</span>);
+        <span class="kw">let</span> char_count = res.chars().count();
+        <span class="pp">println!</span>(<span class="st">&quot;site: {} chars: {}&quot;</span>, site, char_count);
+    }
+}</code></pre></div>
+<div class="fragment">
+<p>(lets get rid of the Rust-specific pattern binding in <code>for</code>; this is not a tutorial)</p>
+</div>
+</section><section id="demo-sequential-web-page-fetch-1" class="slide level2" data-transition="fade">
+<h1>Demo: sequential web page fetch</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> sequential_web_fetch() {
+    <span class="kw">use</span> hyper::{<span class="kw">self</span>, Client};
+    <span class="kw">use</span> std::io::Read; <span class="co">// pulls in `chars` method</span>
+
+    <span class="kw">let</span> sites = &amp;[<span class="st">&quot;http://www.eff.org/&quot;</span>, <span class="st">&quot;http://rust-lang.org/&quot;</span>,
+        <span class="st">&quot;http://imgur.com&quot;</span>, <span class="st">&quot;http://mozilla.org&quot;</span>];
+
+    <span class="kw">for</span> site_ref <span class="kw">in</span> sites { <span class="co">// step through the array...</span>
+        <span class="kw">let</span> site = *site_ref; <span class="co">// (separated for expository purposes)</span>
+
+        { <span class="co">// (and a separate block, again for expository purposes)</span>
+            <span class="kw">let</span> client = Client::new();
+
+            <span class="kw">let</span> res = client.get(site).send().unwrap();
+            <span class="pp">assert_eq!</span>(res.status, hyper::<span class="cn">Ok</span>);
+            <span class="kw">let</span> char_count = res.chars().count();
+            <span class="pp">println!</span>(<span class="st">&quot;site: {} chars: {}&quot;</span>, site, char_count);
+        }
+    }
+}</code></pre></div>
+</section><section id="demo-concurrent-web-page-fetch" class="slide level2" data-transition="fade-in">
+<h1>Demo: concurrent web page fetch</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> concurrent_web_fetch() -&gt; <span class="dt">Vec</span>&lt;::std::thread::JoinHandle&lt;()&gt;&gt; {
+    <span class="kw">use</span> hyper::{<span class="kw">self</span>, Client};
+    <span class="kw">use</span> std::io::Read; <span class="co">// pulls in `chars` method</span>
+
+    <span class="kw">let</span> sites = &amp;[<span class="st">&quot;http://www.eff.org/&quot;</span>, <span class="st">&quot;http://rust-lang.org/&quot;</span>,
+        <span class="st">&quot;http://imgur.com&quot;</span>, <span class="st">&quot;http://mozilla.org&quot;</span>];
+    <span class="kw">let</span> <span class="kw">mut</span> handles = <span class="dt">Vec</span>::new();
+    <span class="kw">for</span> site_ref <span class="kw">in</span> sites {
+        <span class="kw">let</span> site = *site_ref;
+        <span class="kw">let</span> handle = ::std::thread::spawn(<span class="kw">move</span> || {
+            <span class="co">// block code put in closure: ~~~~~~~</span>
+            <span class="kw">let</span> client = Client::new();
+
+            <span class="kw">let</span> res = client.get(site).send().unwrap();
+            <span class="pp">assert_eq!</span>(res.status, hyper::<span class="cn">Ok</span>);
+            <span class="kw">let</span> char_count = res.chars().count();
+            <span class="pp">println!</span>(<span class="st">&quot;site: {} chars: {}&quot;</span>, site, char_count);
+        });
+
+        handles.push(handle);
+    }
+
+    <span class="kw">return</span> handles;
+}</code></pre></div>
+</section><section id="print-outs" class="slide level2">
+<h1>Print outs</h1>
+<h3 id="sequential-version">Sequential version:</h3>
+<pre><code>site: http://www.eff.org/ chars: 42425
+site: http://rust-lang.org/ chars: 16748
+site: http://imgur.com chars: 152384
+site: http://mozilla.org chars: 63349</code></pre>
+<p>(on every run, when internet, and sites, available)</p>
+<h3 id="concurrent-version">Concurrent version:</h3>
+<pre><code>site: http://imgur.com chars: 152384
+site: http://rust-lang.org/ chars: 16748
+site: http://mozilla.org chars: 63349
+site: http://www.eff.org/ chars: 42425</code></pre>
+<p>(on at least one run)</p>
+<!--
+```rust
+#[should_panic]
+#[test]
+fn web_fetch() {
+    for j in concurrent_web_fetch() { j.join(); }
+    sequential_web_fetch();
+    panic!("want to see output");
+}
+```
+-->
+</section><section id="what-is-this-soundness-of-which-you-speak" class="slide level2 center">
+<h1>&quot;what is this 'soundness' of which you speak?&quot;</h1>
+</section><section id="demo-soundness-i" class="slide level2" data-transition="fade-out">
+<h1>Demo: soundness I</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> sequential_web_fetch_2() {
+    <span class="kw">use</span> hyper::{<span class="kw">self</span>, Client};
+    <span class="kw">use</span> std::io::Read; <span class="co">// pulls in `chars` method</span>
+
+    <span class="kw">let</span> sites = &amp;[<span class="st">&quot;http://www.eff.org/&quot;</span>, <span class="st">&quot;http://rust-lang.org/&quot;</span>,
+    <span class="co">//  ~~~~~ `sites`, an array (slice) of strings, is stack-local</span>
+        <span class="st">&quot;http://imgur.com&quot;</span>, <span class="st">&quot;http://mozilla.org&quot;</span>];
+
+    <span class="kw">for</span> site_ref <span class="kw">in</span> sites {
+    <span class="co">//  ~~~~~~~~ `site_ref` is a *reference to* elem of array.</span>
+        <span class="kw">let</span> client = Client::new();
+        <span class="kw">let</span> res = client.get(*site_ref).send().unwrap();
+        <span class="co">// moved deref here  ~~~~~~~~~ </span>
+        <span class="pp">assert_eq!</span>(res.status, hyper::<span class="cn">Ok</span>);
+        <span class="kw">let</span> char_count = res.chars().count();
+        <span class="pp">println!</span>(<span class="st">&quot;site: {} chars: {}&quot;</span>, site_ref, char_count);
+    }
+}</code></pre></div>
+</section><section id="demo-soundness-ii" class="slide level2" data-transition="fade-in">
+<h1>Demo: soundness II</h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> concurrent_web_fetch_2() -&gt; <span class="dt">Vec</span>&lt;::std::thread::JoinHandle&lt;()&gt;&gt; {
+    <span class="kw">use</span> hyper::{<span class="kw">self</span>, Client};
+    <span class="kw">use</span> std::io::Read; <span class="co">// pulls in `chars` method</span>
+
+    <span class="kw">let</span> sites = &amp;[<span class="st">&quot;http://www.eff.org/&quot;</span>, <span class="st">&quot;http://rust-lang.org/&quot;</span>,
+    <span class="co">//  ~~~~~ `sites`, an array (slice) of strings, is stack-local</span>
+        <span class="st">&quot;http://imgur.com&quot;</span>, <span class="st">&quot;http://mozilla.org&quot;</span>];
+    <span class="kw">let</span> <span class="kw">mut</span> handles = <span class="dt">Vec</span>::new();
+    <span class="kw">for</span> site_ref <span class="kw">in</span> sites {
+    <span class="co">//  ~~~~~~~~ `site_ref` still a *reference* into an array</span>
+        <span class="kw">let</span> handle = ::std::thread::spawn(<span class="kw">move</span> || {
+            <span class="kw">let</span> client = Client::new();
+            <span class="kw">let</span> res = client.get(*site_ref).send().unwrap();
+            <span class="co">// moved deref here  ~~~~~~~~~ </span>
+            <span class="pp">assert_eq!</span>(res.status, hyper::<span class="cn">Ok</span>);
+            <span class="kw">let</span> char_count = res.chars().count();
+            <span class="pp">println!</span>(<span class="st">&quot;site: {} chars: {}&quot;</span>, site_ref, char_count);
+            <span class="co">// Q: will `sites` array still be around when above runs?</span>
+        });
+        handles.push(handle);
+    }
+    <span class="kw">return</span> handles;
+}</code></pre></div>
+</section></section>
+<section><section id="some-white-lies-rust-is-just-about-ownership" class="titleslide slide level1 center"><h1>some (white) lies: &quot;Rust is just about ownership&quot;</h1></section></section>
+<section><section id="ownership-is-intuitive" class="titleslide slide level1 center"><h1>&quot;Ownership is intuitive&quot;</h1></section><section id="ownership-is-intuitive-1" class="slide level2" data-transition="fade-out">
+<h1>&quot;Ownership is intuitive&quot;</h1>
+<p>Let's buy a car</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> money: Money = bank.withdraw_cash();
+<span class="kw">let</span> my_new_car: Car = dealership.buy_car(money);</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">let</span> second_car = dealership.buy_car(money); <span class="co">// &lt;-- cannot reuse</span></code></pre></div>
+<p>money transferred into <code>dealership</code>, and car transferred to us.</p>
+</section><section id="ownership-is-intuitive-2" class="slide level2" data-transition="fade">
+<h1>&quot;Ownership is intuitive&quot;</h1>
+<p>Let's buy a car</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> money: Money = bank.withdraw_cash();
+<span class="kw">let</span> my_new_car: Car = dealership.buy_car(money);
+<span class="co">// let second_car = dealership.buy_car(money); // &lt;-- cannot reuse</span></code></pre></div>
+<p>money transferred into <code>dealership</code>, and car transferred to us.</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">my_new_car.drive_to(home);
+garage.park(my_new_car);</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust">my_new_car.drive_to(...) <span class="co">// now doesn&#39;t work</span></code></pre></div>
+<p>(can't drive car without access to it, e.g. taking it out of the garage)</p>
+</section><section id="ownership-is-intuitive-3" class="slide level2" data-transition="fade-in">
+<h1>&quot;Ownership is intuitive&quot;</h1>
+<p>Let's buy a car</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> money: Money = bank.withdraw_cash();
+<span class="kw">let</span> my_new_car: Car = dealership.buy_car(money);
+<span class="co">// let second_car = dealership.buy_car(money); // &lt;-- cannot reuse</span></code></pre></div>
+<p>money transferred into <code>dealership</code>, and car transferred to us.</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">my_new_car.drive_to(home);
+garage.park(my_new_car);
+<span class="co">// my_new_car.drive_to(...) // now doesn&#39;t work</span></code></pre></div>
+<p>(can't drive car without access to it, e.g. taking it out of the garage)</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> my_car = garage.unpark();
+my_car.drive_to(work);</code></pre></div>
+<div class="fragment">
+<p>...reflection time...</p>
+</div>
+</section><section id="correction-ownership-is-intuitive-except-for-programmers-..." class="slide level2 center">
+<h1>Correction: Ownership is intuitive, except for programmers ...</h1>
+<p>(copying data like integers, and characters, and .mp3's, is &quot;free&quot;)</p>
+<div class="fragment">
+<h3 id="and-anyone-else-who-names-things">... and anyone else who <em>names</em> things</h3>
+</div>
+</section><section id="über-sinn-und-bedeutung" class="slide level2">
+<h1>Über Sinn und Bedeutung</h1>
+<p>(&quot;On sense and reference&quot; -- Gottlob Frege, 1892)</p>
+<p>If ownership were all we had, car-purchase slide seems nonsensical</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">my_new_car.drive_to(home);</code></pre></div>
+<div class="fragment">
+<p>Does this transfer <code>home</code> into the car?</p>
+<p>Do I lose access to my home, just because I drive to it?</p>
+</div>
+<div class="fragment">
+<p>We must distinguish an object itself from ways to name that object</p>
+<ul>
+<li><p>Above, <code>home</code> cannot be (an owned) <code>Home</code></p></li>
+<li><p><code>home</code> must instead be some kind of <em>reference</em> to a <code>Home</code></p></li>
+</ul>
+</div>
+</section><section id="so-we-will-need-references" class="slide level2 center">
+<h1>So we will need references</h1>
+<blockquote>
+<p>We can solve any problem by introducing an extra level of indirection</p>
+</blockquote>
+<p>-- David J. Wheeler</p>
+</section><section id="a-truth-ownership-is-important" class="slide level2 center">
+<h1>a truth: Ownership <em>is</em> important</h1>
+</section><section id="ownership-is-important" class="slide level2">
+<h1>Ownership is important</h1>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Ownership enables:</th>
+<th style="text-align: left;">which removes:</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">RAII-style destructors</td>
+<td style="text-align: left;">a source of memory leaks (or fd leaks, etc)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">no dangling pointers</td>
+<td style="text-align: left;">many resource management bugs</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">no data races</td>
+<td style="text-align: left;">many multithreading heisenbugs</td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<blockquote>
+<p>Do I need to take ownership here, accepting the associated resource management responsibility? Would temporary access suffice?</p>
+</blockquote>
+</div>
+<div class="fragment">
+<p>Good developers ask this already!</p>
+<p>Rust forces function signatures to encode the answers</p>
+<p>(and they are checked by the compiler)</p>
+<aside class="notes">
+<p>Its worth pointing out that the encoded answer can include &quot;I leave it up to the caller to decide&quot;; that is what <code>Cow&lt;'a, T&gt;</code> is for.</p>
+</aside>
+</div>
+</section></section>
+<section><section id="sharing-data-ownership-and-references" class="titleslide slide level1 center"><h1>Sharing Data: Ownership and References</h1></section><section id="rust-types" class="slide level2">
+<h1>Rust types</h1>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Move</th>
+<th style="text-align: left;">Copy</th>
+<th style="text-align: left;">Copy if <code>T:Copy</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Vec&lt;T&gt;</code>, <code>String</code>, ...</td>
+<td style="text-align: left;"><code>i32</code>, <code>char</code>, ...</td>
+<td style="text-align: left;"><code>[T; n]</code>, <code>(T1,T2,T3)</code>, ...</td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">struct</span> Car { color: Color, engine: Engine }
+
+<span class="kw">fn</span> demo_ownership() {
+    <span class="kw">let</span> <span class="kw">mut</span> used_car: Car = Car { color: Color::Red,
+                                  engine: Engine::BrokenV8 };
+    <span class="kw">let</span> apartments = ApartmentBuilding::new();</code></pre></div>
+</div>
+<div class="fragment">
+<p>references to data (<code>&amp;mut T</code>, <code>&amp;T</code>):</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">    <span class="kw">let</span> my_home: &amp;Home;      <span class="co">// &lt;-- an &quot;immutable&quot; borrow</span>
+    <span class="kw">let</span> christine: &amp;<span class="kw">mut</span> Car; <span class="co">// &lt;-- a &quot;mutable&quot; borrow</span>
+    my_home = &amp;apartments[<span class="dv">6</span>]; <span class="co">//      (read `mut` as &quot;exclusive&quot;)</span>
+    <span class="kw">let</span> neighbors_home = &amp;apartments[<span class="dv">5</span>];
+    christine = &amp;<span class="kw">mut</span> used_car;
+    christine.engine = Engine::VintageV8;
+}</code></pre></div>
+</div>
+</section><section id="why-multiple--reference-types" class="slide level2 center">
+<h1>Why multiple <code>&amp;</code>-reference types?</h1>
+<div class="fragment">
+<ul>
+<li><p>Distinguish <em>exclusive</em> access from <em>shared</em> access</p></li>
+<li><p>Enables <strong>safe</strong>, <strong>parallel</strong> API's</p></li>
+</ul>
+</div>
+</section></section>
+<section><section id="a-metaphor" class="titleslide slide level1 center"><h1>A Metaphor</h1></section><section id="reminder-metaphors-never-work-100" class="slide level2 big_text center">
+<h1>(reminder: metaphors never work 100%)</h1>
+</section><section class="slide level2">
+
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> christine = Car::new();</code></pre></div>
+<p>This is &quot;Christine&quot;</p>
+<figure>
+<img src="christine_car_pristine.png" alt="pristine unborrowed car" /><figcaption>pristine unborrowed car</figcaption>
+</figure>
+<p>(apologies to Stephen King)</p>
+</section><section class="slide level2">
+
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> read_only_borrow = &amp;christine;</code></pre></div>
+<figure>
+<img src="christine_car_single_inspector.png" alt="single inspector (immutable borrow)" /><figcaption>single inspector (immutable borrow)</figcaption>
+</figure>
+<p>(apologies to Randall Munroe)</p>
+</section><section class="slide level2">
+
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">read_only_borrows[<span class="dv">2</span>] = &amp;christine;
+read_only_borrows[<span class="dv">3</span>] = &amp;christine;
+read_only_borrows[<span class="dv">4</span>] = &amp;christine;</code></pre></div>
+<figure>
+<img src="christine_car_many_inspectors.png" alt="many inspectors (immutable borrows)" /><figcaption>many inspectors (immutable borrows)</figcaption>
+</figure>
+</section><section class="slide level2">
+
+<p>When inspectors are finished, we are left again with:</p>
+<figure>
+<img src="christine_car_pristine.png" alt="pristine unborrowed car" /><figcaption>pristine unborrowed car</figcaption>
+</figure>
+</section><section class="slide level2">
+
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> mutable_borrow = &amp;<span class="kw">mut</span> christine; <span class="co">// like taking keys ...</span>
+give_arnie(mutable_borrow); <span class="co">// ... and giving them to someone</span></code></pre></div>
+<figure>
+<img src="christine_car_driven.png" alt="driven car (mutably borrowed)" /><figcaption>driven car (mutably borrowed)</figcaption>
+</figure>
+</section><section id="cant-mix-the-two-in-safe-code" class="slide level2 center">
+<h1>Can't mix the two in safe code!</h1>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><img src="christine_car_many_inspectors.png" alt="many inspectors (immutable borrows)" /></td>
+<td style="text-align: left;"><img src="christine_car_driven.png" alt="driven car (mutably borrowed)" /></td>
+</tr>
+</tbody>
+</table>
+<h3 id="otherwise-data-races">Otherwise: (data) races!</h3>
+</section><section class="slide level2">
+
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust">read_only_borrows[<span class="dv">2</span>] = &amp;christine;
+<span class="kw">let</span> mutable_borrow = &amp;<span class="kw">mut</span> christine;
+read_only_borrows[<span class="dv">3</span>] = &amp;christine;
+<span class="co">// ⇒ CHAOS!</span></code></pre></div>
+<figure>
+<img src="christine_car_driving_over_inspectors.png" alt="mixing mutable and immutable is illegal" /><figcaption>mixing mutable and immutable is illegal</figcaption>
+</figure>
+</section><section id="section" class="slide level2 center">
+<h1></h1>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Ownership</td>
+<td style="text-align: left;"><code>T</code></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Exclusive access</td>
+<td style="text-align: left;"><code>&amp;mut T</code></td>
+<td style="text-align: left;">(&quot;mutable&quot;)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Shared access</td>
+<td style="text-align: left;"><code>&amp;T</code></td>
+<td style="text-align: left;">(&quot;read-only&quot;)</td>
+</tr>
+</tbody>
+</table>
+</section></section>
+<section><section id="exclusive-access" class="titleslide slide level1 center"><h1>Exclusive access</h1></section><section id="mut-can-i-borrow-the-car" class="slide level2">
+<h1><code>&amp;mut</code>: can I borrow the car?</h1>
+<aside class="notes">
+<p>If I own a car, and I lend the keys to Arnie, I <em>still</em> own the car</p>
+</aside>
+<!--
+```rust
+fn invite_friend_over() -> Arnie {
+    Arnie { fav_color: Color::Black, partner: NoGirlfriend }
+}
+type Location = ();
+static work: Location = ();
+impl Car {
+    fn new() -> Car { Car { color: Color::Red, engine: Engine::VintageV8 } }
+    fn drive_to(&mut self, l: Location) { }
+}
+```
+-->
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> borrow_the_car_1() {
+    <span class="kw">let</span> <span class="kw">mut</span> christine = Car::new();
+    {
+        <span class="kw">let</span> car_keys = &amp;<span class="kw">mut</span> christine;
+        <span class="kw">let</span> arnie = invite_friend_over();
+        arnie.lend(car_keys);
+    } <span class="co">// end of scope for `arnie` and `car_keys`</span>
+    christine.drive_to(work); <span class="co">// I still own the car!</span>
+}</code></pre></div>
+<div class="fragment">
+<p>But when her keys are elsewhere, I cannot drive <code>christine</code>!</p>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> borrow_the_car_2() {
+    <span class="kw">let</span> <span class="kw">mut</span> christine = Car::new();
+    {
+        <span class="kw">let</span> car_keys = &amp;<span class="kw">mut</span> christine;
+        <span class="kw">let</span> arnie = invite_friend_over();
+        arnie.lend(car_keys);
+        christine.drive_to(work); <span class="co">// &lt;-- compile error</span>
+    } <span class="co">// end of scope for `arnie` and `car_keys`</span>
+}</code></pre></div>
+</div>
+</section><section id="extending-the-metaphor" class="slide level2">
+<h1>Extending the metaphor</h1>
+<!--
+```rust
+use std::rc::Rc;
+use std::cell::RefCell;
+struct Arnie<GF=NoGirlfriend> { fav_color: Color, partner: GF }
+struct ArnieLongTermRelationship<'a> { partner: &'a Leigh<'a> }
+struct NoGirlfriend;
+struct Leigh<'a> { car: RefCell<Option<&'a mut Car>> }
+trait Partner<'a> {
+    fn lend(&self, c: &mut Car) { }
+    fn take(&'a self, c: &'a mut Car) { }
+}
+impl<'a> Partner<'a> for NoGirlfriend { }
+impl<'a> Partner<'a> for Leigh<'a> {
+    fn take(&'a self, c: &'a mut Car) {
+        *self.car.borrow_mut() = Some(c);
+    }
+}
+impl Arnie { fn lend(&self, c: &mut Car) { lend_1(self, c); lend_2(self, c); } }
+```
+-->
+<p>Possessing the keys, Arnie could take the car for a new paint job.</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> lend_1(arnie: &amp;Arnie, k: &amp;<span class="kw">mut</span> Car) { k.color = arnie.fav_color; }</code></pre></div>
+<p>Or lend keys to someone else (<em>reborrowing</em>) before paint job</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> lend_2(arnie: &amp;Arnie, k: &amp;<span class="kw">mut</span> Car) {
+    arnie.partner.lend(k); k.color = arnie.fav_color;
+}</code></pre></div>
+<div class="fragment">
+<p>Owner loses capabilities attached to <code>&amp;mut</code>-borrows only <em>temporarily</em> (*)</p>
+<aside class="notes">
+<p>Keys <em>will</em> return after <code>&amp;mut</code>-borrow ends; I, the owner, will regain exclusive access (and the ability to lend out the keys again, or transfer ownership elsewhere, or even destroy Christine).</p>
+</aside>
+<p>(*): &quot;Car keys&quot; return guaranteed by Rust; sadly, not by physical world</p>
+</div>
+</section><section id="end-of-metaphor" class="slide level2">
+<h1>End of metaphor</h1>
+<h3 id="on-to-models">(on to models)</h3>
+</section></section>
+<section><section id="pointers-smart-and-otherwise" class="titleslide slide level1 center"><h1>Pointers, Smart and Otherwise</h1></section><section id="more-pictures" class="slide level2 center">
+<h1>(More pictures)</h1>
+</section><section id="stack-allocation" class="slide level2">
+<h1>Stack allocation</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> b = B::new();</code></pre></div>
+<figure>
+<img src="stackB.png" alt="stack allocation" /><figcaption>stack allocation</figcaption>
+</figure>
+</section><section class="slide level2">
+
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> b = B::new();
+
+<span class="kw">let</span> r1: &amp;B = &amp;b;
+<span class="kw">let</span> r2: &amp;B = &amp;b;</code></pre></div>
+<figure>
+<img src="imm_borrows_stackB.png" alt="stack allocation and immutable borrows" /><figcaption>stack allocation and immutable borrows</figcaption>
+</figure>
+<p>(<code>b</code> has lost write capability)</p>
+</section><section class="slide level2">
+
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> b = B::new();
+
+<span class="kw">let</span> w: &amp;<span class="kw">mut</span> B = &amp;<span class="kw">mut</span> b;</code></pre></div>
+<figure>
+<img src="mutable_borrow_stackB.png" alt="stack allocation and mutable borrows" /><figcaption>stack allocation and mutable borrows</figcaption>
+</figure>
+<p>(<code>b</code> has temporarily lost both read <em>and</em> write capabilities)</p>
+</section><section id="heap-allocation-boxb" class="slide level2">
+<h1>Heap allocation: <code>Box&lt;B&gt;</code></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> a = <span class="dt">Box</span>::new(B::new());</code></pre></div>
+<figure>
+<img src="box_baseline_rw0.png" alt="pristine boxed B" /><figcaption>pristine boxed B</figcaption>
+</figure>
+<p><code>a</code> (as owner) has both read and write capabilities</p>
+</section><section id="immutably-borrowing-a-box" class="slide level2">
+<h1>Immutably borrowing a box</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> a = <span class="dt">Box</span>::new(B::new());
+<span class="kw">let</span> r_of_box: &amp;<span class="dt">Box</span>&lt;B&gt; = &amp;a; <span class="co">// (not directly a ref of B)</span>
+
+<span class="kw">let</span> r1: &amp;B = &amp;*a;
+<span class="kw">let</span> r2: &amp;B = &amp;a; <span class="co">// &lt;-- coercion!</span></code></pre></div>
+<figure>
+<img src="box_imm_borrows.png" alt="immutable borrows of heap-allocated B" /><figcaption>immutable borrows of heap-allocated B</figcaption>
+</figure>
+<p><code>a</code> retains read capabilities (has temporarily lost write)</p>
+</section><section id="mutably-borrowing-a-box" class="slide level2">
+<h1>Mutably borrowing a box</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> a = <span class="dt">Box</span>::new(B::new());
+
+<span class="kw">let</span> w: &amp;<span class="kw">mut</span> B = &amp;<span class="kw">mut</span> a; <span class="co">// (again, coercion happening here)</span></code></pre></div>
+<figure>
+<img src="box_mutable_borrow.png" alt="mutable borrow of heap-allocated B" /><figcaption>mutable borrow of heap-allocated B</figcaption>
+</figure>
+<p><code>a</code> has temporarily lost <em>both</em> read and write capabilities</p>
+</section><section id="heap-allocation-vecb" class="slide level2">
+<h1>Heap allocation: <code>Vec&lt;B&gt;</code></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> a = <span class="dt">Vec</span>::new();
+<span class="kw">for</span> i <span class="kw">in</span> <span class="dv">0.</span>.n { a.push(B::new()); }</code></pre></div>
+<figure>
+<img src="vec_push_realloc_0pre.png" alt="vec, filled to capacity" /><figcaption>vec, filled to capacity</figcaption>
+</figure>
+</section><section id="vec-reallocation" class="slide level2">
+<h1>Vec Reallocation</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">...
+a.push(B::new());</code></pre></div>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">before</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">after</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><img src="vec_push_realloc_0pre.png" alt="vec, filled to capacity" /></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><img src="vec_push_realloc_1post.png" alt="vec, reallocated" /></td>
+</tr>
+</tbody>
+</table>
+</section><section id="slices-borrowing-parts-of-an-array" class="slide level2 center">
+<h1>Slices: borrowing <em>parts</em> of an array</h1>
+</section><section id="basic-vecb" class="slide level2">
+<h1>Basic <code>Vec&lt;B&gt;</code></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> a = <span class="dt">Vec</span>::new();
+<span class="kw">for</span> i <span class="kw">in</span> <span class="dv">0.</span>.n { a.push(B::new()); }</code></pre></div>
+<figure>
+<img src="vec_baseline_rw0.png" alt="pristine unborrowed vec" /><figcaption>pristine unborrowed vec</figcaption>
+</figure>
+<p>(<code>a</code> has read and write capabilities)</p>
+</section><section id="immutable-borrowed-slices" class="slide level2">
+<h1>Immutable borrowed slices</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> a = <span class="dt">Vec</span>::new();
+<span class="kw">for</span> i <span class="kw">in</span> <span class="dv">0.</span>.n { a.push(B::new()); }
+<span class="kw">let</span> r1 = &amp;a[<span class="dv">0.</span>.<span class="dv">3</span>];
+<span class="kw">let</span> r2 = &amp;a[<span class="dv">7.</span>.n-<span class="dv">4</span>];</code></pre></div>
+<figure>
+<img src="vec_slices.png" alt="mutiple borrowed slices vec" /><figcaption>mutiple borrowed slices vec</figcaption>
+</figure>
+<p>(<code>a</code> has only read capability now; shares it with <code>r1</code> and <code>r2</code>)</p>
+</section><section id="safe-overlap-between-.." class="slide level2">
+<h1>Safe overlap between <code>&amp;[..]</code></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> a = <span class="dt">Vec</span>::new();
+<span class="kw">for</span> i <span class="kw">in</span> <span class="dv">0.</span>.n { a.push(B::new()); }
+<span class="kw">let</span> r1 = &amp;a[<span class="dv">0.</span>.<span class="dv">7</span>];
+<span class="kw">let</span> r2 = &amp;a[<span class="dv">3.</span>.n-<span class="dv">4</span>];</code></pre></div>
+<figure>
+<img src="vec_slices_overlapping.png" alt="overlapping slices" /><figcaption>overlapping slices</figcaption>
+</figure>
+</section><section id="basic-vecb-again" class="slide level2">
+<h1>Basic <code>Vec&lt;B&gt;</code> again</h1>
+<figure>
+<img src="vec_baseline_rw0.png" alt="pristine unborrowed vec" /><figcaption>pristine unborrowed vec</figcaption>
+</figure>
+<p>(<code>a</code> has read and write capabilities)</p>
+</section><section id="mutable-slice-of-whole-vec" class="slide level2">
+<h1>Mutable slice of whole vec</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> w = &amp;<span class="kw">mut</span> a[<span class="dv">0.</span>.n];</code></pre></div>
+<figure>
+<img src="vec_slice_mut.png" alt="mutable slice of vec" /><figcaption>mutable slice of vec</figcaption>
+</figure>
+<p>(<code>a</code> has <em>no</em> capabilities; <code>w</code> now has read and write capability)</p>
+</section><section id="mutable-disjoint-slices" class="slide level2">
+<h1>Mutable disjoint slices</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> (w1,w2) = a.split_at_mut(n-<span class="dv">4</span>);</code></pre></div>
+<figure>
+<img src="vec_split_mut_at.png" alt="disjoint mutable borrows" /><figcaption>disjoint mutable borrows</figcaption>
+</figure>
+<p>(<code>w1</code> and <code>w2</code> share read and write capabilities for disjoint portions)</p>
+</section><section id="shared-ownership" class="slide level2 center">
+<h1>Shared <em>Ownership</em></h1>
+</section><section id="shared-ownership-1" class="slide level2">
+<h1>Shared Ownership</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> rc1 = Rc::new(B::new());
+<span class="kw">let</span> rc2 = rc1.clone(); <span class="co">// increments ref-count on heap-alloc&#39;d value</span></code></pre></div>
+<figure>
+<img src="rc_baseline.png" alt="shared ownership via ref counting" /><figcaption>shared ownership via ref counting</figcaption>
+</figure>
+<p>(<code>rc1</code> and <code>rc2</code> each have read access; but neither can statically assume exclusive (<code>mut</code>) access, nor can they provide <code>&amp;mut</code> borrows without assistance.)</p>
+</section><section id="dynamic-exclusivity" class="slide level2 center">
+<h1>Dynamic Exclusivity</h1>
+</section><section id="refcellt-dynamic-exclusivity" class="slide level2">
+<h1><code>RefCell&lt;T&gt;</code>: Dynamic Exclusivity</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> b = <span class="dt">Box</span>::new(RefCell::new(B::new()));
+
+<span class="kw">let</span> r1: &amp;RefCell&lt;B&gt; = &amp;b;
+<span class="kw">let</span> r2: &amp;RefCell&lt;B&gt; = &amp;b;</code></pre></div>
+<figure>
+<img src="box_refcell_borrows.png" alt="box of refcell" /><figcaption>box of refcell</figcaption>
+</figure>
+</section><section id="refcellt-dynamic-exclusivity-1" class="slide level2">
+<h1><code>RefCell&lt;T&gt;</code>: Dynamic Exclusivity</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> b = <span class="dt">Box</span>::new(RefCell::new(B::new()));
+<span class="kw">let</span> r1: &amp;RefCell&lt;B&gt; = &amp;b;
+<span class="kw">let</span> r2: &amp;RefCell&lt;B&gt; = &amp;b;
+<span class="kw">let</span> w = r2.borrow_mut(); <span class="co">// if successful, `w` acts like `&amp;mut B`</span></code></pre></div>
+<figure>
+<img src="box_refcell_writer.png" alt="fallible mutable borrow" /><figcaption>fallible mutable borrow</figcaption>
+</figure>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="co">// below panics if `w` still in scope</span>
+<span class="kw">let</span> w2 = b.borrow_mut();</code></pre></div>
+</section><section id="previous-generalizes-to-shared-ownership" class="slide level2 big_text center">
+<h1>Previous generalizes to shared ownership</h1>
+</section><section id="rcrefcellt" class="slide level2">
+<h1><code>Rc&lt;RefCell&lt;T&gt;&gt;</code></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> rc1 = Rc::new(RefCell::new(B::new()));
+<span class="kw">let</span> rc2 = rc1.clone(); <span class="co">// increments ref-count on heap-alloc&#39;d value</span></code></pre></div>
+<figure>
+<img src="rc_refcell_baseline.png" alt="shared ownership of refcell" /><figcaption>shared ownership of refcell</figcaption>
+</figure>
+</section><section id="rcrefcellt-1" class="slide level2">
+<h1><code>Rc&lt;RefCell&lt;T&gt;&gt;</code></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> rc1 = Rc::new(RefCell::new(B::new()));
+<span class="kw">let</span> rc2 = rc1.clone();
+<span class="kw">let</span> r1: &amp;RefCell&lt;B&gt; = &amp;rc1;
+<span class="kw">let</span> r2: &amp;RefCell&lt;B&gt; = &amp;rc2; <span class="co">// (or even just `r1`)</span></code></pre></div>
+<figure>
+<img src="rc_refcell_readers.png" alt="borrows of refcell can alias" /><figcaption>borrows of refcell can alias</figcaption>
+</figure>
+</section><section id="rcrefcellt-2" class="slide level2">
+<h1><code>Rc&lt;RefCell&lt;T&gt;&gt;</code></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> rc1 = Rc::new(RefCell::new(B::new()));
+<span class="kw">let</span> rc2 = rc1.clone();
+<span class="kw">let</span> w = rc2.borrow_mut();</code></pre></div>
+<figure>
+<img src="rc_refcell_w.png" alt="there can be only one!" /><figcaption>there can be only one!</figcaption>
+</figure>
+</section><section id="what-static-guarantees-does-rcrefcellt-have" class="slide level2">
+<h1>What static guarantees does <code>Rc&lt;RefCell&lt;T&gt;&gt;</code> have?</h1>
+<div class="fragment">
+<p>Not much!</p>
+</div>
+<div class="fragment">
+<p>If you want to port an existing <em>imperative</em> algorithm with all sorts of sharing, you <em>could</em> try using <code>Rc&lt;RefCell&lt;T&gt;&gt;</code>.</p>
+<p>You then might spend much less time wrestling with Rust's type (+borrow) checker.</p>
+</div>
+<div class="fragment">
+<p>The point: <code>Rc&lt;RefCell&lt;T&gt;&gt;</code> is nearly an anti-pattern. It limits static reasoning. You should avoid it if you can.</p>
+</div>
+</section><section id="other-kinds-of-shared-ownership" class="slide level2">
+<h1>Other kinds of shared ownership</h1>
+<ul>
+<li><p><code>TypedArena&lt;T&gt;</code></p></li>
+<li><p><code>Cow&lt;T&gt;</code></p></li>
+<li><p><code>Rc&lt;T&gt;</code> vs <code>Arc&lt;T&gt;</code></p></li>
+</ul>
+</section></section>
+<section><section id="sharing-work-parallelism-concurrency" class="titleslide slide level1 center"><h1>Sharing Work: Parallelism / Concurrency</h1></section><section id="threading-apis-plural" class="slide level2">
+<h1>Threading APIs (plural!)</h1>
+<ul>
+<li><p><code>std::thread</code></p></li>
+<li><p><code>dispatch</code> : OS X-specific &quot;Grand Central Dispatch&quot;</p></li>
+<li><p><code>crossbeam</code> : Lock-Free Abstractions, Scoped &quot;Must-be&quot; Concurrency</p></li>
+<li><p><code>rayon</code> : Scoped Fork-join &quot;Maybe&quot; Parallelism (inspired by Cilk)</p></li>
+</ul>
+<p>(Only the <em>first</em> comes with Rust out of the box)</p>
+</section><section id="stdthread" class="slide level2" data-transition="fade-out">
+<h1>std::thread</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> concurrent_web_fetch() -&gt; <span class="dt">Vec</span>&lt;::std::thread::JoinHandle&lt;()&gt;&gt; {
+    <span class="kw">use</span> hyper::{<span class="kw">self</span>, Client};
+    <span class="kw">use</span> std::io::Read; <span class="co">// pulls in `chars` method</span>
+
+
+    <span class="kw">let</span> sites = &amp;[<span class="st">&quot;http://www.eff.org/&quot;</span>, <span class="st">&quot;http://rust-lang.org/&quot;</span>,
+        <span class="st">&quot;http://imgur.com&quot;</span>, <span class="st">&quot;http://mozilla.org&quot;</span>];
+    <span class="kw">let</span> <span class="kw">mut</span> handles = <span class="dt">Vec</span>::new();
+    <span class="kw">for</span> site_ref <span class="kw">in</span> sites {
+        <span class="kw">let</span> site = *site_ref;
+        <span class="kw">let</span> handle = ::std::thread::spawn(<span class="kw">move</span> || {
+            <span class="co">// block code put in closure: ~~~~~~~</span>
+            <span class="kw">let</span> client = Client::new();
+
+            <span class="kw">let</span> res = client.get(site).send().unwrap();
+            <span class="pp">assert_eq!</span>(res.status, hyper::<span class="cn">Ok</span>);
+            <span class="kw">let</span> char_count = res.chars().count();
+            <span class="pp">println!</span>(<span class="st">&quot;site: {} chars: {}&quot;</span>, site, char_count);
+        });
+
+        handles.push(handle);
+    }
+
+    <span class="kw">return</span> handles;
+}</code></pre></div>
+</section><section id="dispatch" class="slide level2" data-transition="fade-in">
+<h1>dispatch</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> concurrent_gcd_fetch() -&gt; <span class="dt">Vec</span>&lt;::dispatch::Queue&gt; {
+    <span class="kw">use</span> hyper::{<span class="kw">self</span>, Client};
+    <span class="kw">use</span> std::io::Read; <span class="co">// pulls in `chars` method</span>
+    <span class="kw">use</span> dispatch::{Queue, QueueAttribute};
+
+    <span class="kw">let</span> sites = &amp;[<span class="st">&quot;http://www.eff.org/&quot;</span>, <span class="st">&quot;http://rust-lang.org/&quot;</span>,
+        <span class="st">&quot;http://imgur.com&quot;</span>, <span class="st">&quot;http://mozilla.org&quot;</span>];
+    <span class="kw">let</span> <span class="kw">mut</span> queues = <span class="dt">Vec</span>::new();
+    <span class="kw">for</span> site_ref <span class="kw">in</span> sites {
+        <span class="kw">let</span> site = *site_ref;
+        <span class="kw">let</span> q = Queue::create(<span class="st">&quot;qcon2016&quot;</span>, QueueAttribute::Serial);
+        q.async(<span class="kw">move</span> || {
+            <span class="kw">let</span> client = Client::new();
+
+            <span class="kw">let</span> res = client.get(site).send().unwrap();
+            <span class="pp">assert_eq!</span>(res.status, hyper::<span class="cn">Ok</span>);
+            <span class="kw">let</span> char_count = res.chars().count();
+            <span class="pp">println!</span>(<span class="st">&quot;site: {} chars: {}&quot;</span>, site, char_count);
+        });
+
+        queues.push(q);
+    }
+
+    <span class="kw">return</span> queues;
+}</code></pre></div>
+<!--
+```rust
+#[test]
+fn gcd_web_fetch() {
+    println!("gcd_web_fetch");
+    for q in concurrent_gcd_fetch() { q.sync(|| {}); }
+    panic!("want to see output");
+}
+```
+-->
+</section><section id="crossbeam" class="slide level2 big_text center">
+<h1>crossbeam</h1>
+<ul>
+<li><p>lock-free data structures</p></li>
+<li><p>scoped threading abstraction</p></li>
+<li><p>upholds Rust's safety (data-race freedom) guarantees</p></li>
+</ul>
+</section><section id="lock-free-data-structures" class="slide level2 big_text center">
+<h1>lock-free data structures</h1>
+</section><section id="crossbeam-mpsc-benchmark" class="slide level2">
+<h1><code>crossbeam</code> MPSC benchmark</h1>
+<p>mean ns/msg (2 producers, 1 consumer; msg count 10e6; 1G heap)</p>
+<table>
+<tr>
+<td>
+<div class="bar" style="height: 108px;">
+108ns
+</div>
+</td>
+<!--
+-->
+<td>
+<div class="bar" style="height:  98px;">
+98ns
+</div>
+</td>
+<!--
+-->
+<td>
+<div class="bar" style="height:  53px;">
+53ns
+</div>
+</td>
+<!--
+-->
+<td>
+<div class="bar" style="height: 461px;">
+461ns
+</div>
+</td>
+<!--
+-->
+<td>
+<div class="bar" style="height: 192px;">
+192ns
+</div>
+</td>
+</tr>
+<tr>
+<td>
+Rust channel
+</td>
+<td>
+<code>crossbeam</code> MSQ
+</td>
+<td>
+<code>crossbeam</code> SegQueue
+</td>
+<td>
+Scala MSQ
+</td>
+<td>
+Java ConcurrentLinkedQueue
+</td>
+</tr>
+</table>
+</section><section id="crossbeam-mpmc-benchmark" class="slide level2">
+<h1><code>crossbeam</code> MPMC benchmark</h1>
+<p>mean ns/msg (2 producers, 2 consumers; msg count 10e6; 1G heap)</p>
+<table>
+<tr>
+<td>
+<div class="bar" style="height:   0px;">
+
+</div>
+</td>
+<!--
+-->
+<td>
+<div class="bar" style="height: 102px;">
+102ns
+</div>
+</td>
+<!--
+-->
+<td>
+<div class="bar" style="height:  58px;">
+58ns
+</div>
+</td>
+<!--
+-->
+<td>
+<div class="bar" style="height: 239px;">
+239ns
+</div>
+</td>
+<!--
+-->
+<td>
+<div class="bar" style="height: 204px;">
+204ns
+</div>
+</td>
+</tr>
+<tr>
+<td>
+Rust channel (N/A)
+</td>
+<td>
+<code>crossbeam</code> MSQ
+</td>
+<td>
+<code>crossbeam</code> SegQueue
+</td>
+<td>
+Scala MSQ
+</td>
+<td>
+Java ConcurrentLinkedQueue
+</td>
+</tr>
+</table>
+<p>See &quot;Lock-freedom without garbage collection&quot; <code>https://aturon.github.io/blog/2015/08/27/epoch/</code></p>
+</section><section id="scoped-threading" class="slide level2">
+<h1>scoped threading?</h1>
+<p><code>std::thead</code> does not allow sharing stack-local data</p>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> std_thread_fail() {
+    <span class="kw">let</span> array: [<span class="dt">u32</span>; <span class="dv">3</span>] = [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+
+    <span class="kw">for</span> i <span class="kw">in</span> &amp;array {
+        ::std::thread::spawn(|| {
+            <span class="pp">println!</span>(<span class="st">&quot;element: {}&quot;</span>, i);
+        });
+    }
+}</code></pre></div>
+<div class="fragment">
+<pre><code>error: `array` does not live long enough</code></pre>
+</div>
+</section><section id="crossbeam-scoped-threading" class="slide level2">
+<h1><code>crossbeam</code> scoped threading</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> crossbeam_demo() {
+    <span class="kw">let</span> array = [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+
+    ::crossbeam::scope(|scope| {
+        <span class="kw">for</span> i <span class="kw">in</span> &amp;array {
+            scope.spawn(<span class="kw">move</span> || {
+                <span class="pp">println!</span>(<span class="st">&quot;element: {}&quot;</span>, i);
+            });
+        }
+    });
+}</code></pre></div>
+<div class="fragment">
+<p><code>::crossbeam::scope</code> enforces parent thread joins on all spawned children before returning</p>
+<ul>
+<li>ensures that it is sound for children to access local references passed into them.</li>
+</ul>
+</div>
+</section><section id="crossbeam-scope-must-be-concurrency" class="slide level2 big_text center">
+<h1>crossbeam <code>scope</code>: &quot;must-be concurrency&quot;</h1>
+<p>Each <code>scope.spawn(..)</code> invocation fires up a fresh thread</p>
+<p>(Literally just a wrapper around <code>std::thread</code>)</p>
+</section><section id="rayon-maybe-parallelism" class="slide level2 big_text center">
+<h1><code>rayon</code>: &quot;maybe parallelism&quot;</h1>
+</section><section id="rayon-demo-1-map-reduce" class="slide level2">
+<h1><code>rayon</code> demo 1: map reduce</h1>
+<!--
+```rust
+struct Store;
+struct Item;
+type Groceries<'a> = &'a [Item];
+use rayon;
+use rayon::prelude::*;
+impl Store {
+    fn compute_price(&self, g: Groceries) -> u32 { unimplemented!() }
+}
+```
+-->
+<h3 id="sequential">Sequential</h3>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> demo_map_reduce_seq(stores: &amp;[Store], list: Groceries) -&gt; <span class="dt">u32</span> {
+    <span class="kw">let</span> total_price = stores.iter()
+                            .map(|store| store.compute_price(&amp;list))
+                            .sum();
+    <span class="kw">return</span> total_price;
+}</code></pre></div>
+<h3 id="parallel-potentially">Parallel (<em>potentially</em>)</h3>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> demo_map_reduce_par(stores: &amp;[Store], list: Groceries) -&gt; <span class="dt">u32</span> {
+    <span class="kw">let</span> total_price = stores.par_iter()
+                            .map(|store| store.compute_price(&amp;list))
+                            .sum();
+    <span class="kw">return</span> total_price;
+}</code></pre></div>
+</section><section id="rayons-rule" class="slide level2">
+<h1>Rayon's Rule</h1>
+<blockquote>
+<p>the decision of whether or not to use parallel threads is made dynamically, based on whether idle cores are available</p>
+</blockquote>
+<div class="fragment">
+<p>i.e., solely for offloading work, <em>not</em> for when concurrent operation is necessary for correctness</p>
+</div>
+<div class="fragment">
+<p>(uses work-stealing under the hood to distribute work among a fixed set of threads)</p>
+</div>
+</section><section id="rayon-demo-2-quicksort" class="slide level2" data-transition="fade-out">
+<h1><code>rayon</code> demo 2: quicksort</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> quick_sort&lt;T:<span class="bu">PartialOrd</span>+<span class="bu">Send</span>&gt;(v: &amp;<span class="kw">mut</span> [T]) {
+    <span class="kw">if</span> v.len() &gt; <span class="dv">1</span> {
+        <span class="kw">let</span> mid = partition(v);
+        <span class="kw">let</span> (lo, hi) = v.split_at_mut(mid);
+        rayon::join(|| quick_sort(lo),
+                    || quick_sort(hi));
+    }
+}</code></pre></div>
+<!--
+```rust
+fn partition<T:PartialOrd+Send>(v: &mut [T]) -> usize {
+    // see https://en.wikipedia.org/wiki/Quicksort#Lomuto_partition_scheme
+    unimplemented!()
+}
+```
+-->
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> partition&lt;T:<span class="bu">PartialOrd</span>+<span class="bu">Send</span>&gt;(v: &amp;<span class="kw">mut</span> [T]) -&gt; <span class="dt">usize</span> {
+    <span class="co">// see https://en.wikipedia.org/wiki/</span>
+    <span class="co">//     Quicksort#Lomuto_partition_scheme</span>
+    ...
+}</code></pre></div>
+</section><section id="rayon-demo-3-buggy-quicksort" class="slide level2" data-transition="fade-in">
+<h1><code>rayon</code> demo 3: buggy quicksort</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> quick_sort&lt;T:<span class="bu">PartialOrd</span>+<span class="bu">Send</span>&gt;(v: &amp;<span class="kw">mut</span> [T]) {
+    <span class="kw">if</span> v.len() &gt; <span class="dv">1</span> {
+        <span class="kw">let</span> mid = partition(v);
+        <span class="kw">let</span> (lo, hi) = v.split_at_mut(mid);
+        rayon::join(|| quick_sort(lo),
+                    || quick_sort(hi));
+    }
+}</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> quick_sort&lt;T:<span class="bu">PartialOrd</span>+<span class="bu">Send</span>&gt;(v: &amp;<span class="kw">mut</span> [T]) {
+    <span class="kw">if</span> v.len() &gt; <span class="dv">1</span> {
+        <span class="kw">let</span> mid = partition(v);
+        <span class="kw">let</span> (lo, hi) = v.split_at_mut(mid);
+        rayon::join(|| quick_sort(lo),
+                    || quick_sort(lo));
+        <span class="co">//                        ~~ data race!</span>
+    }
+}</code></pre></div>
+<p>(See blog post &quot;Rayon: Data Parallelism in Rust&quot; <code>bit.ly/1IZcku4</code>)</p>
+</section><section id="big-idea" class="slide level2 big_text center">
+<h1>Big Idea</h1>
+<p>3rd parties identify (and provide) <em>new abstractions</em> for concurrency and parallelism unanticipated in std lib.</p>
+</section></section>
+<section><section id="soundness-and-3rd-party-concurrency" class="titleslide slide level1"><h1>Soundness and 3rd Party Concurrency</h1></section><section id="the-secret-sauce" class="slide level2">
+<h1>The Secret Sauce</h1>
+<ul>
+<li><p><code>Send</code></p></li>
+<li><p><code>Sync</code></p></li>
+<li><p>lifetime bounds</p></li>
+</ul>
+</section><section id="send-and-sync" class="slide level2">
+<h1>Send and Sync</h1>
+<p><code>T: Send</code> means an instance of <code>T</code> can be <em>transferred</em> between threads</p>
+<p>(i.e. move or copied as appropriate)</p>
+<div class="fragment">
+<p><code>T: Sync</code> means two threads can safely <em>share</em> a reference to an instance of <code>T</code></p>
+</div>
+</section><section id="examples" class="slide level2">
+<h1>Examples</h1>
+<p><code>T: Send</code> : <code>T</code> can be <em>transferred</em> between threads</p>
+<p><code>T: Sync</code> : two threads can <em>share</em> refs to a <code>T</code></p>
+<ul>
+<li class="fragment"><code>String</code> is <code>Send</code></li>
+<li class="fragment"><code>Vec&lt;T&gt;</code> is <code>Send</code> (if <code>T</code> is <code>Send</code>)</li>
+<li class="fragment">(double-check: why not require <code>T: Sync</code> for <code>Vec&lt;T&gt;: Send</code>?)</li>
+<li class="fragment"><code>Rc&lt;T&gt;</code> is <em>not</em> <code>Send</code> (for any <code>T</code>)</li>
+<li class="fragment">but <code>Arc&lt;T&gt;</code> <em>is</em> <code>Send</code> (if <code>T</code> is <code>Send</code> and <code>Sync</code>)</li>
+<li class="fragment">(to ponder: why require <code>T:Send</code> for <code>Arc&lt;T&gt;</code>?)</li>
+<li class="fragment"><code>&amp;T</code> is <code>Send</code> if <code>T: Sync</code></li>
+<li class="fragment"><code>&amp;mut T</code> is <code>Send</code> if <code>T: Send</code></li>
+</ul>
+</section><section id="send-and-sync-are-only-half-the-story" class="slide level2 big_text center">
+<h1>Send and Sync are only half the story</h1>
+<h3 id="other-half-is-lifetime-bounds-come-see-me-if-curious">other half is lifetime bounds; come see me if curious</h3>
+</section></section>
+<section><section id="sharing-code-cargo" class="titleslide slide level1 center"><h1>Sharing Code: Cargo</h1></section><section id="sharing-code" class="slide level2">
+<h1>Sharing Code</h1>
+<p><code>std::thread</code> is provided with std lib</p>
+<div class="fragment">
+<p>But <code>dispatch</code>, <code>crossbeam</code>, and <code>rayon</code> are 3rd party</p>
+<p>(not to mention <code>hyper</code> and a host of other crates used in this talk's construction)</p>
+</div>
+<div class="fragment">
+<p>What is Rust's code distribution story?</p>
+</div>
+</section><section id="cargo" class="slide level2">
+<h1>Cargo</h1>
+<p><code>cargo</code> is really simple to use</p>
+<div class="fragment">
+<pre><code>cargo new     -- create a project
+cargo test    -- run project&#39;s unit tests
+cargo run     -- run binaries associated with project
+cargo publish -- push project up to crates.io</code></pre>
+</div>
+<div class="fragment">
+<p>Edit the associated <code>Cargo.toml</code> file to:</p>
+<ul>
+<li>add dependencies</li>
+<li>specify version / licensing info</li>
+<li>conditionally compiled features</li>
+<li>add build-time behaviors (e.g. code generation)</li>
+</ul>
+</div>
+<div class="fragment">
+<p>&quot;What's this about <code>crates.io</code>?&quot;</p>
+</div>
+</section><section id="crates.io" class="slide level2">
+<h1>crates.io</h1>
+<p>Open-source crate distribution site</p>
+<p>Has every version of every crate</p>
+<p>Cargo adheres to <em>semver</em></p>
+</section><section id="semver" class="slide level2">
+<h1>Semver</h1>
+<!--
+From the cargo docs
+
+> Cargo bakes in the concept of [Semantic Versioning][], so make sure you follow some basic rules:
+>
+> * Before you reach 1.0.0, anything goes.
+> * After 1.0.0, only make breaking changes when you increment the major version. In Rust, breaking changes include adding fields to structs or variants to enums. Don’t break the build.
+> * After 1.0.0, don’t add any new public API (no new pub anything) in tiny versions. Always increment the minor version if you add any new pub structs, traits, fields, types, functions, methods or anything else.
+> * Use version numbers with three numeric parts such as 1.0.0 rather than 1.0.
+-->
+<p>The use of <a href="http://semver.org/">Semantic Versioning</a> in <code>cargo</code> basically amounts to this:</p>
+<p>Major versions (MAJOR.minor.patch) are free to break whatever they want.</p>
+<p>New public API's can be added with minor versions updates (major.MINOR.patch), as long as they do not impose breaking changes.</p>
+<div class="fragment">
+<p>In Rust, breaking changes <em>includes</em> data-structure representation changes.</p>
+<p>Adding fields to structs (or variants to enums) can cause their memory representation to change.</p>
+</div>
+</section><section id="why-major-versions-can-include-breaking-changes" class="slide level2">
+<h1>Why major versions can include breaking changes</h1>
+<p>Cargo invokes the Rust compiler in a way that salts the symbols exported by a compiled library.</p>
+<p>This ends up allowing two distinct (major) versions of a library to be used <em>simultaneously</em> in the same program.</p>
+<p>This is important when pulling in third party libraries.</p>
+</section><section id="fixing-versions" class="slide level2">
+<h1>Fixing versions</h1>
+<p><code>cargo</code> generates a <code>Cargo.lock</code> file that tracks the versions you built the project with</p>
+<p>Intent: application (i.e. final) crates should check their <code>Cargo.lock</code> into version control</p>
+<ul>
+<li>Ensures that future build attempts will choose the <em>same</em> versions</li>
+</ul>
+<p>However: library (i.e. intermediate) crates should <em>not</em> check their <code>Cargo.lock</code> into version control.</p>
+<ul>
+<li>Instead, everyone should follow sem.ver.; then individual applications can mix different libraries into their final product, upgrading intermediate libraries as necessary</li>
+</ul>
+</section><section id="crate-dependency-graph" class="slide level2">
+<h1>Crate dependency graph</h1>
+<p>Compiler ensures one cannot pass struct defined via <code>X</code> version 2.x.y into function expecting <code>X</code> version 1.m.n, or vice versa.</p>
+<figure>
+<img src="crate_dep_graph.png" alt="" />
+</figure>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>A</code>: Graph Structure</td>
+<td style="text-align: center;"><code>B</code>: Token API</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>C</code>: Lexical Scanner</td>
+<td style="text-align: center;"><code>D</code>: GLL Parser</td>
+<td style="text-align: left;"><code>P</code>: Linked Program</td>
+</tr>
+</tbody>
+</table>
+</section><section id="in-practice" class="slide level2">
+<h1>In Practice</h1>
+<ul>
+<li><p>If you (*) follow the sem.ver. rules, then you do not usually have to think hard about those sorts of pictures.</p></li>
+<li><p>&quot;you&quot; is really &quot;you and all the crates you use&quot;</p></li>
+</ul>
+<p> </p>
+<ul>
+<li class="fragment">You may not believe me, but <code>cargo</code> is really simple to use</li>
+<li class="fragment">Coming from a C/C++ world, this feels like magic</li>
+<li class="fragment">(probably feels like old hat for people used to package dependency managers)</li>
+</ul>
+</section></section>
+<section><section id="final-words" class="titleslide slide level1"><h1>Final Words</h1></section><section id="final-words-1" class="slide level2 center">
+<h1>Final Words</h1>
+<h3 id="and-no-more-pictures">(and no more pictures)</h3>
+</section><section id="interop" class="slide level2">
+<h1>Interop</h1>
+<ul>
+<li><p>Rust to C</p></li>
+<li><div class="fragment">
+easy: <code>extern { ... }</code> and <code>unsafe { ... }</code>
+</div></li>
+<li><p>C to Rust</p></li>
+<li><div class="fragment">
+easy: <code>#[no_mangle] extern &quot;C&quot; fn foo(...) { ... }</code>
+</div></li>
+<li><p>Ruby, Python, etc to Rust</p></li>
+<li><div class="fragment">
+see e.g. <code>https://github.com/wycats/rust-bridge</code>
+</div></li>
+</ul>
+</section><section id="customers" class="slide level2 big_text center">
+<h1>Customers</h1>
+<p>Mozilla (of course)</p>
+<p>Skylight</p>
+<p>MaidSafe</p>
+<p>... others</p>
+</section><section id="pivot-from-cc-to-rust" class="slide level2 big_text center">
+<h1>Pivot from C/C++ to Rust</h1>
+<p>Maidsafe is one example of this</p>
+</section><section id="rust-as-enabler-of-individuals" class="slide level2 big_text center">
+<h1>Rust as enabler of individuals</h1>
+<h3 id="from-mere-script-programmer">From &quot;mere script programmer&quot;</h3>
+<h3 id="to-lauded-systems-hacker">to &quot;lauded systems hacker&quot;</h3>
+<!--
+## The Buck Stops Here
+-->
+</section><section id="or-if-you-prefer" class="slide level2 big_text center">
+<h1>Or if you prefer:</h1>
+<p>Enabling <em>sharing</em> systems hacking knowledge with everyone</p>
+<div class="fragment">
+<blockquote>
+<p>Programming in Rust has made me look at C++ code in a whole new light</p>
+</blockquote>
+</div>
+</section><section id="thanks" class="slide level2 center">
+<h1>Thanks</h1>
+<p><code>www.rust-lang.org</code></p>
+<div class="no_border logo">
+<img src="Rust_programming_language_black_logo.svg" alt="Rust Logo" />
+<div>
+
+<p><em>Hack Without Fear</em></p>
+</section></section>
+    </div>
+  </div>
+
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,         // Display controls in the bottom right corner
+        progress: true,         // Display a presentation progress bar
+        history: true,          // Push each slide change to the browser history
+        center: false,                       // Vertical centering of slides
+        maxScale: 1.5,                  // Bounds for smallest/largest possible content scale
+        slideNumber: false,                // Display the page number of the current slide
+        theme: 'mozilla-sandstone', // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+//          { src: 'reveal.js/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; }, }
+//          { src: 'reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+]});
+    </script>
+    </body>
+</html>

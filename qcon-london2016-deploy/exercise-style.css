@@ -1,0 +1,9 @@
+div.hint, span.hint {
+    color: transparent;
+    text-shadow: 0px 0px 10px #808080;
+}
+
+a:hover div.hint, a:hover span.hint {
+    color: transparent;
+    text-shadow: 0px 0px 5px #808080;
+}
