@@ -79,7 +79,7 @@ my_car.drive_to(work);
 
 ## Correction: Ownership is intuitive, except for programmers ...  { .center }
 
-(copying data like integers and characters is free)
+(copying data like integers, and characters, and .mp3's, is "free")
 
 . . .
 
