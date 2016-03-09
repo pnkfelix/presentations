@@ -58,6 +58,8 @@ Exclusive access  `&mut T` ("mutable")
 Shared access     `&T`     ("read-only")
 ----------------- -------- -------------
 
+# Exclusive access
+
 ## `&mut`: can I borrow the car?
 
 <div class="notes">
@@ -192,6 +194,8 @@ fn borrow_the_car_3() {
 ```
 
 (*): "Car keys" return guaranteed by Rust; sadly, not by physical world
+
+# Shared Access
 
 ## Shared Access {.center}
 
