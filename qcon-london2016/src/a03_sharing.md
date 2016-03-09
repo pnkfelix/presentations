@@ -109,6 +109,8 @@ give_arnie(mutable_borrow);
 
 ## Can't mix the two in safe code! {.center}
 
+### Otherwise: (data) races!
+
 ----
 
 ``` {.rust .compile_error}
