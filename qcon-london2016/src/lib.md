@@ -5,9 +5,12 @@ Features:
  * I want to use the `chars` method of the `std::io::Read` trait,
    which needs the `io` feature.
 
+ * I want to use the `sum` method of the `Iterator` trait.
+
 ```rust
 #![feature(test)]
 #![feature(io)] // ugh what a shame
+#![feature(iter_arith)]
 ```
 
 We use #[bench] which requires the `test` crate.
@@ -33,10 +36,12 @@ As a prelude to rayon, I use `.foreach` on an iterator, which I grabbed from ite
 extern crate itertools;
 ```
 
-And of course we want to include rayon demos.
+And of course we want to include rayon demos (and other lib demos).
 
 ```rust
 extern crate rayon;
+extern crate crossbeam;
+extern crate dispatch;
 ```
 
 We list all the source we want included as part of the build / test process here.
