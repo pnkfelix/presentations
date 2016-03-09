@@ -22,6 +22,10 @@ It's awesome!
 
 (Was the previous slide really not a sufficient answer?)
 
+. . .
+
+oh, maybe you meant ...
+
 ## Why would Mozilla sponsor Rust?   { data-transition="fade" }
 
 >- Hard to prototype research-y browser changes atop C++ code base
@@ -35,7 +39,6 @@ It's awesome!
 ## Talk plan
 
 >- "Why Rust" Demonstration
->- "Sharing is Great" (... or Terrible)
 >- "Ownership is easy" (... or is it?)
 >- ___Sharing                        Stuff
    -----------------------------  --------------------------------
