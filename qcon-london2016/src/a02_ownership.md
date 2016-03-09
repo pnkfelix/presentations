@@ -2,7 +2,23 @@
 
 # "Ownership is intuitive" {.center}
 
-## "Ownership is intuitive"
+## "Ownership is intuitive"  { data-transition="fade-out" }
+
+Let's buy a car
+
+``` {.rust}
+let money: Money = bank.withdraw_cash();
+let my_new_car: Car = dealership.buy_car(money);
+```
+
+``` {.rust .compile_error}
+let second_car = dealership.buy_car(money); // <-- cannot reuse
+```
+
+money transferred into `dealership`,
+and car transferred to us.
+
+## "Ownership is intuitive"  { data-transition="fade" }
 
 Let's buy a car
 
@@ -12,10 +28,35 @@ let my_new_car: Car = dealership.buy_car(money);
 // let second_car = dealership.buy_car(money); // <-- cannot reuse
 ```
 
-money transferred into `dealership`
+money transferred into `dealership`,
 and car transferred to us.
 
-. . .
+
+``` {.rust}
+my_new_car.drive_to(home);
+garage.park(my_new_car);
+```
+
+``` {.rust .compile_error}
+my_new_car.drive_to(...) now doesn't work
+```
+
+(can't drive car without access to it, e.g. taking it
+out of the garage)
+
+## "Ownership is intuitive"  { data-transition="fade-in" }
+
+Let's buy a car
+
+``` {.rust}
+let money: Money = bank.withdraw_cash();
+let my_new_car: Car = dealership.buy_car(money);
+// let second_car = dealership.buy_car(money); // <-- cannot reuse
+```
+
+money transferred into `dealership`,
+and car transferred to us.
+
 
 ``` {.rust}
 my_new_car.drive_to(home);
@@ -30,6 +71,11 @@ out of the garage)
 let my_car = garage.unpark();
 my_car.drive_to(work);
 ```
+
+. . .
+
+...reflection time...
+
 
 ## Correction: Ownership is intuitive, except for programmers ...  { .center }
 
