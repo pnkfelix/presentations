@@ -50,14 +50,6 @@ references to data (`&mut T`, `&T`):
 
  * Enables **safe**, **parallel** API's
 
-## {.center}
-
------------------ -------- -------------
-Ownership         `T`
-Exclusive access  `&mut T` ("mutable")
-Shared access     `&T`     ("read-only")
------------------ -------- -------------
-
 # A Metaphor {.center}
 
 ## (reminder: metaphors never work 100%) {.big_text .center}
@@ -82,7 +74,7 @@ let read_only_borrow = &christine;
 
 ![single inspector (immutable borrow)](christine_car_single_inspector.png)
 
-(apologies to Randall Munroe))
+(apologies to Randall Munroe)
 
 ----
 
@@ -103,13 +95,18 @@ When inspectors are finished, we are left again with:
 ----
 
 ``` {.rust}
-let mutable_borrow = &mut christine;
-give_arnie(mutable_borrow);
+let mutable_borrow = &mut christine; // like taking keys ...
+give_arnie(mutable_borrow); // ... and giving them to someone
 ```
 
 ![driven car (mutably borrowed)](christine_car_driven.png)
 
 ## Can't mix the two in safe code! {.center}
+
+------------------------------------------------------------------------- ----------------------------------------------------------
+![many inspectors (immutable borrows)](christine_car_many_inspectors.png) ![driven car (mutably borrowed)](christine_car_driven.png)
+------------------------------------------------------------------------- ----------------------------------------------------------
+
 
 ### Otherwise: (data) races!
 
@@ -124,7 +121,15 @@ read_only_borrows[3] = &christine;
 
 ![mixing mutable and immutable is illegal](christine_car_driving_over_inspectors.png)
 
-# Exclusive access
+## {.center}
+
+----------------- -------- -------------
+Ownership         `T`
+Exclusive access  `&mut T` ("mutable")
+Shared access     `&T`     ("read-only")
+----------------- -------- -------------
+
+# Exclusive access {.center}
 
 ## `&mut`: can I borrow the car?
 
@@ -212,6 +217,18 @@ fn lend_2(arnie: &Arnie, k: &mut Car) {
 }
 ```
 
+. . .
+
+Owner loses capabilities attached to `&mut`-borrows only
+*temporarily* (*)
+
+<div class="notes">
+Keys *will* return after `&mut`-borrow ends; I, the owner, will regain
+exclusive access (and the ability to lend out the keys again, or
+transfer ownership elsewhere, or even destroy Christine).
+</div>
+
+(*): "Car keys" return guaranteed by Rust; sadly, not by physical world
 
 ## End of metaphor
 
