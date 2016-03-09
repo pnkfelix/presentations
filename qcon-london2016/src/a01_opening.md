@@ -4,15 +4,16 @@
 
 > - Fast code, low memory footprint
 > - Go from bare metal (assembly; C FFI) ...
-  <div class="fragment">... to high-level (closures, generic containers) ...</div>
-  <div class="fragment">with *zero cost*</div>
-> - *Safety*
-> - *Parallelism*
+  <div class="fragment">... to high-level (collections, closures, generic containers) ...</div>
+  <div class="fragment">with *zero cost* (no GC, unboxed closures, monomorphization of generics)</div>
+> - *Safety* and *Parallelism*
 
 <div class="notes">
  * So far, sounds like C++
  * "the UB stops here"
 </div>
+
+## Safety and Parallelism {.center}
 
 ## Why would you (Felix) work on Rust?  { .big_text data-transition="fade" }
 
@@ -20,7 +21,7 @@
 
 It's awesome!
 
-(Was the previous slide really not a sufficient answer?)
+(Were prior slides really not a sufficient answer?)
 
 . . .
 
@@ -40,11 +41,18 @@ oh, maybe you meant ...
 
 ## Where is Rust now?
 
- * 1.0 release back in May 2015
+ * 1.0 release was back in May 2015
 
  * Rolling release cycle (up to Rust 1.7 as of March 2nd 2016)
 
+ * Open source from the begining
+   `https://github.com/rust-lang/rust/`
+
+ * Open model for future change (RFC process)
+   `https://github.com/rust-lang/rfcs/`
+
  * Awesome developer community
+   (~1,000 people in `#rust`, ~250 people in `#rust-internals`, ~1,300 unique commiters to rust.git)
 
 ## Talk plan
 
