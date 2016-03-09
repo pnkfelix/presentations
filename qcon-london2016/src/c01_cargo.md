@@ -86,6 +86,19 @@ used *simultaneously* in the same program.
 
 This is important when pulling in third party libraries.
 
+## Fixing versions
+
+`cargo` generates a `Cargo.lock` file that tracks the versions you built the project with
+
+Intent: application (i.e. final) crates should check their `Cargo.lock` into version control
+
+ * Ensures that future build attempts will choose the *same* versions
+
+However: library (i.e. intermediate) crates should *not* check their `Cargo.lock` into version control.
+
+ * Instead, everyone should follow sem.ver.; then individual applications can mix different libraries
+   into their final product, upgrading intermediate libraries as necessary
+
 ## Crate dependency graph
 
 Compiler ensures one cannot pass struct defined
@@ -100,3 +113,15 @@ via `X` version 2.x.y into function expecting
 `A`: Graph Structure       `B`: Token API
 `C`: Lexical Scanner       `D`: GLL Parser     `P`: Linked Program
 ------------------------ --------------------- -------------------
+
+## In Practice
+
+* If you (*) follow the sem.ver. rules, then you do not usually have to think hard about those sorts of pictures.
+
+   * "you" is really "you and all the crates you use"
+
+&nbsp;
+
+>- You may not believe me, but `cargo` is really simple to use
+>- Coming from a C/C++ world, this feels like magic
+   >- (probably feels like old hat for people used to package dependency managers)
