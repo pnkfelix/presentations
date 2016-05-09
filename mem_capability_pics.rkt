@@ -235,8 +235,12 @@
 (define-syntax save-svg
   (syntax-rules ()
     ((save-svg NAME)
-     (save-svg-image (clear-pinhole NAME) (string-append "/tmp/" (symbol->string 'NAME) ".svg")))))
+     (save-svg-image (scale 3/4 (clear-pinhole NAME)) (string-append "/tmp/" (symbol->string 'NAME) ".svg")))))
 
+(define-syntax save-svgs
+  (syntax-rules ()
+    ((save-svgs NAME ...)
+     (begin (save-svg NAME) ... (list NAME ...)))))
 
 (list 
  stack-allocation
