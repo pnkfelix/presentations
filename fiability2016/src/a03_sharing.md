@@ -62,7 +62,7 @@ let christine = Car::new();
 
 This is "Christine"
 
-![pristine unborrowed car](christine_car_pristine.png)
+![pristine unborrowed car](christine-svg/pristine-car.svg)
 
 (apologies to Stephen King)
 
@@ -72,9 +72,7 @@ This is "Christine"
 let read_only_borrow = &christine;
 ```
 
-![single inspector (immutable borrow)](christine_car_single_inspector.png)
-
-(apologies to Randall Munroe)
+![single inspector (immutable borrow)](christine-svg/show-one-inspector.svg)
 
 ----
 
@@ -84,13 +82,13 @@ read_only_borrows[3] = &christine;
 read_only_borrows[4] = &christine;
 ```
 
-![many inspectors (immutable borrows)](christine_car_many_inspectors.png)
+![many inspectors (immutable borrows)](christine-svg/show-many-inspectors.svg)
 
 ----
 
 When inspectors are finished, we are left again with:
 
-![pristine unborrowed car](christine_car_pristine.png)
+![pristine unborrowed car](christine-svg/pristine-car.svg)
 
 ----
 
@@ -99,13 +97,13 @@ let mutable_borrow = &mut christine; // like taking keys ...
 give_arnie(mutable_borrow); // ... and giving them to someone
 ```
 
-![driven car (mutably borrowed)](christine_car_driven.png)
+![driven car (mutably borrowed)](christine-svg/show-driver-alone.svg)
 
 ## Can't mix the two in safe code! {.center}
 
-------------------------------------------------------------------------- ----------------------------------------------------------
-![many inspectors (immutable borrows)](christine_car_many_inspectors.png) ![driven car (mutably borrowed)](christine_car_driven.png)
-------------------------------------------------------------------------- ----------------------------------------------------------
+------------------------------------------------------------------------------ ----------------------------------------------------------
+![many inspectors (immutable borrows)](christine-svg/show-many-inspectors.svg) ![driven car (mutably borrowed)](christine-svg/show-driver-alone.svg)
+------------------------------------------------------------------------------ ----------------------------------------------------------
 
 
 ### Otherwise: (data) races!
@@ -119,7 +117,7 @@ read_only_borrows[3] = &christine;
 // ⇒ CHAOS!
 ```
 
-![mixing mutable and immutable is illegal](christine_car_driving_over_inspectors.png)
+![mixing mutable and immutable is illegal](christine-svg/show-driver-and-corpses.svg)
 
 ## {.center}
 
