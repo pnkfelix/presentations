@@ -129,6 +129,8 @@ Exclusive access  `&mut T` ("mutable")
 Shared access     `&T`     ("read-only")
 ----------------- -------- -------------
 
+TODO: Vec example (in C++ perhaps?)
+
 . . .
 
 Reminder: this does not apply only to concurrency (iterator invalidation, etc.)

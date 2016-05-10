@@ -3,7 +3,7 @@
 ## Big Idea {.big_text .center}
 
 3rd parties identify (and provide) *new abstractions*
-for concurrency and parallelism unanticipated in std lib.
+for (safe) concurrency and parallelism unanticipated in std lib.
 
 ## Example: `rayon`'s scoped parallelism {.big_text .center}
 

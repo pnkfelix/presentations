@@ -79,10 +79,12 @@ my_car.drive_to(work);
 
 Ownership enables:       which removes:
 ----------------------   -------------------------------------------
-RAII-style destructors   a source of memory leaks (or fd leaks, etc)
+RsAII-style destructors   a source of memory leaks (or fd leaks, etc)
 no dangling pointers     many resource management bugs
 no data races            many multithreading heisenbugs
 ----------------------   -------------------------------------------
+
+TODO: code example
 
 . . .
 

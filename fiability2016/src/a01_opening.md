@@ -23,14 +23,6 @@
 
 * No data races
 
-### (Multi-paradigm) Parallelism
-
-  * msg passing via channels
-
-  * shared state via `Arc` and atomics, `Mutex`, etc
-
-  * use native threads... or scoped threads... or work-stealing...
-
 ## Why would Mozilla sponsor Rust?   { data-transition="fade" }
 
 >- Hard to prototype research-y browser changes atop C++ code base
@@ -38,10 +30,6 @@
 >- Rust ⇒ Servo, WebRender
 
 >- Want Rust for next-gen infrastructure (services, IoT)
-
->- > "Our mission is to ensure the Internet is a global public resource, open and accessible to all. An Internet that truly puts people first, where individuals can shape their own experience and are empowered, safe and independent."
-
->- "accessible to all"
 
 ## Where is Rust now?
 
