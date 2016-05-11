@@ -119,6 +119,23 @@ read_only_borrows[3] = &christine;
 
 ![mixing mutable and immutable is illegal](christine-svg/show-driver-and-corpses.svg)
 
+## Mixing mutable and immutable is illegal
+
+Reminder: this does not apply only to concurrency (iterator invalidation, etc.)
+
+. . .
+
+```{.cpp .compile_error}
+std::vector<int> v = {1};
+int &i = v[0];
+std::cout << i << std::endl; // prints 1
+
+v.push_back(2);
+
+std::vector<int> v2 = {2};
+std::cout << i << std::endl; // prints 2
+```
+
 ## {.center}
 
 ----------------- -------- -------------
@@ -126,12 +143,6 @@ Ownership         `T`
 Exclusive access  `&mut T` ("mutable")
 Shared access     `&T`     ("read-only")
 ----------------- -------- -------------
-
-TODO: Vec example (in C++ perhaps?)
-
-. . .
-
-Reminder: this does not apply only to concurrency (iterator invalidation, etc.)
 
 . . .
 

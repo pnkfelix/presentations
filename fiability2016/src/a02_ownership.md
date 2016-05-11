@@ -84,8 +84,6 @@ no dangling pointers     many resource management bugs
 no data races            many multithreading heisenbugs
 ----------------------   -------------------------------------------
 
-TODO: code example
-
 . . .
 
 > Do I need to take ownership here, accepting the associated
@@ -96,9 +94,9 @@ TODO: code example
 
 Good system developers ask this already!
 
-Rust forces function signatures to encode the answers
+‶The pointer may subsequently be used as an argument to the function free(3).″ STRDUP(2)
 
-(and they are checked by the compiler)
+Rust forces function signatures to encode the answers, and they are checked by the compiler.
 
 <div class="notes">
 Its worth pointing out that the encoded answer can
