@@ -109,7 +109,7 @@ fn sequential_web_fetch() {
 
 ## Demo: sequential web page fetch  { data-transition="fade" }
 
-```rust
+``` {.rust}
 fn sequential_web_fetch() {
     use hyper::{self, Client};
     use std::io::Read; // pulls in `chars` method
@@ -134,7 +134,7 @@ fn sequential_web_fetch() {
 
 ## Demo: concurrent web page fetch { data-transition="fade-in" }
 
-```rust
+``` {.rust}
 fn concurrent_web_fetch() -> Vec<::std::thread::JoinHandle<()>> {
     use hyper::{self, Client};
     use std::io::Read; // pulls in `chars` method
@@ -200,7 +200,7 @@ fn web_fetch() {
 
 ## Demo: soundness I  { data-transition="fade-out" }
 
-```rust
+``` {.rust}
 fn sequential_web_fetch_2() {
     use hyper::{self, Client};
     use std::io::Read; // pulls in `chars` method

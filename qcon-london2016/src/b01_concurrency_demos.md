@@ -15,6 +15,7 @@
 ## std::thread { data-transition="fade-out" }
 
 ```rust
+#[cfg(not_now)]
 fn concurrent_web_fetch() -> Vec<::std::thread::JoinHandle<()>> {
     use hyper::{self, Client};
     use std::io::Read; // pulls in `chars` method
@@ -45,6 +46,7 @@ fn concurrent_web_fetch() -> Vec<::std::thread::JoinHandle<()>> {
 ## dispatch { data-transition="fade-in" }
 
 ```rust
+#[cfg(not_now)]
 fn concurrent_gcd_fetch() -> Vec<::dispatch::Queue> {
     use hyper::{self, Client};
     use std::io::Read; // pulls in `chars` method
@@ -165,6 +167,7 @@ error: `array` does not live long enough
 ## `crossbeam` scoped threading
 
 ```rust
+#[cfg(not_now)]
 fn crossbeam_demo() {
     let array = [1, 2, 3];
 

@@ -28,7 +28,7 @@ extern crate piston_window;
 This is to support demo'ing concurrent web fetch.
 
 ```rust
-extern crate hyper;
+// extern crate hyper;
 ```
 
 As a prelude to rayon, I use `.foreach` on an iterator, which I grabbed from itertools.
@@ -40,8 +40,8 @@ And of course we want to include rayon demos (and other lib demos).
 
 ```rust
 extern crate rayon;
-extern crate crossbeam;
-extern crate dispatch;
+// extern crate crossbeam;
+// extern crate dispatch;
 ```
 
 We list all the source we want included as part of the build / test process here.
