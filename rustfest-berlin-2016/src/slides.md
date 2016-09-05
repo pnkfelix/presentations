@@ -37,26 +37,55 @@ fn here_is() {
 
 Compiler needs the expected type.
 
-E.g. if you have
+E.g. this compiles and runs:
 ```rust
-trait Input { }
-impl Input for [u8] { }
-fn process1(input: &[u8]) { }
-fn process2<I>(input: &I) where I: Input { }
-```
-
-consider
-
-```rust
+fn process1(input: &[i32]) { }
 fn foo() { process1(&vec![1, 2, 3]); }
 ```
 
-but this fails
+but this fails at compile time:
 
-```rust
-#[cfg(off)]
+``` {.rust .compile_error }
+trait Input { }
+impl Input for [i32] { }
+fn process2<I>(input: &I) where I: Input { }
 fn bar() { process2(&vec![1, 2, 3]); }
 ```
+
+## Why?
+
+
+``` {.rust}
+fn process1(input: &[i32]) { }
+```
+
+```art
+         &Vec<i32>
+            |
+            v
+ process1(&[i32])
+```
+
+Compiler sees input + expected types
+
+ * adds `&Vec -> &[i32]` coercion
+
+. . .
+
+``` {.rust .compile_error }
+fn process2<I>(input: &I) where I: Input { }
+```
+
+```art
+         &Vec<i32>
+            |
+            v
+   process2(&I)
+```
+
+Compiler decides `I` is `Vec<i32>`
+
+ * tries to find `impl Input for Vec<i32>`
 
 # Conclusion  {.center}
 
