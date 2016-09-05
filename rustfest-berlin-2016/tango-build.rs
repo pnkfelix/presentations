@@ -15,6 +15,8 @@ fn run_pandoc() {
     pandoc.add_input("src/slides.md");
     pandoc.set_output("slides.html");
     pandoc.add_option(pandoc::PandocOption::Css("stripes.css".to_string()));
+    pandoc.add_option(pandoc::PandocOption::Css("slide-style.css".to_string()));
+    pandoc.add_option(pandoc::PandocOption::Css("code-style.css".to_string()));
     pandoc.set_output_format(pandoc::OutputFormat::Revealjs);
     pandoc.add_option(pandoc::PandocOption::Standalone);
     pandoc.add_option(pandoc::PandocOption::SlideLevel(2));
