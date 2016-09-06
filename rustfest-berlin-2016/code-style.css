@@ -54,3 +54,13 @@
 .sourceCode .pp { color: #DC322F; font-weight: bold; }
 /* ATtribute */
 .sourceCode .at { color: #DC322F; font-weight: bold; }
+
+.sourceCode .stripes code {
+    background: repeating-linear-gradient(
+                        45deg,
+                        #f0dfdf,
+                        #f0dfdf 30px,
+                        #f7f8f8 30px,
+                        #f7f8f8 60px
+                    );
+}

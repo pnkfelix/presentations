@@ -18,3 +18,5 @@
 /* .sourceCode .rust { background: #3F3F3F; display: block; } */
 
 .left_align > div { text-align: left; }
+
+.reveal .slide-number { font-size: 24pt; color: #ffffff; }

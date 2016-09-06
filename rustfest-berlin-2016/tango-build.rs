@@ -23,6 +23,7 @@ fn run_pandoc() {
     pandoc.set_variable("theme", "mozilla-sandstone");
     // pandoc.set_variable("theme", "White");
     pandoc.set_variable("center", "false");
+    pandoc.set_variable("slideNumber", "'c / t'");
     pandoc.add_filter(run_art_filter);
     pandoc.execute().unwrap();
 }
