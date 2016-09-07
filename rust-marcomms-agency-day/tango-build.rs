@@ -23,6 +23,7 @@ fn run_pandoc() {
     pandoc.set_variable("theme", "mozilla-sandstone");
     // pandoc.set_variable("theme", "White");
     pandoc.set_variable("center", "false");
+    pandoc.set_variable("slideNumber", "'c / t'");
     pandoc.add_filter(run_art_filter);
     pandoc.execute().unwrap();
 }
@@ -66,8 +67,8 @@ fn run_mon_artiste(id: &str, content: &str) -> String {
     use mon_artiste::render::svg::{SvgRender};
     use mon_artiste::render::{RenderS};
     let r = SvgRender {
-        x_scale: 10, y_scale: 16,
-        font_family: "Menlo".to_string(), font_size: 16,
+        x_scale: 9, y_scale: 15,
+        font_family: "Menlo".to_string(), font_size: 15,
         show_gridlines: false,
         name: (if id == "" { "rustfest" } else { id }).to_string(),
     };
