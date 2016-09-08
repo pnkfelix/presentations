@@ -405,8 +405,7 @@ Initial proposals:
 
 ![][rust logo]
 
+"Hack Without Fear" [https://www.rust-lang.org/][rust-lang.org]
+
 [rust logo]: rust-logo-blk.svg "Rust Logo" {width="50%"}
-
-[https://www.rust-lang.org/][rust-lang.org]
-
 [rust-lang.org]: https://www.rust-lang.org/
