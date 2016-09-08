@@ -72,6 +72,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h3 id="felix-klock-pnkfelix-mozilla-research">Felix Klock (<code>@pnkfelix</code>), Mozilla Research</h3>
 <h3 id="marcomms-agency-day-paris-8-sept-2016">MarComms Agency Day, Paris; 8 Sept 2016</h3>
 <p>Slides: <a href="http://bit.ly/2c0zILe" class="uri">http://bit.ly/2c0zILe</a></p>
+<p>(<kbd>space</kbd>: next slide; <kbd>shift</kbd><kbd>space</kbd>: previous slide; <kbd>esc</kbd>: overview; arrows navigate)</p>
 </section>
 <section id="what" class="slide level2 center">
 <h1>What</h1>
@@ -159,63 +160,63 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1></h1>
 <p>Example systems code: direct access to bytes in memory</p>
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">buffer = new <span class="dt">String</span>(<span class="st">&quot;Hello&quot;</span>);</code></pre></div>
-<svg height="135" baseProfile="full" width="684" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <rect height="120" x="49.5" width="126" stroke-width="2" y="7.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <rect height="30" x="247.5" width="432" stroke-width="2" y="97.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <path d="M 63,37.5 L 72,37.5L 81,37.5L 90,37.5L 99,37.5L 108,37.5L 117,37.5L 126,37.5L 135,37.5L 144,37.5L 153,37.5L 162,37.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 153,52.5 L 162,52.5L 171,52.5L 175.5,52.5L 189,52.5L 198,52.5L 207,52.5L 216,52.5Q 220.5,52.5 220.5,60L 220.5,75L 220.5,90L 220.5,105Q 220.5,112.5 225,112.5Q 225,112.5 234,112.5L 238.5,112.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 63,67.5 L 72,67.5L 81,67.5L 90,67.5L 99,67.5L 108,67.5L 117,67.5L 126,67.5L 135,67.5L 144,67.5L 153,67.5L 162,67.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 63,97.5 L 72,97.5L 81,97.5L 90,97.5L 99,97.5L 108,97.5L 117,97.5L 126,97.5L 135,97.5L 144,97.5L 153,97.5L 162,97.5" stroke-width="2" stroke="green" fill="none" />
-  <text x="0" font-family="Menlo" dominant-baseline="middle" font-size="15" y="22.5" xml:space="preserve" fill="black" text-anchor="start">buf: </text>
-  <text x="63" font-family="Menlo" dominant-baseline="middle" font-size="15" y="22.5" xml:space="preserve" fill="black" text-anchor="start">String      </text>
-  <text x="99" font-family="Menlo" dominant-baseline="middle" font-size="15" y="52.5" xml:space="preserve" fill="black" text-anchor="start">data: </text>
-  <text x="81" font-family="Menlo" dominant-baseline="middle" font-size="15" y="82.5" xml:space="preserve" fill="black" text-anchor="start">length: 5 </text>
-  <text x="63" font-family="Menlo" dominant-baseline="middle" font-size="15" y="112.5" xml:space="preserve" fill="black" text-anchor="start">capacity: 8 </text>
-  <text x="261" font-family="Menlo" dominant-baseline="middle" font-size="15" y="112.5" xml:space="preserve" fill="black" text-anchor="start">'H' | 'e' | 'l' | 'l' | 'o' |     |     |     </text>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="684" baseProfile="full" height="135">
+  <rect fill="None" stroke-width="2" y="7.5" width="126" ry="7.5" x="49.5" height="120" stroke="red" rx="4.5" />
+  <rect fill="None" stroke-width="2" y="97.5" width="432" ry="7.5" x="247.5" height="30" stroke="red" rx="4.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 63,37.5 L 72,37.5L 81,37.5L 90,37.5L 99,37.5L 108,37.5L 117,37.5L 126,37.5L 135,37.5L 144,37.5L 153,37.5L 162,37.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 153,52.5 L 162,52.5L 171,52.5L 175.5,52.5L 189,52.5L 198,52.5L 207,52.5L 216,52.5Q 220.5,52.5 220.5,60L 220.5,75L 220.5,90L 220.5,105Q 220.5,112.5 225,112.5Q 225,112.5 234,112.5L 238.5,112.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 63,67.5 L 72,67.5L 81,67.5L 90,67.5L 99,67.5L 108,67.5L 117,67.5L 126,67.5L 135,67.5L 144,67.5L 153,67.5L 162,67.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 63,97.5 L 72,97.5L 81,97.5L 90,97.5L 99,97.5L 108,97.5L 117,97.5L 126,97.5L 135,97.5L 144,97.5L 153,97.5L 162,97.5" />
+  <text fill="black" text-anchor="start" y="22.5" dominant-baseline="middle" x="0" font-family="Menlo" xml:space="preserve" font-size="15">buf: </text>
+  <text fill="black" text-anchor="start" y="22.5" dominant-baseline="middle" x="63" font-family="Menlo" xml:space="preserve" font-size="15">String      </text>
+  <text fill="black" text-anchor="start" y="52.5" dominant-baseline="middle" x="99" font-family="Menlo" xml:space="preserve" font-size="15">data: </text>
+  <text fill="black" text-anchor="start" y="82.5" dominant-baseline="middle" x="81" font-family="Menlo" xml:space="preserve" font-size="15">length: 5 </text>
+  <text fill="black" text-anchor="start" y="112.5" dominant-baseline="middle" x="63" font-family="Menlo" xml:space="preserve" font-size="15">capacity: 8 </text>
+  <text fill="black" text-anchor="start" y="112.5" dominant-baseline="middle" x="261" font-family="Menlo" xml:space="preserve" font-size="15">'H' | 'e' | 'l' | 'l' | 'o' |     |     |     </text>
 </svg>
 </section><section id="section-1" class="slide level2 left_align" data-transition="fade-in">
 <h1></h1>
 <p>Example systems code: direct access to bytes in memory</p>
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">buffer = new <span class="dt">String</span>(<span class="st">&quot;Hello&quot;</span>);  interior = &amp;buffer[<span class="dv">2.</span>.];  <span class="pp">assert_eq!</span>(interior[<span class="dv">0</span>], <span class="ch">&#39;l&#39;</span>);</code></pre></div>
-<svg height="180" baseProfile="full" width="684" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <rect height="120" x="49.5" width="126" stroke-width="2" y="7.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <rect height="30" x="247.5" width="432" stroke-width="2" y="97.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <path d="M 63,37.5 L 72,37.5L 81,37.5L 90,37.5L 99,37.5L 108,37.5L 117,37.5L 126,37.5L 135,37.5L 144,37.5L 153,37.5L 162,37.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 153,52.5 L 162,52.5L 171,52.5L 175.5,52.5L 189,52.5L 198,52.5L 207,52.5L 216,52.5Q 220.5,52.5 220.5,60L 220.5,75L 220.5,90L 220.5,105Q 220.5,112.5 225,112.5Q 225,112.5 234,112.5L 238.5,112.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 63,67.5 L 72,67.5L 81,67.5L 90,67.5L 99,67.5L 108,67.5L 117,67.5L 126,67.5L 135,67.5L 144,67.5L 153,67.5L 162,67.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 63,97.5 L 72,97.5L 81,97.5L 90,97.5L 99,97.5L 108,97.5L 117,97.5L 126,97.5L 135,97.5L 144,97.5L 153,97.5L 162,97.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 382.5,142.5 l 0,-5 m -3,5 l 3,-5 l 3, 5 m -3,0L 382.5,165Q 382.5,172.5 378,172.5Q 378,172.5 369,172.5L 360,172.5L 351,172.5L 342,172.5L 333,172.5L 324,172.5L 315,172.5L 306,172.5L 297,172.5L 288,172.5L 279,172.5L 270,172.5L 261,172.5L 252,172.5L 243,172.5L 234,172.5L 225,172.5L 216,172.5L 207,172.5L 198,172.5L 189,172.5L 180,172.5L 171,172.5L 162,172.5L 153,172.5L 144,172.5L 135,172.5L 126,172.5L 117,172.5L 108,172.5L 99,172.5L 90,172.5" stroke-width="2" stroke="green" fill="none" />
-  <text x="0" font-family="Menlo" dominant-baseline="middle" font-size="15" y="22.5" xml:space="preserve" fill="black" text-anchor="start">buf: </text>
-  <text x="63" font-family="Menlo" dominant-baseline="middle" font-size="15" y="22.5" xml:space="preserve" fill="black" text-anchor="start">String      </text>
-  <text x="99" font-family="Menlo" dominant-baseline="middle" font-size="15" y="52.5" xml:space="preserve" fill="black" text-anchor="start">data: </text>
-  <text x="81" font-family="Menlo" dominant-baseline="middle" font-size="15" y="82.5" xml:space="preserve" fill="black" text-anchor="start">length: 5 </text>
-  <text x="63" font-family="Menlo" dominant-baseline="middle" font-size="15" y="112.5" xml:space="preserve" fill="black" text-anchor="start">capacity: 8 </text>
-  <text x="261" font-family="Menlo" dominant-baseline="middle" font-size="15" y="112.5" xml:space="preserve" fill="black" text-anchor="start">'H' | 'e' | 'l' | 'l' | 'o' |     |     |     </text>
-  <text x="0" font-family="Menlo" dominant-baseline="middle" font-size="15" y="172.5" xml:space="preserve" fill="black" text-anchor="start">interior: </text>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="684" baseProfile="full" height="180">
+  <rect fill="None" stroke-width="2" y="7.5" width="126" ry="7.5" x="49.5" height="120" stroke="red" rx="4.5" />
+  <rect fill="None" stroke-width="2" y="97.5" width="432" ry="7.5" x="247.5" height="30" stroke="red" rx="4.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 63,37.5 L 72,37.5L 81,37.5L 90,37.5L 99,37.5L 108,37.5L 117,37.5L 126,37.5L 135,37.5L 144,37.5L 153,37.5L 162,37.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 153,52.5 L 162,52.5L 171,52.5L 175.5,52.5L 189,52.5L 198,52.5L 207,52.5L 216,52.5Q 220.5,52.5 220.5,60L 220.5,75L 220.5,90L 220.5,105Q 220.5,112.5 225,112.5Q 225,112.5 234,112.5L 238.5,112.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 63,67.5 L 72,67.5L 81,67.5L 90,67.5L 99,67.5L 108,67.5L 117,67.5L 126,67.5L 135,67.5L 144,67.5L 153,67.5L 162,67.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 63,97.5 L 72,97.5L 81,97.5L 90,97.5L 99,97.5L 108,97.5L 117,97.5L 126,97.5L 135,97.5L 144,97.5L 153,97.5L 162,97.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 382.5,142.5 l 0,-5 m -3,5 l 3,-5 l 3, 5 m -3,0L 382.5,165Q 382.5,172.5 378,172.5Q 378,172.5 369,172.5L 360,172.5L 351,172.5L 342,172.5L 333,172.5L 324,172.5L 315,172.5L 306,172.5L 297,172.5L 288,172.5L 279,172.5L 270,172.5L 261,172.5L 252,172.5L 243,172.5L 234,172.5L 225,172.5L 216,172.5L 207,172.5L 198,172.5L 189,172.5L 180,172.5L 171,172.5L 162,172.5L 153,172.5L 144,172.5L 135,172.5L 126,172.5L 117,172.5L 108,172.5L 99,172.5L 90,172.5" />
+  <text fill="black" text-anchor="start" y="22.5" dominant-baseline="middle" x="0" font-family="Menlo" xml:space="preserve" font-size="15">buf: </text>
+  <text fill="black" text-anchor="start" y="22.5" dominant-baseline="middle" x="63" font-family="Menlo" xml:space="preserve" font-size="15">String      </text>
+  <text fill="black" text-anchor="start" y="52.5" dominant-baseline="middle" x="99" font-family="Menlo" xml:space="preserve" font-size="15">data: </text>
+  <text fill="black" text-anchor="start" y="82.5" dominant-baseline="middle" x="81" font-family="Menlo" xml:space="preserve" font-size="15">length: 5 </text>
+  <text fill="black" text-anchor="start" y="112.5" dominant-baseline="middle" x="63" font-family="Menlo" xml:space="preserve" font-size="15">capacity: 8 </text>
+  <text fill="black" text-anchor="start" y="112.5" dominant-baseline="middle" x="261" font-family="Menlo" xml:space="preserve" font-size="15">'H' | 'e' | 'l' | 'l' | 'o' |     |     |     </text>
+  <text fill="black" text-anchor="start" y="172.5" dominant-baseline="middle" x="0" font-family="Menlo" xml:space="preserve" font-size="15">interior: </text>
 </svg>
 <div class="fragment">
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">buffer.append(<span class="st">&quot; all!&quot;</span>); <span class="co">// adds five more bytes</span></code></pre></div>
 </div>
 <div class="fragment">
-<svg height="180" baseProfile="full" width="846" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <rect height="120" x="49.5" width="126" stroke-width="2" y="7.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <rect height="30" x="229.5" width="612" stroke-width="2" y="37.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <rect height="30" x="229.5" width="432" stroke-width="2" id="deleted" y="97.5" style="stroke-dasharray: 5,2;" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <path d="M 63,37.5 L 72,37.5L 81,37.5L 90,37.5L 99,37.5L 108,37.5L 117,37.5L 126,37.5L 135,37.5L 144,37.5L 153,37.5L 162,37.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 153,52.5 L 162,52.5L 171,52.5L 175.5,52.5L 189,52.5L 198,52.5L 207,52.5L 211.5,52.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 63,67.5 L 72,67.5L 81,67.5L 90,67.5L 99,67.5L 108,67.5L 117,67.5L 126,67.5L 135,67.5L 144,67.5L 153,67.5L 162,67.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 63,97.5 L 72,97.5L 81,97.5L 90,97.5L 99,97.5L 108,97.5L 117,97.5L 126,97.5L 135,97.5L 144,97.5L 153,97.5L 162,97.5" stroke-width="2" stroke="green" fill="none" />
-  <path stroke-dasharray="5,2" d="M 364.5,142.5 l 0,-5 m -3,5 l 3,-5 l 3, 5 m -3,0L 364.5,165Q 364.5,172.5 360,172.5Q 360,172.5 351,172.5L 342,172.5L 333,172.5L 324,172.5L 315,172.5L 306,172.5L 297,172.5L 288,172.5L 279,172.5L 270,172.5L 261,172.5L 252,172.5L 243,172.5L 234,172.5L 225,172.5L 216,172.5L 207,172.5L 198,172.5L 189,172.5L 180,172.5L 171,172.5L 162,172.5L 153,172.5L 144,172.5L 135,172.5L 126,172.5L 117,172.5L 108,172.5L 99,172.5L 90,172.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 400.5,172.5 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 414,172.5L 423,172.5" stroke-width="2" stroke="green" fill="none" />
-  <text x="0" font-family="Menlo" dominant-baseline="middle" font-size="15" y="22.5" xml:space="preserve" fill="black" text-anchor="start">buf: </text>
-  <text x="63" font-family="Menlo" dominant-baseline="middle" font-size="15" y="22.5" xml:space="preserve" fill="black" text-anchor="start">String      </text>
-  <text x="99" font-family="Menlo" dominant-baseline="middle" font-size="15" y="52.5" xml:space="preserve" fill="black" text-anchor="start">data: </text>
-  <text x="243" font-family="Menlo" dominant-baseline="middle" font-size="15" y="52.5" xml:space="preserve" fill="black" text-anchor="start">'H' | 'e' | 'l' | 'l' | 'o' | ' ' | 'a' | 'l' | 'l' | '!' |   |   </text>
-  <text x="81" font-family="Menlo" dominant-baseline="middle" font-size="15" y="82.5" xml:space="preserve" fill="black" text-anchor="start">length:10 </text>
-  <text x="63" font-family="Menlo" dominant-baseline="middle" font-size="15" y="112.5" xml:space="preserve" fill="black" text-anchor="start">capacity:12 </text>
-  <text x="243" font-family="Menlo" dominant-baseline="middle" font-size="15" y="112.5" xml:space="preserve" fill="black" text-anchor="start">'H' | 'e' | 'l' | 'l' | 'o' |     |     |     </text>
-  <text x="0" font-family="Menlo" dominant-baseline="middle" font-size="15" y="172.5" xml:space="preserve" fill="black" text-anchor="start">interior: </text>
-  <text x="432" font-family="Menlo" dominant-baseline="middle" font-size="15" y="172.5" xml:space="preserve" fill="black" text-anchor="start">dangling reference!</text>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="846" baseProfile="full" height="180">
+  <rect fill="None" stroke-width="2" y="7.5" width="126" ry="7.5" x="49.5" height="120" stroke="red" rx="4.5" />
+  <rect fill="None" stroke-width="2" y="37.5" width="612" ry="7.5" x="229.5" height="30" stroke="red" rx="4.5" />
+  <rect fill="None" stroke-width="2" y="97.5" width="432" style="stroke-dasharray: 5,2;" ry="7.5" id="deleted" x="229.5" height="30" stroke="red" rx="4.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 63,37.5 L 72,37.5L 81,37.5L 90,37.5L 99,37.5L 108,37.5L 117,37.5L 126,37.5L 135,37.5L 144,37.5L 153,37.5L 162,37.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 153,52.5 L 162,52.5L 171,52.5L 175.5,52.5L 189,52.5L 198,52.5L 207,52.5L 211.5,52.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 63,67.5 L 72,67.5L 81,67.5L 90,67.5L 99,67.5L 108,67.5L 117,67.5L 126,67.5L 135,67.5L 144,67.5L 153,67.5L 162,67.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 63,97.5 L 72,97.5L 81,97.5L 90,97.5L 99,97.5L 108,97.5L 117,97.5L 126,97.5L 135,97.5L 144,97.5L 153,97.5L 162,97.5" />
+  <path fill="none" stroke-dasharray="5,2" stroke-width="2" stroke="green" d="M 364.5,142.5 l 0,-5 m -3,5 l 3,-5 l 3, 5 m -3,0L 364.5,165Q 364.5,172.5 360,172.5Q 360,172.5 351,172.5L 342,172.5L 333,172.5L 324,172.5L 315,172.5L 306,172.5L 297,172.5L 288,172.5L 279,172.5L 270,172.5L 261,172.5L 252,172.5L 243,172.5L 234,172.5L 225,172.5L 216,172.5L 207,172.5L 198,172.5L 189,172.5L 180,172.5L 171,172.5L 162,172.5L 153,172.5L 144,172.5L 135,172.5L 126,172.5L 117,172.5L 108,172.5L 99,172.5L 90,172.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 400.5,172.5 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 414,172.5L 423,172.5" />
+  <text fill="black" text-anchor="start" y="22.5" dominant-baseline="middle" x="0" font-family="Menlo" xml:space="preserve" font-size="15">buf: </text>
+  <text fill="black" text-anchor="start" y="22.5" dominant-baseline="middle" x="63" font-family="Menlo" xml:space="preserve" font-size="15">String      </text>
+  <text fill="black" text-anchor="start" y="52.5" dominant-baseline="middle" x="99" font-family="Menlo" xml:space="preserve" font-size="15">data: </text>
+  <text fill="black" text-anchor="start" y="52.5" dominant-baseline="middle" x="243" font-family="Menlo" xml:space="preserve" font-size="15">'H' | 'e' | 'l' | 'l' | 'o' | ' ' | 'a' | 'l' | 'l' | '!' |   |   </text>
+  <text fill="black" text-anchor="start" y="82.5" dominant-baseline="middle" x="81" font-family="Menlo" xml:space="preserve" font-size="15">length:10 </text>
+  <text fill="black" text-anchor="start" y="112.5" dominant-baseline="middle" x="63" font-family="Menlo" xml:space="preserve" font-size="15">capacity:12 </text>
+  <text fill="black" text-anchor="start" y="112.5" dominant-baseline="middle" x="243" font-family="Menlo" xml:space="preserve" font-size="15">'H' | 'e' | 'l' | 'l' | 'o' |     |     |     </text>
+  <text fill="black" text-anchor="start" y="172.5" dominant-baseline="middle" x="0" font-family="Menlo" xml:space="preserve" font-size="15">interior: </text>
+  <text fill="black" text-anchor="start" y="172.5" dominant-baseline="middle" x="432" font-family="Menlo" xml:space="preserve" font-size="15">dangling reference!</text>
 </svg>
 </div>
 <div class="fragment">
@@ -225,25 +226,25 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1>Even Worse: Multithreaded Code</h1>
 </section><section id="section-2" class="slide level2 left_align separated">
 <h1></h1>
-<svg height="150" baseProfile="full" width="774" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <rect height="120" x="121.5" width="108" stroke-width="2" y="22.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <rect height="30" x="247.5" width="432" stroke-width="2" y="112.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <path d="M 0,22.5 L 9,22.5L 18,22.5L 27,22.5L 36,22.5L 45,22.5L 54,22.5L 63,22.5L 72,22.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 702,22.5 L 711,22.5L 720,22.5L 729,22.5L 738,22.5L 747,22.5L 756,22.5L 765,22.5L 774,22.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 72,37.5 L 81,37.5L 90,37.5L 99,37.5L 108,37.5L 112.5,37.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 238.5,37.5 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 252,37.5L 261,37.5L 270,37.5L 279,37.5L 288,37.5L 297,37.5L 306,37.5L 315,37.5L 324,37.5L 333,37.5L 342,37.5L 351,37.5L 360,37.5L 369,37.5L 378,37.5L 387,37.5L 396,37.5L 405,37.5L 414,37.5L 423,37.5L 432,37.5L 441,37.5L 450,37.5L 459,37.5L 468,37.5L 477,37.5L 486,37.5L 495,37.5L 504,37.5L 513,37.5L 522,37.5L 531,37.5L 540,37.5L 549,37.5L 558,37.5L 567,37.5L 576,37.5L 585,37.5L 594,37.5L 603,37.5L 612,37.5L 621,37.5L 630,37.5L 639,37.5L 648,37.5L 657,37.5L 666,37.5L 675,37.5L 684,37.5L 693,37.5L 702,37.5L 711,37.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 135,52.5 L 144,52.5L 153,52.5L 162,52.5L 171,52.5L 180,52.5L 189,52.5L 198,52.5L 207,52.5L 216,52.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 207,67.5 L 216,67.5L 225,67.5L 229.5,67.5L 243,67.5L 252,67.5Q 256.5,67.5 256.5,75L 256.5,90L 256.5,97.5 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 135,82.5 L 144,82.5L 153,82.5L 162,82.5L 171,82.5L 180,82.5L 189,82.5L 198,82.5L 207,82.5L 216,82.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 135,112.5 L 144,112.5L 153,112.5L 162,112.5L 171,112.5L 180,112.5L 189,112.5L 198,112.5L 207,112.5L 216,112.5" stroke-width="2" stroke="green" fill="none" />
-  <text x="0" font-family="Menlo" dominant-baseline="middle" font-size="15" y="7.5" xml:space="preserve" fill="black" text-anchor="start">Thread 1                                                                      Thread 2</text>
-  <text x="27" font-family="Menlo" dominant-baseline="middle" font-size="15" y="37.5" xml:space="preserve" fill="black" text-anchor="start">buf: </text>
-  <text x="135" font-family="Menlo" dominant-baseline="middle" font-size="15" y="37.5" xml:space="preserve" fill="black" text-anchor="start">String    </text>
-  <text x="720" font-family="Menlo" dominant-baseline="middle" font-size="15" y="37.5" xml:space="preserve" fill="black" text-anchor="start">:buf</text>
-  <text x="153" font-family="Menlo" dominant-baseline="middle" font-size="15" y="67.5" xml:space="preserve" fill="black" text-anchor="start">data: </text>
-  <text x="135" font-family="Menlo" dominant-baseline="middle" font-size="15" y="97.5" xml:space="preserve" fill="black" text-anchor="start">length    </text>
-  <text x="135" font-family="Menlo" dominant-baseline="middle" font-size="15" y="127.5" xml:space="preserve" fill="black" text-anchor="start">capacity  </text>
-  <text x="261" font-family="Menlo" dominant-baseline="middle" font-size="15" y="127.5" xml:space="preserve" fill="black" text-anchor="start">'H' | 'e' | 'l' | 'l' | 'o' |     |     |     </text>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="774" baseProfile="full" height="150">
+  <rect fill="None" stroke-width="2" y="22.5" width="108" ry="7.5" x="121.5" height="120" stroke="red" rx="4.5" />
+  <rect fill="None" stroke-width="2" y="112.5" width="432" ry="7.5" x="247.5" height="30" stroke="red" rx="4.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 0,22.5 L 9,22.5L 18,22.5L 27,22.5L 36,22.5L 45,22.5L 54,22.5L 63,22.5L 72,22.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 702,22.5 L 711,22.5L 720,22.5L 729,22.5L 738,22.5L 747,22.5L 756,22.5L 765,22.5L 774,22.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 72,37.5 L 81,37.5L 90,37.5L 99,37.5L 108,37.5L 112.5,37.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 238.5,37.5 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 252,37.5L 261,37.5L 270,37.5L 279,37.5L 288,37.5L 297,37.5L 306,37.5L 315,37.5L 324,37.5L 333,37.5L 342,37.5L 351,37.5L 360,37.5L 369,37.5L 378,37.5L 387,37.5L 396,37.5L 405,37.5L 414,37.5L 423,37.5L 432,37.5L 441,37.5L 450,37.5L 459,37.5L 468,37.5L 477,37.5L 486,37.5L 495,37.5L 504,37.5L 513,37.5L 522,37.5L 531,37.5L 540,37.5L 549,37.5L 558,37.5L 567,37.5L 576,37.5L 585,37.5L 594,37.5L 603,37.5L 612,37.5L 621,37.5L 630,37.5L 639,37.5L 648,37.5L 657,37.5L 666,37.5L 675,37.5L 684,37.5L 693,37.5L 702,37.5L 711,37.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 135,52.5 L 144,52.5L 153,52.5L 162,52.5L 171,52.5L 180,52.5L 189,52.5L 198,52.5L 207,52.5L 216,52.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 207,67.5 L 216,67.5L 225,67.5L 229.5,67.5L 243,67.5L 252,67.5Q 256.5,67.5 256.5,75L 256.5,90L 256.5,97.5 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 135,82.5 L 144,82.5L 153,82.5L 162,82.5L 171,82.5L 180,82.5L 189,82.5L 198,82.5L 207,82.5L 216,82.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 135,112.5 L 144,112.5L 153,112.5L 162,112.5L 171,112.5L 180,112.5L 189,112.5L 198,112.5L 207,112.5L 216,112.5" />
+  <text fill="black" text-anchor="start" y="7.5" dominant-baseline="middle" x="0" font-family="Menlo" xml:space="preserve" font-size="15">Thread 1                                                                      Thread 2</text>
+  <text fill="black" text-anchor="start" y="37.5" dominant-baseline="middle" x="27" font-family="Menlo" xml:space="preserve" font-size="15">buf: </text>
+  <text fill="black" text-anchor="start" y="37.5" dominant-baseline="middle" x="135" font-family="Menlo" xml:space="preserve" font-size="15">String    </text>
+  <text fill="black" text-anchor="start" y="37.5" dominant-baseline="middle" x="720" font-family="Menlo" xml:space="preserve" font-size="15">:buf</text>
+  <text fill="black" text-anchor="start" y="67.5" dominant-baseline="middle" x="153" font-family="Menlo" xml:space="preserve" font-size="15">data: </text>
+  <text fill="black" text-anchor="start" y="97.5" dominant-baseline="middle" x="135" font-family="Menlo" xml:space="preserve" font-size="15">length    </text>
+  <text fill="black" text-anchor="start" y="127.5" dominant-baseline="middle" x="135" font-family="Menlo" xml:space="preserve" font-size="15">capacity  </text>
+  <text fill="black" text-anchor="start" y="127.5" dominant-baseline="middle" x="261" font-family="Menlo" xml:space="preserve" font-size="15">'H' | 'e' | 'l' | 'l' | 'o' |     |     |     </text>
 </svg>
 <table>
 <thead>
@@ -272,33 +273,33 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 </section><section id="section-3" class="slide level2 left_align">
 <h1></h1>
-<svg height="315" baseProfile="full" width="774" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <rect height="120" x="121.5" width="108" stroke-width="2" y="22.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <rect height="30" x="247.5" width="432" stroke-width="2" y="112.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <rect height="30" x="121.5" width="648" stroke-width="2" y="217.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <rect height="30" x="121.5" width="648" stroke-width="2" y="277.5" rx="4.5" stroke="red" fill="None" ry="7.5" />
-  <path d="M 0,22.5 L 9,22.5L 18,22.5L 27,22.5L 36,22.5L 45,22.5L 54,22.5L 63,22.5L 72,22.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 702,22.5 L 711,22.5L 720,22.5L 729,22.5L 738,22.5L 747,22.5L 756,22.5L 765,22.5L 774,22.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 72,37.5 L 81,37.5L 90,37.5L 99,37.5L 108,37.5L 112.5,37.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 238.5,37.5 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 252,37.5L 261,37.5L 270,37.5L 279,37.5L 288,37.5L 297,37.5L 306,37.5L 315,37.5L 324,37.5L 333,37.5L 342,37.5L 351,37.5L 360,37.5L 369,37.5L 378,37.5L 387,37.5L 396,37.5L 405,37.5L 414,37.5L 423,37.5L 432,37.5L 441,37.5L 450,37.5L 459,37.5L 468,37.5L 477,37.5L 486,37.5L 495,37.5L 504,37.5L 513,37.5L 522,37.5L 531,37.5L 540,37.5L 549,37.5L 558,37.5L 567,37.5L 576,37.5L 585,37.5L 594,37.5L 603,37.5L 612,37.5L 621,37.5L 630,37.5L 639,37.5L 648,37.5L 657,37.5L 666,37.5L 675,37.5L 684,37.5L 693,37.5L 702,37.5L 711,37.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 135,52.5 L 144,52.5L 153,52.5L 162,52.5L 171,52.5L 180,52.5L 189,52.5L 198,52.5L 207,52.5L 216,52.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 207,67.5 L 216,67.5L 225,67.5L 229.5,67.5L 243,67.5L 252,67.5Q 256.5,67.5 256.5,75L 256.5,90L 256.5,97.5 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 135,82.5 L 144,82.5L 153,82.5L 162,82.5L 171,82.5L 180,82.5L 189,82.5L 198,82.5L 207,82.5L 216,82.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 135,112.5 L 144,112.5L 153,112.5L 162,112.5L 171,112.5L 180,112.5L 189,112.5L 198,112.5L 207,112.5L 216,112.5" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 72,172.5 L 81,172.5Q 85.5,172.5 85.5,180L 85.5,195L 85.5,210L 85.5,225L 85.5,240L 85.5,255L 85.5,270L 85.5,285Q 85.5,292.5 90,292.5Q 90,292.5 99,292.5L 108,292.5L 112.5,292.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-width="2" stroke="green" fill="none" />
-  <path d="M 139.5,202.5 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0L 139.5,180Q 139.5,172.5 144,172.5Q 144,172.5 153,172.5L 162,172.5L 171,172.5L 180,172.5L 189,172.5L 198,172.5L 207,172.5L 216,172.5L 225,172.5L 234,172.5L 243,172.5L 252,172.5L 261,172.5L 270,172.5L 279,172.5L 288,172.5L 297,172.5L 306,172.5L 315,172.5L 324,172.5L 333,172.5L 342,172.5L 351,172.5L 360,172.5L 369,172.5L 378,172.5L 387,172.5L 396,172.5L 405,172.5L 414,172.5L 423,172.5L 432,172.5L 441,172.5L 450,172.5L 459,172.5L 468,172.5L 477,172.5L 486,172.5L 495,172.5L 504,172.5L 513,172.5L 522,172.5L 531,172.5L 540,172.5L 549,172.5L 558,172.5L 567,172.5L 576,172.5L 585,172.5L 594,172.5L 603,172.5L 612,172.5L 621,172.5L 630,172.5L 639,172.5L 648,172.5L 657,172.5L 666,172.5L 675,172.5L 684,172.5L 693,172.5L 702,172.5L 711,172.5" stroke-width="2" stroke="green" fill="none" />
-  <text x="0" font-family="Menlo" dominant-baseline="middle" font-size="15" y="7.5" xml:space="preserve" fill="black" text-anchor="start">Thread 1                                                                      Thread 2</text>
-  <text x="27" font-family="Menlo" dominant-baseline="middle" font-size="15" y="37.5" xml:space="preserve" fill="black" text-anchor="start">buf: </text>
-  <text x="135" font-family="Menlo" dominant-baseline="middle" font-size="15" y="37.5" xml:space="preserve" fill="black" text-anchor="start">String    </text>
-  <text x="720" font-family="Menlo" dominant-baseline="middle" font-size="15" y="37.5" xml:space="preserve" fill="black" text-anchor="start">:buf</text>
-  <text x="153" font-family="Menlo" dominant-baseline="middle" font-size="15" y="67.5" xml:space="preserve" fill="black" text-anchor="start">data: </text>
-  <text x="135" font-family="Menlo" dominant-baseline="middle" font-size="15" y="97.5" xml:space="preserve" fill="black" text-anchor="start">length    </text>
-  <text x="135" font-family="Menlo" dominant-baseline="middle" font-size="15" y="127.5" xml:space="preserve" fill="black" text-anchor="start">capacity  </text>
-  <text x="261" font-family="Menlo" dominant-baseline="middle" font-size="15" y="127.5" xml:space="preserve" fill="black" text-anchor="start">'H' | 'e' | 'l' | 'l' | 'o' |     |     |     </text>
-  <text x="27" font-family="Menlo" dominant-baseline="middle" font-size="15" y="172.5" xml:space="preserve" fill="black" text-anchor="start">tmp: </text>
-  <text x="720" font-family="Menlo" dominant-baseline="middle" font-size="15" y="172.5" xml:space="preserve" fill="black" text-anchor="start">:tmp</text>
-  <text x="135" font-family="Menlo" dominant-baseline="middle" font-size="15" y="232.5" xml:space="preserve" fill="black" text-anchor="start">'H' | 'e' | 'l' | 'l' | 'o' |     | 'r' | 'i' | 'g' | 'h' | 't' |     </text>
-  <text x="135" font-family="Menlo" dominant-baseline="middle" font-size="15" y="292.5" xml:space="preserve" fill="black" text-anchor="start">'H' | 'e' | 'l' | 'l' | 'o' |     | 'l' | 'e' | 'f' | 't' |     |     </text>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="774" baseProfile="full" height="315">
+  <rect fill="None" stroke-width="2" y="22.5" width="108" ry="7.5" x="121.5" height="120" stroke="red" rx="4.5" />
+  <rect fill="None" stroke-width="2" y="112.5" width="432" ry="7.5" x="247.5" height="30" stroke="red" rx="4.5" />
+  <rect fill="None" stroke-width="2" y="217.5" width="648" ry="7.5" x="121.5" height="30" stroke="red" rx="4.5" />
+  <rect fill="None" stroke-width="2" y="277.5" width="648" ry="7.5" x="121.5" height="30" stroke="red" rx="4.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 0,22.5 L 9,22.5L 18,22.5L 27,22.5L 36,22.5L 45,22.5L 54,22.5L 63,22.5L 72,22.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 702,22.5 L 711,22.5L 720,22.5L 729,22.5L 738,22.5L 747,22.5L 756,22.5L 765,22.5L 774,22.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 72,37.5 L 81,37.5L 90,37.5L 99,37.5L 108,37.5L 112.5,37.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 238.5,37.5 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 252,37.5L 261,37.5L 270,37.5L 279,37.5L 288,37.5L 297,37.5L 306,37.5L 315,37.5L 324,37.5L 333,37.5L 342,37.5L 351,37.5L 360,37.5L 369,37.5L 378,37.5L 387,37.5L 396,37.5L 405,37.5L 414,37.5L 423,37.5L 432,37.5L 441,37.5L 450,37.5L 459,37.5L 468,37.5L 477,37.5L 486,37.5L 495,37.5L 504,37.5L 513,37.5L 522,37.5L 531,37.5L 540,37.5L 549,37.5L 558,37.5L 567,37.5L 576,37.5L 585,37.5L 594,37.5L 603,37.5L 612,37.5L 621,37.5L 630,37.5L 639,37.5L 648,37.5L 657,37.5L 666,37.5L 675,37.5L 684,37.5L 693,37.5L 702,37.5L 711,37.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 135,52.5 L 144,52.5L 153,52.5L 162,52.5L 171,52.5L 180,52.5L 189,52.5L 198,52.5L 207,52.5L 216,52.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 207,67.5 L 216,67.5L 225,67.5L 229.5,67.5L 243,67.5L 252,67.5Q 256.5,67.5 256.5,75L 256.5,90L 256.5,97.5 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 135,82.5 L 144,82.5L 153,82.5L 162,82.5L 171,82.5L 180,82.5L 189,82.5L 198,82.5L 207,82.5L 216,82.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 135,112.5 L 144,112.5L 153,112.5L 162,112.5L 171,112.5L 180,112.5L 189,112.5L 198,112.5L 207,112.5L 216,112.5" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 72,172.5 L 81,172.5Q 85.5,172.5 85.5,180L 85.5,195L 85.5,210L 85.5,225L 85.5,240L 85.5,255L 85.5,270L 85.5,285Q 85.5,292.5 90,292.5Q 90,292.5 99,292.5L 108,292.5L 112.5,292.5 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke-width="2" stroke="green" d="M 139.5,202.5 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0L 139.5,180Q 139.5,172.5 144,172.5Q 144,172.5 153,172.5L 162,172.5L 171,172.5L 180,172.5L 189,172.5L 198,172.5L 207,172.5L 216,172.5L 225,172.5L 234,172.5L 243,172.5L 252,172.5L 261,172.5L 270,172.5L 279,172.5L 288,172.5L 297,172.5L 306,172.5L 315,172.5L 324,172.5L 333,172.5L 342,172.5L 351,172.5L 360,172.5L 369,172.5L 378,172.5L 387,172.5L 396,172.5L 405,172.5L 414,172.5L 423,172.5L 432,172.5L 441,172.5L 450,172.5L 459,172.5L 468,172.5L 477,172.5L 486,172.5L 495,172.5L 504,172.5L 513,172.5L 522,172.5L 531,172.5L 540,172.5L 549,172.5L 558,172.5L 567,172.5L 576,172.5L 585,172.5L 594,172.5L 603,172.5L 612,172.5L 621,172.5L 630,172.5L 639,172.5L 648,172.5L 657,172.5L 666,172.5L 675,172.5L 684,172.5L 693,172.5L 702,172.5L 711,172.5" />
+  <text fill="black" text-anchor="start" y="7.5" dominant-baseline="middle" x="0" font-family="Menlo" xml:space="preserve" font-size="15">Thread 1                                                                      Thread 2</text>
+  <text fill="black" text-anchor="start" y="37.5" dominant-baseline="middle" x="27" font-family="Menlo" xml:space="preserve" font-size="15">buf: </text>
+  <text fill="black" text-anchor="start" y="37.5" dominant-baseline="middle" x="135" font-family="Menlo" xml:space="preserve" font-size="15">String    </text>
+  <text fill="black" text-anchor="start" y="37.5" dominant-baseline="middle" x="720" font-family="Menlo" xml:space="preserve" font-size="15">:buf</text>
+  <text fill="black" text-anchor="start" y="67.5" dominant-baseline="middle" x="153" font-family="Menlo" xml:space="preserve" font-size="15">data: </text>
+  <text fill="black" text-anchor="start" y="97.5" dominant-baseline="middle" x="135" font-family="Menlo" xml:space="preserve" font-size="15">length    </text>
+  <text fill="black" text-anchor="start" y="127.5" dominant-baseline="middle" x="135" font-family="Menlo" xml:space="preserve" font-size="15">capacity  </text>
+  <text fill="black" text-anchor="start" y="127.5" dominant-baseline="middle" x="261" font-family="Menlo" xml:space="preserve" font-size="15">'H' | 'e' | 'l' | 'l' | 'o' |     |     |     </text>
+  <text fill="black" text-anchor="start" y="172.5" dominant-baseline="middle" x="27" font-family="Menlo" xml:space="preserve" font-size="15">tmp: </text>
+  <text fill="black" text-anchor="start" y="172.5" dominant-baseline="middle" x="720" font-family="Menlo" xml:space="preserve" font-size="15">:tmp</text>
+  <text fill="black" text-anchor="start" y="232.5" dominant-baseline="middle" x="135" font-family="Menlo" xml:space="preserve" font-size="15">'H' | 'e' | 'l' | 'l' | 'o' |     | 'r' | 'i' | 'g' | 'h' | 't' |     </text>
+  <text fill="black" text-anchor="start" y="292.5" dominant-baseline="middle" x="135" font-family="Menlo" xml:space="preserve" font-size="15">'H' | 'e' | 'l' | 'l' | 'o' |     | 'l' | 'e' | 'f' | 't' |     |     </text>
 </svg>
 <div class="fragment">
 <p>Data Race! At end could be any of:</p>
@@ -368,8 +369,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>The Rust community seems to be populated entirely by human beings. I have no idea how this was done. I suspect Graydon Hoare deserves a large share of the credit for leading by example but everyone I have interacted with in the community has been friendly and patient.</p>
 </blockquote>
 <p><a href="http://scattered-thoughts.net/blog/2015/06/04/three-months-of-rust/" class="uri">http://scattered-thoughts.net/blog/2015/06/04/three-months-of-rust/</a></p>
-<svg height="15" baseProfile="full" width="27" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <path d="M 0,7.5 L 9,7.5L 18,7.5L 27,7.5" stroke-width="2" stroke="green" fill="none" />
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="27" baseProfile="full" height="15">
+  <path fill="none" stroke-width="2" stroke="green" d="M 0,7.5 L 9,7.5L 18,7.5L 27,7.5" />
 </svg>
 <p>We still need help improving diversity, though; see <a href="https://blog.rust-lang.org/2016/06/30/State-of-Rust-Survey-2016.html">2016 survey</a>.</p>
 </section><section id="projects-are-pivoting-to-rust" class="slide level2 center">
