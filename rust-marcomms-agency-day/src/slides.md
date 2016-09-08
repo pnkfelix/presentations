@@ -19,12 +19,12 @@ Servo: Browser research platform
 
 [https://youtu.be/u0hYIRQRiws](https://youtu.be/u0hYIRQRiws)
 
- Browser     Frames/Second
- --------   --------------
- Chrome     15 fps
- Firefox    9 fps
- Safari     5 fp
- Servo      60 fps
+ Browser                                     Frames/Second
+ --------                                   --------------
+ Chrome                                     15 fps
+ Firefox                                     9 fps
+ Safari                                      5 fps
+ Servo WebRender (web content atop GPU)     60 fps
 
 # Background {.center}
 
@@ -262,10 +262,11 @@ No popular systems language offers all of above properties
 
 ## Why Mozilla Invests
 
->- Hard to prototype changes atop C++ code base (e.g. Firefox today)
->- Rust ⇒ Servo, platform for browswer implementation research
->- Servo ⇒ Parallel CSS matching, [WebRender][] (web content atop GPU)
->- Want Rust for next-gen infrastructure (services, IoT)
+ * Hard to prototype changes atop C++ (e.g. Firefox ~~today~~ yesterday)
+
+ * Rust ⇒ Servo; Servo ⇒ Parallel CSS, [WebRender][]
+
+ * Want Rust for next-gen infrastructure (services, IoT)
 
 [WebRender]: https://air.mozilla.org/bay-area-rust-meetup-february-2016/#@25m50s
 
@@ -315,7 +316,7 @@ stressing inclusiveness, and evolving it as needed
 >  large share of the credit for leading by example but everyone I have
 >  interacted with in the community has been friendly and patient.
 
-http://scattered-thoughts.net/blog/2015/06/04/three-months-of-rust/
+[http://scattered-thoughts.net/blog/2015/06/04/three-months-of-rust/](http://scattered-thoughts.net/blog/2015/06/04/three-months-of-rust/)
 
 ```art
 ---
@@ -327,15 +328,15 @@ We still need help improving diversity, though; see [2016 survey].
 
 ## Projects are pivoting to Rust {.center}
 
-* [Skylight][] swapped Rust for Ruby back in 2014
+ * [Skylight][] swapped Rust for Ruby back in 2014
 
-* [Maidsafe][] went from C++ to Rust in 2015
+ * [Maidsafe][] went from C++ to Rust in 2015
 
-* Dropbox moved [Diskotech][] from Go to Rust in 2016
+ * Dropbox moved [Diskotech][] from Go to Rust in 2016
 
-  * and ported [Broti][] compression from C to Rust too
+   * and ported [Broti][] compression from C to Rust too
 
-* [Friends of Rust][]: organizations using Rust in production
+ * [Friends of Rust][]: organizations using Rust in production
 
 [Friends of Rust]: https://www.rust-lang.org/en-US/friends.html
 
