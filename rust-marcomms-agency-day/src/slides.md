@@ -5,6 +5,8 @@
 
 Slides: [http://bit.ly/2c0zILe](http://bit.ly/2c0zILe)
 
+(<kbd>space</kbd>: next slide; <kbd>shift</kbd><kbd>space</kbd>: previous slide; <kbd>esc</kbd>: overview; arrows navigate)
+
 ## What {.center}
 
 Rust: new systems programming language
