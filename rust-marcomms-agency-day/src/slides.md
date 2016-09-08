@@ -3,6 +3,8 @@
 ### Felix Klock (`@pnkfelix`), Mozilla Research
 ### MarComms Agency Day, Paris; 8 Sept 2016
 
+Slides: [http://bit.ly/2c0zILe](http://bit.ly/2c0zILe)
+
 ## What {.center}
 
 Rust: new systems programming language
@@ -384,7 +386,9 @@ Or try out Servo yourself! [Nightlies][]
 
 ----
 
-### Rust itself
+## What's next
+
+### For Rust itself
 
 Still establishing vision for 2017; [discussion link][2017 vision discuss]
 
@@ -396,11 +400,11 @@ Initial proposals:
 
  * Faster compiler
 
- * IDE support
+ * Integrated Dev Environment (IDE) support
 
  * Advanced abstractions for concurrency and parallelism
 
- * More seamless FFI
+ * More seamless Foreign Function Interface (FFI)
 
 ## Thanks {.center}
 
