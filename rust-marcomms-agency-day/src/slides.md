@@ -1,6 +1,7 @@
-% Rust: Hack without Fear
-% Felix Klock (`@pnkfelix`), Mozilla Research
-% MarComms Agency Day, Paris; 9 Sept 2016
+## Rust: No Fear Systems Dev {.center}
+
+### Felix Klock (`@pnkfelix`), Mozilla Research
+### MarComms Agency Day, Paris; 8 Sept 2016
 
 ## What {.center}
 
@@ -11,6 +12,19 @@ Rust: new systems programming language
 Mozilla: building new high-perf. browser technology atop Rust
 
 Servo: Browser research platform
+
+## Demo: WebRender
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/u0hYIRQRiws" frameborder="0" allowfullscreen></iframe>
+
+[https://youtu.be/u0hYIRQRiws](https://youtu.be/u0hYIRQRiws)
+
+ Browser     Frames/Second
+ --------   --------------
+ Chrome     15 fps
+ Firefox    9 fps
+ Safari     5 fp
+ Servo      60 fps
 
 # Background {.center}
 
@@ -70,7 +84,29 @@ Most not suitable for *systems development* ...
 
 ... and complicate utilization of available (multicore) parallelism.
 
-## { .left_align }
+# Programming is Hard {.center}
+
+## { .left_align data-transition="fade-out" }
+
+Example systems code: direct access to bytes in memory
+
+``` {.rust}
+buffer = new String("Hello");
+```
+
+```art
+     .-------------.
+buf: | String      |
+     | ----------- |
+     |     data: --+----.
+     | ----------- |    |
+     |   length: 5 |    |
+     | ----------- |    |  .-----------------------------------------------.
+     | capacity: 8 |    '->| 'H' | 'e' | 'l' | 'l' | 'o' |     |     |     |
+     '-------------'       '-----------------------------------------------'
+```
+
+## { .left_align data-transition="fade-in" }
 
 Example systems code: direct access to bytes in memory
 
@@ -84,7 +120,7 @@ buf: | String      |
      | ----------- |
      |     data: --+----.
      | ----------- |    |
-     |   length: 4 |    |
+     |   length: 5 |    |
      | ----------- |    |  .-----------------------------------------------.
      | capacity: 8 |    '->| 'H' | 'e' | 'l' | 'l' | 'o' |     |     |     |
      '-------------'       '-----------------------------------------------'
@@ -107,7 +143,7 @@ buf: | String      |
      | ----------- |     .-------------------------------------------------------------------.
      |     data: --+---> | 'H' | 'e' | 'l' | 'l' | 'o' | ' ' | 'a' | 'l' | 'l' | '!' |   |   |
      | ----------- |     '-------------------------------------------------------------------'
-     |   length: 4 |
+     |   length:10 |
      | ----------- |     .-----------------------------------------------.
      | capacity:12 |     | 'H' | 'e' | 'l' | 'l' | 'o' |     |     |     |
      '-------------'     '-----------------------------------------------'
@@ -123,9 +159,86 @@ interior: --=-=-=-----------------------'   <-- dangling reference!
 assert_eq!(interior[0], 💣); // 😱
 ```
 
-## Enter Rust
+## Even Worse: Multithreaded Code { .center }
 
-Objective: Prevent all bugs of this nature
+## {.left_align .separated}
+
+```art
+Thread 1                                                                      Thread 2
+--------     .-----------.                                                    --------
+   buf: ---->| String    |<---------------------------------------------------- :buf
+             | --------- |
+             |   data: --+--.
+             | --------- |  | 
+             | length    |  v
+             | --------- | .-----------------------------------------------.
+             | capacity  | | 'H' | 'e' | 'l' | 'l' | 'o' |     |     |     |
+             '-----------' '-----------------------------------------------'
+```
+
+Thread 1                                    Thread 2
+-------------------------  -------------------------
+`buf.append(" left");`       `buf.append(" right");`
+-------------------------  -------------------------
+
+Both threads want to update `buf`
+
+What is outcome?
+
+. . .
+
+ * `"Hello left right"` ?
+
+ * `"Hello right left"` ?
+
+. . .
+
+Again, must reallocate underlying buffer
+
+## {.left_align}
+
+```art
+Thread 1                                                                      Thread 2
+--------     .-----------.                                                    --------
+   buf: ---->| String    |<---------------------------------------------------- :buf
+             | --------- |
+             |   data: --+--.
+             | --------- |  | 
+             | length    |  v
+             | --------- | .-----------------------------------------------.
+             | capacity  | | 'H' | 'e' | 'l' | 'l' | 'o' |     |     |     |
+             '-----------' '-----------------------------------------------'
+
+   tmp: -.     .--------------------------------------------------------------- :tmp
+         |     |
+         |     v
+         |   .-----------------------------------------------------------------------.
+         |   | 'H' | 'e' | 'l' | 'l' | 'o' |     | 'r' | 'i' | 'g' | 'h' | 't' |     |
+         |   '-----------------------------------------------------------------------'
+         |
+         |   .-----------------------------------------------------------------------.
+         '-->| 'H' | 'e' | 'l' | 'l' | 'o' |     | 'l' | 'e' | 'f' | 't' |     |     |
+             '-----------------------------------------------------------------------'
+
+```
+
+. . .
+
+Data Race! At end could be any of:
+
+ * `"Hello left right"` (Thread 1 finishes before Thread 2 starts)
+
+ * `"Hello right left"` (Thread 2 finishes before Thread 1 starts)
+
+ * `"Hello left"`       (Both start at same time, Thread 2 "wins")
+
+ * `"Hello right"`      (Both start at same time, Thread 1 "wins")
+
+# Enter Rust {.center}
+
+## Objective
+
+Prevent all bugs of this nature
 
 . . .
 
@@ -149,16 +262,20 @@ No popular systems language offers all of above properties
 
 ## Why Mozilla Invests
 
->- Hard to prototype changes atop C++ code base
+>- Hard to prototype changes atop C++ code base (e.g. Firefox today)
 >- Rust ⇒ Servo, platform for browswer implementation research
->- Servo ⇒ Parallel CSS matching, WebRender (web content atop GPU)
+>- Servo ⇒ Parallel CSS matching, [WebRender][] (web content atop GPU)
 >- Want Rust for next-gen infrastructure (services, IoT)
+
+[WebRender]: https://air.mozilla.org/bay-area-rust-meetup-february-2016/#@25m50s
 
 . . .
 
 Mozilla's mission statement
 
 > "Our mission is to ensure the Internet is a global public resource, open and accessible to all. An Internet that truly puts people first, where individuals can shape their own experience and are empowered, safe and independent."
+
+# Open and Accessible to All {.center}
 
 ## Open and Accessible to All
 
@@ -184,11 +301,14 @@ Open governance model based on *public RFCs*
 
 We have an *active, amazing community*
 
+## [Language Wars][Business Insider] {.center}
+
+[Business Insider]: http://uk.businessinsider.com/why-coders-get-into-religious-wars-over-programming-languages-2015-6
+
 ## Community
 
 We have had a code of conduct from the outset,
-stressing inclusiveness (and clarifying what that means when
-necessary).
+stressing inclusiveness, and evolving it as needed
 
 > The Rust community seems to be populated entirely by human beings. I
 >  have no idea how this was done. I suspect Graydon Hoare deserves a
@@ -212,7 +332,7 @@ We still need help improving diversity, though; see [2016 survey].
 * [Maidsafe][] went from C++ to Rust in 2015
 
 * Dropbox moved [Diskotech][] from Go to Rust in 2016
- 
+
   * and ported [Broti][] compression from C to Rust too
 
 * [Friends of Rust][]: organizations using Rust in production
@@ -227,35 +347,39 @@ We still need help improving diversity, though; see [2016 survey].
 
 [Broti]: https://blogs.dropbox.com/tech/2016/06/lossless-compression-with-brotli/
 
-## How to "sell" Rust?
+## How to "sell" Rust? {.left_align}
 
-* If you are, or know, a C/C++ programmer
+* If you are a C/C++ programmer ...
 
-* tired of debugging crashes and/or multithreaded programs
+* ... tired of debugging crashes and/or multithreaded programs
 
 You might want to try Rust
 
 . . .
 
-* If you are, or know, a "high-level programmer" (Javascript, Ruby)
+* If you are a "high-level programmer" (Javascript, Ruby) ...
 
-* but you want to expand your mind/skill-set
+* ... and you want to expand your mind/skill-set
 
 You might want to try Rust
 
-## What's Next
+# What's Next {.center}
 
-Firefox 48 had the first bits of Rust (media parser)
+## What's Next
 
 ### Browser Technology
 
+ * Firefox 48 had the first bits of Rust (media parser)
+
  * Servo marches on (e.g WebRender 2)
 
- * Incremental integration with Gecko (Stylo); want "best of both worlds"
+ * Incremental integration with Gecko (e.g. Stylo); want "best of both worlds"
 
 To learn more, contact the Servo team, especially `@pcwalton`
 
-Or try out Servo yourself! https://blog.servo.org/2016/06/30/servo-nightlies/
+Or try out Servo yourself! [Nightlies][]
+
+[Nightlies]: https://blog.servo.org/2016/06/30/servo-nightlies/
 
 ----
 
@@ -278,3 +402,11 @@ Initial proposals:
  * More seamless FFI
 
 ## Thanks {.center}
+
+![][rust logo]
+
+[rust logo]: rust-logo-blk.svg "Rust Logo" {width="50%"}
+
+[https://www.rust-lang.org/][rust-lang.org]
+
+[rust-lang.org]: https://www.rust-lang.org/

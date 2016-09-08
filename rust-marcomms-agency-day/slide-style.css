@@ -51,3 +51,18 @@ kbd {
 }
 
 .reveal .slide-number { font-size: 24pt; color: #912c00; }
+
+.reveal .separated table {
+    border-collapse: separate;
+    border-spacing: 1rem;
+}
+
+.reveal blockquote {
+    width: 90%;
+}
+
+.reveal section img {
+    background: initial;
+    border: initial;
+    box-shadow: initial;
+}
