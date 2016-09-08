@@ -1,3 +1,6 @@
 [submodule "reveal.js"]
 	path = reveal.js
 	url = https://github.com/pnkfelix/reveal.js
+[submodule "rust-marcomms-agency-day-2016/reveal.js"]
+	path = rust-marcomms-agency-day-2016/reveal.js
+	url = https://github.com/pnkfelix/reveal.js.git
