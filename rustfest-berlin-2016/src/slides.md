@@ -1,16 +1,15 @@
-% Subtyping in Rust and Clarke's Third Law
-% Felix Klock (`@pnkfelix`), Mozilla
-% Rust Fest, Berlin, 17 September 2016
+## Subtyping in Rust and Clarke's Third Law
 
-# Bienvenue {.center}
+### Felix Klock (`@pnkfelix`), Mozilla Research
+### Rust Fest, Berlin; 17 Sept 2016
 
-```rust
-#![allow(dead_code, unused_variables)]
-```
+Slides: [http://TODO](TODO)
 
-## Advanced Technology and Magic
+(<kbd>space</kbd>: next slide; <kbd>shift</kbd><kbd>space</kbd>: previous slide; <kbd>esc</kbd>: overview; arrows navigate)
 
-Invited to give technical talk
+# Advanced Tech and Magic
+
+## Language Technology
 
 Lots of interesting tech in Rust
 
@@ -22,34 +21,35 @@ Lots of interesting tech in Rust
 
 * L-value `match`-ing
 
-----
+. . .
 
-```art
-.---.
-|   |  Holy
-'-+-'         Rectangle
-  |                       Batman
-  |   .----.  +-------+  .------.
-  |   |    |  |       |  |      |
-  '-->|    +->|       +->|      |
-      |    |  |       |  |      |
-      '----'  +-------+  '------'
-```
+Any of above can look like magic
 
-```rust
-fn here_is() {
-    struct Some { rust: u32 }
-    let s = Some { rust: 10 };
-}
-```
+. . .
+
+But, *subtyping* has characteristics of a magic show
+
+"We all already know what subtyping is..."
 
 ## Aside: On Magicians and Lying
 
-or Aside: Are Magicians Liars?
+> "You can lie as entertainment, but still be honest and moral"
+>
+> Penn Jillette, attributed to James Randi
 
-# Why might we care about subtyping?
+. . .
 
-# What is Subtyping?
+I'm probably going to lie to you several times during this
+presentation.
+
+(Sometimes exploratory science, sometimes magic show.)
+
+# What is subtyping? {.center}
+
+## Why do we care about subtyping?
+
+Insisting types of inputs exactly match expected types leads compiler
+to reject programs that seem obviously well-behaved.
 
 ## Intuition: "Compatibility"
 
@@ -61,49 +61,44 @@ or Aside: Are Magicians Liars?
 
 . . .
 
-Amazingly "try it and see" often works.
+Amazingly, "try it and see" often works.
 
-## Exploring References
+## Results and Errs
 
-The reference types `&mut T` and `&T` look like candidates for
-having some sort of compatibility relationship.
-
-"Have a `&mut [i32]`, but code expects a `&[i32]` slice. What now?"
+"Have a specific error, but result's error is more general. What now?"
 
 ### Try it and see
 
 . . .
 
-```rust
-fn product(nums: &[i32]) -> i32 {
-    let mut x = 1;
-    for n in nums { x *= *n; }
-    x
+``` {.rust}
+fn phase_1(x: Ast) -> Result<Mir, PhaseOneErr> { /* ... */ }
+fn phase_2(y: Mir) -> Result<Out, PhaseTwoErr> { /* ... */ }
+```
+
+. . .
+
+``` {.rust}
+fn composed(a: Ast) -> Result<Out, EndToEndErr> {
+    let b = try!(phase_1(a));
+    let c = try!(phase_2(b));
+    return Ok(c);
 }
 ```
 
 . . .
 
-```rust
-fn demo_product(m: &mut [i32]) {
-    m[0] = product(m);
-}
-```
+(we will look more at an instance of this example later)
+
+## Exploring Vectors and Slices { data-transition="fade-out" }
+
+`Vec<T>` and `[T]` "look like subtyping".
+
+"Have a `Vec<i32>`, but code expects a `[i32]` slice. What now?"
+
+### Try it and see
 
 . . .
-
-```art
-             m: &mut [i32]
-             |
-             v
-fn product(&[i32])
-```
-
-Maybe we can plug in a `&mut [i32]` whenever we want a `&[i32]`
-
-## Exploring Vectors and Slices
-
-`Vec<T>` and `[T]` strike me as "looking like subtyping".
 
 ```rust
 fn rotate(nums: &mut [i32]) {
@@ -114,15 +109,38 @@ fn rotate(nums: &mut [i32]) {
 }
 ```
 
+. . .
+
+```
+fn demo_rotate() {
+    let v = vec![1, 2, 3];
+    rotate(v);
+    assert_eq!(v, &[3, 1, 2]);
+}
+```
+
+does it compile?
+
+## Exploring Vectors and Slices { data-transition="fade-in" }
+
+`Vec<T>` and `[T]` "look like subtyping".
+
 "Have a `Vec<i32>`, but code expects a `[i32]` slice. What now?"
 
 ### Try it and see
 
-. . .
+``` {.rust}
+fn rotate(nums: &mut [i32]) {
+    let len = nums.len();
+    let first = nums[0];
+    for i in 1..len { nums[i-1] = nums[i]; }
+    nums[len-1] = first;
+}
+```
 
 ``` {.rust .compile_error .stripes}
 fn demo_rotate() {
-    let mut v = vec![1, 2, 3];
+    let v = vec![1, 2, 3];
     rotate(v);
     assert_eq!(v, &[3, 1, 2]);
 }
@@ -138,26 +156,82 @@ fn demo_rotate() {
 }
 ```
 
-## Observation {.center}
+. . .
 
-Maybe we can plug in `&mut Vec<T>` whenever we want a `&mut [T]`
+## Stripped to skeletal form
+
+```rust
+mod demo_vec_slice {
+    fn provide(m: &mut Vec<i32>) { expect(m); }
+    fn expect(_nums: &mut [i32]) { unimplemented!() }
+}
+```
+
+```art
+        &mut Vec<i32>
+            |
+            v
+  fn expect(&[i32])
+```
+
+## Exploring References
+
+The reference types `&mut T` and `&T` look like candidates for
+having some sort of compatibility relationship.
+
+"Have a `&mut [i32]`, but code expects a `&[i32]` slice. What now?"
+
+### Try it and see
 
 . . .
 
-Q: Can we conclude `&mut Vec<T>` is a subtype of `&mut [T]`?
+```rust
+mod demo_mut_slice_imm_slice {
+    fn provide(m: &mut [i32]) { expect(m); }
+    fn expect(_nums: &[i32]) { unimplemented!() }
+}
+```
+
+```art
+         &mut [i32]
+            |
+            v
+  fn expect(&[i32])
+```
+
+<!--
+## Textbook subtyping { data-transition="fade-out" }
+
+Classic example: "Records"
+
+* "Have a record with these fields, want one with a subset of the fields"
+
+* A Rust analogue: "Have `(A, B, C)`, this function wants `(A, B)`"
 
 . . .
 
-A: (we'll see; we certainly have seen something interesting linking them.)
+### Try it and see
 
-## More experiments
+```
+mod demo_subtuple {
+    fn provide<A, B, C>(tup: (A, B, C)) { expect(tup); }
+    fn expect<A, B>(_tup: (A, B)) { unimplemented!(); }
+}
+```
 
-Assume `T` is some type
+does it compile?
+-->
+
+## Methodology and methods
+
+If you have `self` or `Self`, you're (probably) talking about a method
+
+. . .
 
 "Have an X, but code expects a Y",<br/>
-for every X,Y from `{ T, &T, &mut T }`
+for every X,Y from `{ Self, &Self, &mut Self }`
 
-Let us try "something simple": `char` arrays.
+Let us try "something simple": Methods on `char` arrays.
 
 ## Magical receivers
 
@@ -172,7 +246,11 @@ trait AsciiIncr {
 impl AsciiIncr for char {
     fn incr(&mut self) { *self = (*self as u8 + 1) as char }
 }
+```
 
+. . .
+
+```rust
 #[test]
 fn check_ascii_incr() {
     let mut c: char = 'a';
@@ -181,22 +259,37 @@ fn check_ascii_incr() {
 }
 ```
 
+<!--
 . . .
 
 Q: Why not just use this function, instead of messing with traits?
 ```rust
 fn ascii_incr(c: &mut char) { *c = (*c as u8 + 1) as char }
 ```
+-->
 
-
-## Exploring one's `self`
+## Exploring one's self { data-transition="fade" }
 
 Exploration: Mock up trivially simple traits, rather than get bogged
 down with code of "useful" traits (like `AsciiIncr`).
 
-## Sanity Check { data-transition="fade-out" }
+. . .
 
 ```rust
+trait Receiver {
+    fn by_ref(&self); fn by_mut(&mut self); fn by_val(self) where Self: Sized;
+}
+
+impl Receiver for [char; 2] {
+    fn by_ref(&self)     { println!("ref: {:?}", self[0]); }
+    fn by_mut(&mut self) { println!("mut: {:?}", self[0]); self[1].incr(); }
+    fn by_val(mut self)  { println!("val: {:?}", self[0]); self[1].incr(); }
+}
+```
+
+## Sanity check { data-transition="fade" }
+
+``` {.rust}
 trait Receiver {
     fn by_ref(&self); fn by_mut(&mut self); fn by_val(self) where Self: Sized;
 }
@@ -213,14 +306,11 @@ impl Receiver for [char; 2] {
 ```rust
 #[test]
 fn demo_obvious_cases() {
-    let a: [char; 2]      =      ['a', '1'];
-    let b: &[char; 2]     =     &['b', '4'];
-    let c: &mut [char; 2] = &mut ['c', '7'];
-
-    // [char; 2]   &[char; 2]     &mut [char; 2]
+    let a = ['a', '1']; let b = &['b', '4']; let c = &mut ['c', '7'];
+    // [char; 2]        &[char; 2]           &mut [char; 2]
     a.by_val();
-                   b.by_ref();
-                                  c.by_mut();
+                        b.by_ref();
+                                             c.by_mut();
     println!("obvious: (a,b,c): {:?}", (a,b,c));
 }
 ```
@@ -230,6 +320,9 @@ prints:
 . . .
 
 ```
+val: 'a'
+ref: 'b'
+mut: 'c'
 obvious: (a,b,c): (['a', '1'], ['b', '4'], ['c', '8'])
 ```
 
@@ -251,14 +344,11 @@ impl Receiver for [char; 2] {
 ```rust
 #[test]
 fn demo_interesting_cases() {
-    let mut a: [char; 2]  =      ['a', '1'];
-    let b: &[char; 2]     =     &['b', '4'];
-    let c: &mut [char; 2] = &mut ['c', '7'];
-
-    // [char; 2]   &[char; 2]     &mut [char; 2]
-    a.by_val();    b.by_val();    c.by_val();
-    a.by_ref();    b.by_ref();    c.by_ref();
-    a.by_mut();    /*  ...  */    c.by_mut();
+    let mut a = ['a', '1']; let b = &['b', '4']; let c = &mut ['c', '7'];
+    // [char; 2]            &[char; 2]           &mut [char; 2]
+    a.by_val();             b.by_val();          c.by_val();
+    a.by_ref();             b.by_ref();          c.by_ref();
+    a.by_mut();             /*  ...  */          c.by_mut();
     println!("interesting: (a,b,c): {:?}", (a,b,c));
 }
 ```
@@ -267,13 +357,14 @@ fn demo_interesting_cases() {
 
 Only `b.by_mut()` rejected by compiler.
 
-## Observation {.center}
+## Observation {.center .left_align}
 
 For receiver for a method (i.e. the `x` in `x.m(...)`):
 
- * only going from `&[char; n]` to `&mut [char; n]` is disallowed
-
- * can go from `[char; n]` to `&mut [char; n]`, `&[char; n]` to `[char; n]`, etc.
+ >- only going from `&[char; n]` to `&mut [char; n]` is disallowed
+ >- can go from `[char; n]` to `&mut [char; n]`
+ >- `&[char; n]` to `[char; n]`
+ >- et cetera
 
 . . .
 
@@ -281,181 +372,113 @@ Does this make sense?
 
 (How can we go from a reference to a value?)
 
+# Is this subtyping? {.center}
 
-## ~~> in parameter
+## Is this subtyping? {.center}
 
-yes SOMETHING SOMETHING
+(*Temporarily* putting aside previous examples)
 
-but not SOMETHING
+## Textbook subtyping
 
-nor SOMETHING
+Classic example: "Records"
 
-## ~~> in `Result::Err` (`?`)
+* "Have a record with these fields, want one with a subset of the fields"
 
-"Have a specific error, but result's error is more general. What now?"
-
-. . .
+* A Rust analogue: "Have `(A, B, C)`, this function wants `(A, B)`"
 
 ### Try it and see
 
-``` {.rust}
-fn phase_1(x: i32) -> Result<i32, PhaseOneErr> { /* ... */ }
-fn phase_2(y: i32) -> Result<i32, PhaseTwoErr> { /* ... */ }
-
-fn composed(a: i32) -> Result<i32, EndToEndErr> {
-    let b = try!(phase_1(a));
-    let c = try!(phase_2(b));
-    return Ok(c);
-}
-```
-
-## also, trait tricks
-
-e.g. `IntoPath`, `AsStr`
-
-# Reality
-
-## What is actually happening?
-
-## Coercions, Borrowing, Protocols
-
-# Coercions
-
-## Receiver coercion
-
-e.g. `self`, `&self` `&mut self`
-
-auto-ref
-
-auto-deref
-
-## Deref coercion
-
-## Auto Borrowing and Reborrowing
-
-(imm and mut)
-
-## Protocols
-
-How did we get `EndToEndErr` from the results of `phase_1`/`phase_2`?
-
-. . .
-
-``` {.rust}
-fn phase_1(x: i32) -> Result<i32, PhaseOneErr> { /* ... */ }
-fn phase_2(y: i32) -> Result<i32, PhaseTwoErr> { /* ... */ }
-
-fn composed(a: i32) -> Result<i32, EndToEndErr> {
-    let b = try!(phase_1(a));
-    let c = try!(phase_2(b));
-    return Ok(c);
+``` {.rust .compile_error .stripes}
+mod demo_subtuple {
+    fn provide<A, B, C>(tup: (A, B, C)) { expect(tup); }
+    fn expect<A, B>(_tup: (A, B)) { unimplemented!(); }
 }
 ```
 
 . . .
 
-Are `PhaseOneErr` and `PhaseTwoErr` subtypes of `EndToEndErr`?
+(Q: Why might disallowing this be a good idea for a language like Rust?)
+
+## Textbook subtyping {.left_align}
+
+Academic example: Functions
+
+* Assume types `Int`, `Real` where `Int <: Real`
+
+```art
+                .------------------------------------.
+                |                                    |
+                | Real …, -7.2, ⅓, ½, 3.14, π, …     |
+                |                                    |
+                |  .---------------------------.     |
+                |  |                           |     |
+                |  | Int …, -1, 0, 1, 2, 3, …  |     |
+                |  |                           |     |
+                |  '---------------------------'     |
+                '------------------------------------'
+```
+
+* "Have a function of type `Real -> Int`, want one like `Real -> Real`"
 
 . . .
 
-Answer: Magic is hidden behind the `try!`
+```
+twice: (Real -> Real) Real -> Real
+twice(f, r) = f(f(r))
 
-----
+ceiling: Real -> Int
 
-Answer: Magic is hidden behind the `try!`
-
-``` {.rust}
-    let b = try!(phase_1(a));
+twice(ceiling, 2.3) = ceiling(ceiling(2.3)) = 3.
 ```
 
-expands to:
+* This makes sense, right?
 
-``` {.rust}
-    let b =
-        match phase_1(a) {
-            ::std::result::Result::Ok(val) => val,
-            ::std::result::Result::Err(err) => {
-                return ::std::result::Result::Err(::std::convert::From::from(err))
-            }
-        };
-```
+## Textbook subtyping {.left_align data-transition="fade" }
 
-which means that its inserting a conversion via `std::convert::From`
-to transform your specific error to whatever error is expected
-in the context of that expression.
+* "Have a function of type `Real -> Int`, want one like `Real -> Real`"
 
-FIXME: `?`/`try!`-protocol
+* This makes sense, right?
 
-FIXME: `From`/`Into`
-
-## Gotchas re: coercions
-
-Compiler needs the expected type.
-
-E.g. this compiles and runs:
-```rust
-fn process1(input: &[i32]) { }
-fn foo() { process1(&vec![1, 2, 3]); }
-```
-
-but this fails at compile time:
-
-``` {.rust .compile_error }
-trait Input { }
-impl Input for [i32] { }
-fn process2<I>(input: &I) where I: Input { }
-fn bar() { process2(&vec![1, 2, 3]); }
-```
-
-## Why?
-
-
-``` {.rust}
-fn process1(input: &[i32]) { }
-```
-
-```art
-         &Vec<i32>
-            |
-            v
- process1(&[i32])
-```
-
-Compiler sees input + expected types
-
- * adds `&Vec -> &[i32]` coercion
+"Client says they can handle a production of any real number, so it is safe to provide
+something that will only produce integer values."
 
 . . .
 
-``` {.rust .compile_error }
-fn process2<I>(input: &I) where I: Input { }
+```java
+class Real             { Real increment() { /* ... */ } }
+class Int extends Real {  Int increment() { /* ... */ } }
 ```
 
-```art
-         &Vec<i32>
-            |
-            v
-   process2(&I)
+. . .
+
+or, more accurately,
+
+```java
+class RealFun                { Real operation(Real x) { /* ... */ } }
+class IntFun extends RealFun {  Int operation(Real x) { /* ... */ } }
 ```
 
-Compiler decides `I` is `Vec<i32>`
-
- * tries to find `impl Input for Vec<i32>`
-
-
-# Yes, but is it subtyping?
-
-## (Why wouldn't it be?)
-
-## Caveat
-
-One *can* apply a coercion semantics to subtyping in a programming language.
-
-See Pierce, section 15.6.
-
-## A testing method
+* (tidbit: Sun added *covariant return types* back in Java SE 5, 2004)
 
 ## Gentzen-style subtyping deduction rules
+
+```art
+  precondition
+-----------------
+ postcondition
+```
+
+. . .
+
+Example:
+
+```art
+  A true    B true
+--------------------
+   (A and B) true
+```
+
+## A rule for function values
 
 ```art
      Y <: X
@@ -463,104 +486,457 @@ See Pierce, section 15.6.
 A -> Y <: A -> X
 ```
 
-aka `->` is covariant with respect to its return type.
-(FIXME: Or is that stated the other way around?)
+aka `->` is *covariant* with respect to its return type.
 
-## Covariance intuition
+. . .
 
-If I hand a oven-ready apple pie to someone wanting a ready-to-bake
-dessert, all is well.
+All caller can do is *get* an `X` from calling the function;
+
+So it is safe to narrow and use a `Y` as the return value.
+
+## Contravariant with respect to argument type {.left_align}
+
+* "Have a function of type `Real -> Int`, want one like `Int -> Int`"
+
+* Sometimes unintuitive
+
+"Client says they will only feed integer values into the function,
+so it is safe to provide something that can consume any real number."
+
+. . .
+
+* Not supported by languages like Java; conflicts with method overloading.
+
+## A more general rule with contravariance
 
 ```art
-        ApplePie <: Dessert
-------------------------------------
-Heat -> ApplePie <: Heat -> Dessert
+Y <: X    B <: A
+-----------------
+A -> Y <: B -> X
 ```
 
-## Covariance in other programming languages
-
-Java TODO
-
-## So: Does ~~> generalize the same way?
-
-code examples
-
-## Previous Examples are not Subtyping
-
-## Why might it matter if Rust has Subtyping?
-
-Java example: Does this compile?
-
-```java
-    static void modify_array(Number[] numArray) {
-        numArray[0] = new Float(3.14);
-    }
-```
+aka `->` is covariant with respect to its return type,
+and `->` is *contravariant* with respect to its argument type.
 
 . . .
 
-What happens here?
+All caller can do is feed in more specific `B` (and get out more general `X`).
 
-<!-- FIXME consider adding *caution* signal orange CSS here. -->
-
-```java
-    static void mut_array() {
-        Integer[] intArray = new Integer[1];
-        modify_array(intArray);
-    }
-```
+So it is safe to be more liberal and accept any `A` at all, and guarantee
+the more specific `Y` as return value.
 
 . . .
 
-```
-Exception in thread "main" java.lang.ArrayStoreException: java.lang.Float
-    at Examples.modify_array(Examples.java:25)
-    at Examples.mut_array(Examples.java:21)
-    at Examples.main(Examples.java:9)
-```
-
-## The Rust Analogue
+Aside: What about when domain = range?
 
 ```art
-                  +----------+
-                  |  Number  |
-                  +-----+----+
-                       / \
-                      +-+-+
-                        |
-             +----------+-----------+
-             |                      |
-        +----------+          +-----------+
-        |  Float   |          |  Integer  |
-        +----------+          +-----------+
+       ???
+----------------
+Y -> Y <: X -> X
+```
+
+# Does Rust have variance? {.center}
+
+## Does Rust have variance: experiment 1
+
+```art
+          &Vec<i32>                   fn (&usize) -> &Vec<i32>
+            |                          |
+            |                          : ?
+            v                          v[q]
+  fn expect(&[i32])     fn expect_hof(fn (&usize) -> &[i32])
 ```
 
 . . .
 
-What should be legal? This?
+```rust
+mod demo_variance_and_vec_slice {
+    fn provide(m: &Vec<i32>) { expect(m); }
+    fn expect(_nums: &[i32]) { unimplemented!() }
+}
+```
 
-``` {.rust}
-fn store_float_in_num_dest(num_dest: &mut Number, flo: Float) {
-    *num_dest = flo;
+``` {.rust .compile_error .stripes}
+mod demo_variance_and_vec_slice_hof {
+    fn provide_hof(f: fn (&usize) -> &Vec<i32>) { expect_hof(f); }
+    fn expect_hof(_f: fn (&usize) -> &[i32]) { unimplemented!(); }
+}
+```
+
+```
+error: mismatched types [E0308]
+fn provide_hof(f: fn (&usize) -> &Vec<i32>) { expect_hof(f); }
+                                                         ^
+note: expected type `fn(&usize) -> &[i32]`
+note:    found type `fn(&usize) -> &std::vec::Vec<i32>`
+```
+
+("hof" stands for "higher-order function")
+
+## Does Rust have variance: experiment 2
+
+```art
+         &mut [i32]                 fn (&usize) -> &mut [i32]
+            |                        |
+            |                        : ?
+            v                        v[q]
+  fn expect(&[i32])     fn expect_hof(fn (&usize) -> &[i32])
+
+```
+
+. . .
+
+```rust
+mod demo_variance_and_mut_slice {
+    fn provide(m: &mut [i32]) { expect(m); }
+    fn expect(_nums: &[i32]) { unimplemented!() }
+}
+```
+
+``` {.rust .compile_error .stripes}
+mod demo_variance_and_mut_slice_hof {
+    fn provide_hof(f: fn (&usize) -> &mut [i32]) { expect_hof(f); }
+    fn expect_hof(_f: fn (&usize) -> &[i32]) { unimplemented!(); }
+}
+```
+
+```
+error: mismatched types [E0308]
+fn provide_hof(f: fn (&usize) -> &mut [i32]) { expect_hof(f); }
+                                                          ^
+note: expected type `fn(&usize) -> &[i32]`
+note:    found type `fn(&usize) -> &mut [i32]`
+```
+
+
+## Seems like Rust does not have (co)variance {.center}
+
+. . .
+
+### "seems like" ... hmm
+
+# Misdirection {.center}
+
+## The Sapin example
+
+Let's try to implement `std::cell::Cell`, in user code.
+
+```rust
+struct MyCell<T> {
+    value: T,
+}
+
+impl<T: Copy> MyCell<T> {
+    fn new(x: T) -> MyCell<T> { MyCell { value: x } }
+    fn get(&self) -> T { self.value }
+    fn set(&self, value: T) {
+        use std::ptr;
+        unsafe {
+            ptr::write(&self.value as *const _ as *mut _, value);
+        }
+    }
+}
+```
+
+Is this use of `unsafe` sound?
+
+. . .
+
+(Actually *completely* broken; reasons include compiler details
+regarding aliasing info; we'll focus on another subtle one here.)
+
+----
+
+```rust
+static X: i32 = 10;
+
+#[test]
+fn test_mycell_short_lifetime() {
+    let cell = MyCell::new(&X);
+    step1(&cell);
+
+    fn step1<'a>(r_c1: &MyCell<&'a i32>) {
+        let val: i32 = 13;
+        step2(&val, r_c1);
+        println!("step1 r_c1.value: {}", r_c1.value);
+    }
+
+    fn step2<'b>(r_val: &'b i32, r_c2: &MyCell<&'b i32>) {
+        r_c2.set(r_val);
+    }
+
+    println!("  end cell.value: {}", cell.value);
 }
 ```
 
 . . .
 
-If so, how about this?
+Output (some run on my machine):
 
-``` {.rust}
-fn pass_int_dest_as_num_dest(int: Integer) {
-    let mut my_int: Integer = int;
-    store_float_in_num_dest(&mut my_int);
-}
 ```
-
-## Q: Does Rust have Subtyping?
+step1 r_c1.value: 13
+  end cell.value: 28672
+```
 
 . . .
 
-Unequivocally: Yes
+(`28672`??? Bogus!) Where does this garbage come from?
+
+##  { data-transition="fade" data-transition-speed="fast" }
+
+``` {.rust}
+static X: i32 = 10;
+
+#[test]
+fn test_mycell_short_lifetime() {
+    let cell = MyCell::new(&X);
+    step1(&cell);
+    fn step1<'a>(r_c1: &MyCell<&'a i32>) { let val: i32 = 13; step2(&val, r_c1); }
+    fn step2<'b>(r_val: &'b i32, r_c2: &MyCell<&'b i32>) { r_c2.set(r_val); }
+}
+```
+
+. . .
+
+before `step1(&cell);`:
+
+```art
+                             (static data area)
+
+     (Stack)          .----> X: 10
+                      |
+     cell = MyCell    |
+            value  =--'
+```
+
+##  { data-transition="fade" data-transition-speed="fast" }
+
+``` {.rust}
+static X: i32 = 10;
+
+#[test]
+fn test_mycell_short_lifetime() {
+    let cell = MyCell::new(&X);
+    step1(&cell);
+    fn step1<'a>(r_c1: &MyCell<&'a i32>) { let val: i32 = 13; step2(&val, r_c1); }
+    fn step2<'b>(r_val: &'b i32, r_c2: &MyCell<&'b i32>) { r_c2.set(r_val); }
+}
+```
+
+before `step2(&val, r_c1);`:
+
+```art
+                             (static data area)
+
+     (Stack)          .----> X: 10
+                      |
+ .-> cell = MyCell    |
+ :          value  =--'
+ |   ----
+ |
+ '-- r_c1
+
+      val  13
+```
+
+##  { data-transition="fade" data-transition-speed="fast" }
+
+``` {.rust}
+static X: i32 = 10;
+
+#[test]
+fn test_mycell_short_lifetime() {
+    let cell = MyCell::new(&X);
+    step1(&cell);
+    fn step1<'a>(r_c1: &MyCell<&'a i32>) { let val: i32 = 13; step2(&val, r_c1); }
+    fn step2<'b>(r_val: &'b i32, r_c2: &MyCell<&'b i32>) { r_c2.set(r_val); }
+}
+```
+
+before `r_c2.set(r_val)`:
+
+```art
+                             (static data area)
+
+     (Stack)          .----> X: 10
+                      |
+ .-> cell = MyCell    |
+ :          value  =--'
+ |   ----
+ |
+ +-- r_c1
+ |
+ |    val  13 <-------.
+ |                    :
+ :   ----             |
+ |                    |
+ |  r_val ------------'
+ |
+ '-- r_c2
+```
+
+## { data-transition="fade" data-transition-speed="fast" }
+
+``` {.rust}
+static X: i32 = 10;
+
+#[test]
+fn test_mycell_short_lifetime() {
+    let cell = MyCell::new(&X);
+    step1(&cell);
+    fn step1<'a>(r_c1: &MyCell<&'a i32>) { let val: i32 = 13; step2(&val, r_c1); }
+    fn step2<'b>(r_val: &'b i32, r_c2: &MyCell<&'b i32>) { r_c2.set(r_val); }
+}
+```
+
+after `r_c2.set(r_val)`:
+
+```art
+                             (static data area)
+
+     (Stack)                 X: 10
+
+ .-> cell = MyCell
+ :          value  ---.
+ |   ----             :
+ |                    |
+ +-- r_c1             |
+ |                    |
+ :    val  13 <-----=-+
+ |                    |
+ |   ----             :
+ |                    |
+ |  r_val ------------'
+ |
+ '-- r_c2
+```
+
+## { data-transition="fade" data-transition-speed="fast" }
+
+``` {.rust}
+static X: i32 = 10;
+
+#[test]
+fn test_mycell_short_lifetime() {
+    let cell = MyCell::new(&X);
+    step1(&cell);
+    fn step1<'a>(r_c1: &MyCell<&'a i32>) { let val: i32 = 13; step2(&val, r_c1); }
+    fn step2<'b>(r_val: &'b i32, r_c2: &MyCell<&'b i32>) { r_c2.set(r_val); }
+}
+```
+
+after `step2` returns:
+
+```art
+                             (static data area)
+
+     (Stack)                 X: 10
+
+ .-> cell = MyCell
+ |          value  ---.
+ :   ----             :
+ |                    |
+ '-- r_c1             |
+                      |
+      val  13 <-------'
+```
+
+## { data-transition="fade-in" data-transition-speed="fast" }
+
+``` {.rust}
+static X: i32 = 10;
+
+#[test]
+fn test_mycell_short_lifetime() {
+    let cell = MyCell::new(&X);
+    step1(&cell);
+    fn step1<'a>(r_c1: &MyCell<&'a i32>) { let val: i32 = 13; step2(&val, r_c1); }
+    fn step2<'b>(r_val: &'b i32, r_c2: &MyCell<&'b i32>) { r_c2.set(r_val); }
+}
+```
+
+after `step1` returns:
+
+```art
+                             (static data area)
+
+     (Stack)                 X: 10
+
+     cell = MyCell
+            value  ---.
+                      |
+                      :
+                      |
+                      |
+      ???     <-------'
+```
+
+. . .
+
+Either `MyCell` is broken, or the compiler is.
+
+## Is `Cell` also broken? {.center}
+
+``` {.rust .compile_error .stripes}
+mod test_stdcell_short_lifetime {
+    use std::cell::Cell;
+    static X: i32 = 10;
+
+    #[test]
+    fn test_stdcell_short_lifetime() {
+        let cell = Cell::new(&X);
+        step1(&cell);
+    }
+    fn step1<'a>(r_c1: &Cell<&'a i32>) { let val: i32 = 13; step2(&val, r_c1); }
+    fn step2<'b>(r_val: &'b i32, r_c2: &Cell<&'b i32>) { r_c2.set(r_val); }
+}
+```
+
+. . .
+
+Compiler output:
+
+```
+error: `val` does not live long enough
+step2(&val, r_c1);
+       ^~~
+note: reference must be valid for the lifetime 'a as defined on the block at 775:39...
+fn step1<'a>(r_c1: &Cell<&'a i32>) {
+                                   ^
+note: ...but borrowed value is only valid for the block suffix following statement 0 at 776:26
+    let val: i32 = 13;
+                      ^
+```
+
+## Difference between `MyCell` and `Cell`?
+
+``` {.rust}
+struct MyCell<T> {
+    value: T,
+}
+
+pub struct Cell<T> {
+    value: UnsafeCell<T>,
+}
+
+#[lang = "unsafe_cell"]
+pub struct UnsafeCell<T: ?Sized> {
+    value: T,
+}
+```
+
+. . .
+
+`MyCell` just holds a `T`, while `Cell` holds an `UnsafeCell<T>`,
+which is a "language item" known specially to the compiler.
+
+## Why accept `MyCell` and reject `Cell`? {.center}
+
+. . .
+
+### *Subtyping* and *variance*
+
+# Yes, Rust has Subtyping {.center}
 
 ## Yes, Rust has Subtyping
 
@@ -627,429 +1003,443 @@ fn promote<'a>(x: &'a i32) -> &'static i32 {
 Not legal to return `&'a i32` as a `&'static i32` for arbitrary `'a`;
 otherwise, dangling pointers.
 
-## General rules
+## References revisited
 
-`&'static T <: &'a T`, for any `'a` and any `T`.
-
-(E.g., can pass `&'static &'static i32` when a `&'a &'static i32`
- expected, by plugging in `&'static i32` for `T`.
+Insight: For *any* type `T` and any lifetime `'a`, clearly `&'static T`
+should be valid anywhere that `&'a T` is.
 
 . . .
-
-A more general rule:
 
 ```art
-   'b : 'a
---------------
-&'b T <: &'a T
+         &'static [i32]
+            |
+            |
+            v
+  fn expect(&[i32])
 ```
 
 . . .
 
-Even *more* general:
+Gentzen style
 
 ```art
-   'b : 'a
-    S <: T
---------------
-&'b S <: &'a T
-```
-. . .
-
-i.e., can pass `&'c &'static i32`
-when `&'c &'d i32` expected.
-
-. . .
-
-> "Isn't this obvious, that I can pass long lived references
-> where short-lived references are expected? When is type
-> theory going to be useful?"
-
-## Details matter
-
-So far, only looked at immutable references `&'a T`.
-
-. . .
-
-What are rules for `&'a mut T`?
-
-----
-
-Consider these two function signatures
-
-```rust
-fn non_store<'a>(dest1: &'a     &'a i32, ptr: &'a i32) { /* ... */ }
-fn may_store<'a>(dest2: &'a mut &'a i32, ptr: &'a i32) { /* ... */ }
+ 'static outlives 'a
+---------------------
+ &'static T <: &'a T
 ```
 
+## A more general rule
+
+For any type `T` and lifetimes `'a`, `'b`, if `'b` outlives `'a`, then
+`&'b T` should be valid anywhere `&'a T` is.
+
+```art
+    'b outlives 'a
+---------------------
+    &'b T <: &'a T
+```
+
+## Further generalization
+
+Already established we should have `&'static T <: &'a T`.
+
 . . .
 
-`fn non_store` only gets immutable ref's; safe to call it like this:
+What about `&'a &'static T` and `&'a &'a T`?
 
-```rust
-#[test] fn non_store_test() {
-    let long_ten = 10;
-    let mut long_ptr = &long_ten;
-    let four = 4;
-    let local = &four;
-    non_store(&mut long_ptr, local);
-}
+Should `&'a &'static T <: &'a &'a T` ...?
+
+. . .
+
+Intuition: All you can do with a `&X` is *read* data from the `X` it holds.
+
+Analogous to a function `A -> Y <: A -> X`
+
+. . .
+
+```art
+      'b outlives 'a
+           Y <: X
+  -----------------------------
+       &'b Y <: &'a X
 ```
 
 . . .
 
-`fn may_store` has more expressive freedom. Which means:
+`&X` is *covariant* with respect to `X`
+
+. . .
+
+But that's `&X`; what about `&mut X`?
+
+## What about mut references
+
+Should `&'a mut &'static T <: &'a mut &'a T` ...?
+
+. . .
+
+Allowing that exposes:
+
 
 ``` {.rust .compile_error}
-#[test] fn may_store_test() {
-    let long_ten = 10;
-    let mut long_ptr = &long_ten;
-    let four = 4;
-    let local = &four;
-    may_store(&mut long_ptr, local);
+mod promote_short_to_static {
+    static X: i32 = 10;
+    fn test() {
+        let mut ptr: &'static i32 = &mut X;
+        step1(&mut ptr);
+    }
+    fn step1<'a>(r1: &'a mut &'static i32) { let val: i32 = 13; step2(r, &val); }
+    fn step2<'b, T>(r2: &'b mut &'b T, r_val: &'b T) { *r = r_val; }
 }
 ```
 
-```
-error: `four` does not live long enough
+. . .
+
+```art
+                             (static data area)
+
+     (Stack)          .----> X: 10
+                      :
+ .-> ptr  ------------'
+ :
+ |   ----
+ |
+ +-- r1
+ |
+ :    val  13 <-----=-.
+ |                    |
+ |   ----             :
+ |                    |
+ |  r_val ------------'
+ |
+ '-- r2
 ```
 
-## `four` doesn't live long enough
+## Invariance!
+
+Insight: for any type `T` and any lifetime `'a`, `&'static T` is valid anywhere
+`&'a T` is.
+
+*But* we cannot generalize to `Y <: X`
+
+. . .
+
+Intuition: Once you allow mutation through a reference, the type itself
+must remain fixed.
+
+## Other languages
+
+Java example: Does this compile? (FYI `Float <: Number`)
+
+```java
+static void modify_array(Number[] numArray) { numArray[0] = new Float(3.14); }
+```
+
+. . .
+
+Java array `T[]` is *covariant* with respect to `T`.
+
+. . .
+
+What happens here?
+
+<!-- FIXME consider adding *caution* signal orange CSS here. -->
+
+```java
+static void mut_array() {
+    Integer[] intArray = new Integer[1]; modify_array(intArray); }
+```
+
+. . .
+
+```
+Exception in thread "main" java.lang.ArrayStoreException: java.lang.Float
+    at Examples.modify_array(Examples.java:25)
+    at Examples.mut_array(Examples.java:21)
+    at Examples.main(Examples.java:9)
+```
+
+. . .
+
+(Old ~~wart~~ historical artifact; predates Java support for generics.)
+
+## Are Rust function types variant?
+
+```art
+          &'static i32              fn (&usize) -> &'static i32
+            |                        |
+            |                        : ?
+            v                        v[q]
+  fn expect(&i32)     fn expect_hof(fn (&usize) -> &i32)
+```
+
+. . .
+
+```rust
+mod demo_variance_and_static_ref {
+    fn provide(m: &'static i32) { let val = 13; expect(&val, m); }
+    fn expect<'a>(_: &'a i32, _r: &'a i32) { unimplemented!() }
+}
+
+mod demo_variance_and_static_ref_hof {
+    fn prov_hof(f: fn(&usize) -> &'static i32) { let val = 13; exp_hof(&val, f); }
+    fn exp_hof<'a>(_: &'a i32, _f: fn (&'a usize) -> &'a i32) { unimplemented!() }
+}
+```
+
+. . .
+
+Compiles!
+
+. . .
+
+Functions even contravariant with respect to their argument types
+
+(Rust does not have method overloading so no conflict there)
+
+
+# Behind the curtain: variance {.center}
+
+## Where does variance come from?
+
+Compiler deduces the variance of a type (with respect to its type
+parameters) based on the structure of that type.
+
+```rust
+struct OuterInline<T> { one: T, inner: InnerInline<T> }
+struct InnerInline<T> { data: T }
+```
+
+`InnerInline` and `OuterInline` both covariant with respect to `T`
+
+. . .
+
+```rust
+struct OuterRef<'a, T: 'a> { one: &'a mut T, inner: InnerRef<'a, T> }
+struct InnerRef<'a, T: 'a> { data: &'a T }
+```
+
+`InnerRef` is covariant w.r.t. `T`, while
+`OuterRef` is *invariant* w.r.t. `T`
+
+. . .
+
+If compiler sees a `PhantomData<SomeType>`, it traverses the
+structure of `SomeType` as if it were embedded directly.
+
+## What's up with `Cell`, `UnsafeCell`
+
+`UnsafeCell<T>` is *invariant* with respect to `T`,
+(and that bubbles out to `Cell<T>`).
+
+## What's up with `MyCell`
+
+Structural definition of `MyCell` alone
+implies it is *covariant* w.r.t. `T`
+
+This (broken) method violates rules associated with covariance:
 
 ``` {.rust}
-fn non_store<'a>(dest1: &'a     &'a i32, ptr: &'a i32) { /* ... */ }
-fn may_store<'a>(dest2: &'a mut &'a i32, ptr: &'a i32) { /* ... */ }
-```
-
-```art
-    let long_ten = 10;                ----------------------.
-    let mut long_ptr = &long_ten;     ---------.            | 'long_ten
-    let four = 4;                     -.       | 'long_ptr  |
-    let local = &four;                 |'four  |            |
-    may_store(&mut long_ptr, local);   |       |            |
-                                      -'      -'           -'
-```
-
-A call to `non-store` can choose `'a` to be as short as the lifetime
-of `four`, and then reason:
-
-```art
-            'long_ptr : 'four
-       ----------------------------
-       &'long_ptr i32 <: &'four i32
------------------------------------------- covariance of &T wrt T
-&'four &'long_ptr i32 <: &'four &'four i32
-```
-
-But the call to `may_store` cannot employ the same reasoning!
-
-. . .
-
-To have `&'b mut S <: &'a mut T`, the types `S` and `T` must be *equal*.
-
-----
-
-To have `&'b mut S <: &'a mut T`, the types `S` and `T` must be *equal*.
-
-. . .
-
-I.e. core rule for subtyping of `&mut` is:
-
-```art
-        'b : 'a
-----------------------
-&'b mut T <: &'a mut T
-```
-. . .
-
-This is the heart of why "variance" matters in Rust
-
-`&T` is *covariant* with respect to `T`, while
-`&mut T` is *invariant* with respect to `T`
-
-<!--
-FIXME: maybe verify that a reborrow is what else is happening here,
-and not "just" subtyping between `&mut` and `&`. But maybe just gloss
-over that detail.
--->
-
-----
-
-```rust
-#[test] fn no_store_test() {
-    fn no_store<'a>(dest: &'a &'a i32, ptr: &'a i32) {
-
-    }
-
-    static HUNDRED: i32 = 100;
-
-    fn helper<'long>(long_dest: &'long mut &'long i32) {
-        let temp: i32 = 13;
-        let short_ptr = &temp;
-        no_store(long_dest, short_ptr);
-    }
-
-    let mut long_ptr: &i32 = &HUNDRED;
-    helper(&mut long_ptr);
-}
-```
-
-```art
-HUNDRED <--------+
-                 |
-  =+='long  .----+------. <--------+
-   :        |    |      |          |
-   :        |    |      |    .-----+-----.
-   :        |    |      |    |     |     |
-   :        |           |    |           |  .------. <-------+
-   :        | long_ptr  |    | long_dest |  |      |         |
-   :        |           |    |           |  | temp |   .-----+-----.
-   :        |           |    |           |  |      |   |     |     |     |'a
-   :        |           |    |           |  |      |   | short_ptr |     :
-   :        |           |    |           |  |      |   |           |     |
-   :        |           |    |           |  |      |   |           |
-   :        |           |    |           |  |      |   '-----------'
-   :        |           |    |           |  '------'
-   :        |           |    |           |
-   :        |           |    '-----------'
-   :        |           |
-  =+=       '-----------'
-```
-
-
-----
-
-``` {.rust .compile_error}
-#[test] fn do_store_test() {
-    fn do_store<'a>(dest: &'a mut &'a i32, ptr: &'a i32) {
-        *dest = ptr;
-    }
-
-    static HUNDRED: i32 = 100;
-
-    fn helper<'long>(long_dest: &'long mut &'long i32) {
-        let temp: i32 = 13;
-        let short_ptr = &temp;
-        do_store(long_dest, short_ptr);
-    }
-
-    let mut long_ptr: &i32 = &HUNDRED;
-    helper(&mut long_ptr);
-}
-```
-
-
-## The Sapin example
-
-Let's try to implement `std::cell::Cell`, in user code.
-
-```rust
-struct MyCell<T: Copy> {
-    value: T,
-}
-
-impl<T: Copy> MyCell<T> {
-    fn new(x: T) -> MyCell<T> { MyCell { value: x } }
-    fn get(&self) -> T { self.value }
     fn set(&self, value: T) {
         use std::ptr;
         unsafe {
             ptr::write(&self.value as *const _ as *mut _, value);
         }
     }
+```
+
+. . .
+
+Must impose *invariance*
+
+. . .
+
+Use `PhantomData<fn (T) -> T>` in `MyCell<T>`: one way
+
+Use `UnsafeCell<T>` in `MyCell<T>`: better way
+
+# Behind the curtain: "duck subtyping" {.center}
+
+## Examples from beginning {.center}
+
+The earlier examples are not kind of subtyping that references have.
+
+![](rabbit_hat_wand.svg)
+
+## What is actually happening? {.center}
+
+## Coercions, Auto-Borrowing, Protocols {.center}
+
+# Coercions {.center}
+
+## Receiver coercion
+
+For receiver for a method (i.e. the `x` in `x.m(...)`):
+
+Compiler will automatically insert borrows and dereferences
+to find a type that provides method `m`.
+
+. . .
+
+That, combined with dereference of a `Copy` type, explains
+``` {.rust}
+    let mut a = ['a', '1']; let b = &['b', '4']; let c = &mut ['c', '7'];
+    // [char; 2]            &[char; 2]           &mut [char; 2]
+    a.by_val();             b.by_val();          c.by_val();
+    a.by_ref();             b.by_ref();          c.by_ref();
+    a.by_mut();             /*  ...  */          c.by_mut();
+    println!("interesting: (a,b,c): {:?}", (a,b,c));
+```
+
+. . .
+
+(Note: Parameters other than receiver do not get this special treatment)
+
+## Deref coercion
+
+When you have a type `&Y`, where `Y` can be dereferenced to yield `X`,
+then compiler will automatically coerce `&Y` to `&X` by inserting
+necessary derefers.
+
+See [RFC 271: "Deref Conversions"][RFC 271]
+
+[RFC 271]: https://github.com/rust-lang/rfcs/blob/master/text/0241-deref-conversions.md
+
+. . .
+
+That, combined with the `impl` such that `Vec<T>: Deref<Target=[T]>`, explains
+
+```art
+         &mut [i32]
+            |
+            v
+  fn expect(&[i32])
+```
+
+and
+
+```art
+        &mut Vec<i32>
+            |
+            v
+  fn expect(&[i32])
+```
+
+<!-- Out of time
+## Auto Borrowing and Reborrowing
+
+(imm and mut)
+-->
+
+## Protocols
+
+How did we get `EndToEndErr` from the results of `phase_1`/`phase_2`?
+
+. . .
+
+``` {.rust}
+fn phase_1(x: Ast) -> Result<Mir, PhaseOneErr> { /* ... */ }
+fn phase_2(y: Mir) -> Result<Out, PhaseTwoErr> { /* ... */ }
+
+fn composed(a: Ast) -> Result<Out, EndToEndErr> {
+    let mir = try!(phase_1(a));
+    let out = try!(phase_2(mir));
+    return Ok(out);
 }
 ```
 
-Is this use of `unsafe` sound?
+. . .
+
+Are `PhaseOneErr` and `PhaseTwoErr` subtypes of `EndToEndErr`?
+
+. . .
+
+Answer: Magic is hidden behind the `try!`
 
 ----
 
+Answer: Magic is hidden behind the `try!`
+
+``` {.rust}
+    let mir = try!(phase_1(a));
+```
+
+expands to:
+
+``` {.rust}
+    let mir =
+        match phase_1(a) {
+            ::std::result::Result::Ok(val) => val,
+            ::std::result::Result::Err(err) => {
+                return ::std::result::Result::Err(::std::convert::From::from(err))
+            }
+        };
+```
+
+inserting conversion via `std::convert::From`
+to transform specific error to whatever error is expected
+in context of expression
+
+. . .
+
+(New `?` form currently does same thing as `try!`; easier to
+get hands on expansion of `try!`)
+
+## Gotchas re: coercions
+
+Compiler needs the expected type.
+
+E.g. this compiles and runs:
 ```rust
-static X: i32 = 10;
-
-#[test]
-fn test_mycell_short_lifetime() {
-    let cell = MyCell::new(&X);
-    step1(&cell);
-
-    fn step1<'a>(r_c1: &MyCell<&'a i32>) {
-        let val: i32 = 13;
-        step2(&val, r_c1);
-        println!("step1 r_c1.value: {}", r_c1.value);
-    }
-
-    fn step2<'a>(r_val: &'a i32, r_c2: &MyCell<&'a i32>) {
-        r_c2.set(r_val);
-    }
-
-    println!("  end cell.value: {}", cell.value);
-}
+fn process1(input: &[i32]) { }
+fn foo() { process1(&vec![1, 2, 3]); }
 ```
+
+but this fails at compile time:
+
+``` {.rust .compile_error }
+trait Input { }
+impl Input for [i32] { }
+fn process2<I>(input: &I) where I: Input { }
+fn bar() { process2(&vec![1, 2, 3]); }
+```
+
+## Why?
+
+
+``` {.rust}
+fn process1(input: &[i32]) { }
+```
+
+```art
+       &Vec<i32>
+          |
+          v
+ process1(&[i32])
+```
+
+Compiler sees input + expected types
+
+ * adds `&Vec -> &[i32]` coercion
 
 . . .
 
-Output:
-
+``` {.rust .compile_error }
+fn process2<I>(input: &I) where I: Input { }
 ```
-step1 r_c1.value: 13
-  end cell.value: 28672
-```
-
-##  { data-transition="fade-out" data-transition-speed="fast" }
-
-``` {.rust}
-static X: i32 = 10;
-
-#[test]
-fn test_mycell_short_lifetime() {
-    let cell = MyCell::new(&X);
-    step1(&cell);
-    fn step1<'a>(r_c1: &MyCell<&'a i32>) { let val: i32 = 13; step2(&val, r_c1); }
-    fn step2<'a>(r_val: &'a i32, r_c2: &MyCell<&'a i32>) { r_c2.set(r_val); }
-}
-```
-. . .
-
-before `r_c2.set(r_val)`:
 
 ```art
-                             (static data area)
-
-                      .----> X: 10
-                      |
- .-> cell = MyCell    |
- |          value  ---'
- |   ----
- |
- +-- r_c1
- |
- |    val  13 <-------.
- |                    |
- |   ----             |
- |                    |
- |  r_val ------------'
- |
- '-- r_c2
+         &Vec<i32>
+            |
+            v
+   process2(&I)
 ```
 
-## { data-transition="fade" data-transition-speed="fast" }
+Compiler decides `I` is `Vec<i32>`
 
-``` {.rust}
-static X: i32 = 10;
+ * tries to find `impl Input for Vec<i32>`
 
-#[test]
-fn test_mycell_short_lifetime() {
-    let cell = MyCell::new(&X);
-    step1(&cell);
-    fn step1<'a>(r_c1: &MyCell<&'a i32>) { let val: i32 = 13; step2(&val, r_c1); }
-    fn step2<'a>(r_val: &'a i32, r_c2: &MyCell<&'a i32>) { r_c2.set(r_val); }
-}
-```
-
-after `r_c2.set(r_val)`:
-
-```art
-                             (static data area)
-
-                             X: 10
-
- .-> cell = MyCell
- |          value  ---.
- |   ----             |
- |                    |
- +-- r_c1             |
- |                    |
- |    val  13 <-------+
- |                    |
- |   ----             |
- |                    |
- |  r_val ------------'
- |
- '-- r_c2
-```
-
-## { data-transition="fade" data-transition-speed="fast" }
-
-``` {.rust}
-static X: i32 = 10;
-
-#[test]
-fn test_mycell_short_lifetime() {
-    let cell = MyCell::new(&X);
-    step1(&cell);
-    fn step1<'a>(r_c1: &MyCell<&'a i32>) { let val: i32 = 13; step2(&val, r_c1); }
-    fn step2<'a>(r_val: &'a i32, r_c2: &MyCell<&'a i32>) { r_c2.set(r_val); }
-}
-```
-
-after `step2` returns:
-
-```art
-                             (static data area)
-
-                             X: 10
-
- .-> cell = MyCell
- |          value  ---.
- |   ----             |
- |                    |
- '-- r_c1             |
-                      |
-      val  13 <-------'
-```
-
-## { data-transition="fade-in" data-transition-speed="fast" }
-
-``` {.rust}
-static X: i32 = 10;
-
-#[test]
-fn test_mycell_short_lifetime() {
-    let cell = MyCell::new(&X);
-    step1(&cell);
-    fn step1<'a>(r_c1: &MyCell<&'a i32>) { let val: i32 = 13; step2(&val, r_c1); }
-    fn step2<'a>(r_val: &'a i32, r_c2: &MyCell<&'a i32>) { r_c2.set(r_val); }
-}
-```
-
-after `step1` returns:
-
-```art
-                             (static data area)
-
-                             X: 10
-
-     cell = MyCell
-            value  ---.
-                      |
-                      |
-                      |
-                      |
-      ???     <-------'
-```
-
-## Rust certainly has subtyping
-
-`&'static T <: &'x T`
-
-. . .
-
-More generally:
-
-If `'a` outlives `'b`, then `&'a T <: &'b T`.
-
-----
-
-demo compatibilty
-
-----
-
-demo covariance
-
-## Why does variance matter?
-
-Getting covariance vs invariance right matters for soundness
-
+# Conclusion  {.center}
 
 ## Pop Quiz
 
@@ -1059,11 +1449,38 @@ Getting covariance vs invariance right matters for soundness
 
 * `&'a mut &'static T` (?) `&'a mut &'a T`
 
-## Why does variance matter
+. . .
 
+Real answer: How often do you *actually* have to
+answer those questions?
 
-# Conclusion  {.center}
+(i.e., maybe subtyping does not matter much in Rust.)
+
+## Why does variance matter?
+
+Getting covariance vs invariance right matters for soundness
+
+. . .
+
+But you should not need to think about it at all if you are not writing
+`unsafe { ... }`
+
+(it is solely compiler's job until `unsafe` gets involved)
 
 ## More Info
+
+See RFCs, the Book, and the Rustonomicon.
+
+And contribute back to them!
+
+## End Thoughts
+
+* Keep asking questions
+
+* "Show me the code!"
+
+* Do the experiments
+
+* Magic: As real as you want it to be
 
 ## Thanks!

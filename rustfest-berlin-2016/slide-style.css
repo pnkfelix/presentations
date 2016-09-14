@@ -19,4 +19,12 @@
 
 .left_align > div { text-align: left; }
 
+.reveal .slides .left_align {
+  text-align: left;
+}
+
+.reveal .slides .left_align h1 {
+  text-align: center;
+}
+
 .reveal .slide-number { font-size: 24pt; color: #ffffff; }

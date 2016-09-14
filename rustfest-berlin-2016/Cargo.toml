@@ -21,6 +21,4 @@ mon-artiste = { git = "https://github.com/pnkfelix/mon-artiste" }
 
 [lib]
 name = "rustfest_berlin_2016"
-
-[[bin]]
-name = "main"
+path = "src/lib.rs"

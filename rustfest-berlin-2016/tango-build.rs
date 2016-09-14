@@ -8,6 +8,12 @@ fn main() {
     // println!("cargo:warning='tango says hello'");
     tango::process_root().unwrap();
     run_pandoc();
+    run_java_examples();
+}
+
+fn run_java_examples() {
+    std::process::Command::new("javac").args(&["-d", ".", "src/Examples.java"]).output().unwrap();
+    std::process::Command::new("java").args(&["Examples"]).output().unwrap();
 }
 
 fn run_pandoc() {
