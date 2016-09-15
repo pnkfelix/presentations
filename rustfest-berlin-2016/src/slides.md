@@ -71,6 +71,18 @@ Amazingly, "try it and see" often works.
 
 . . .
 
+<!--
+```rust
+struct Ast;
+struct Mir;
+struct Out;
+struct PhaseOneErr;
+struct PhaseTwoErr;
+fn phase_1(x: Ast) -> Result<Mir, PhaseOneErr> { unimplemented!() }
+fn phase_2(y: Mir) -> Result<Out, PhaseTwoErr> { unimplemented!() }
+```
+-->
+
 ``` {.rust}
 fn phase_1(x: Ast) -> Result<Mir, PhaseOneErr> { /* ... */ }
 fn phase_2(y: Mir) -> Result<Out, PhaseTwoErr> { /* ... */ }
@@ -90,9 +102,9 @@ fn composed(a: Ast) -> Result<Out, EndToEndErr> {
 
 (we will look more at an instance of this example later)
 
-## Exploring Vectors and Slices { data-transition="fade-out" }
+## Exploring Vectors and Slices { data-transition="fade-out" .tight }
 
-`Vec<T>` and `[T]` "look like subtyping".
+`Vec<T>` and `[T]` *look* like subtyping
 
 "Have a `Vec<i32>`, but code expects a `[i32]` slice. What now?"
 
@@ -121,9 +133,9 @@ fn demo_rotate() {
 
 does it compile?
 
-## Exploring Vectors and Slices { data-transition="fade-in" }
+## Exploring Vectors and Slices { data-transition="fade-in" .tight }
 
-`Vec<T>` and `[T]` "look like subtyping".
+`Vec<T>` and `[T]` *look* like subtyping
 
 "Have a `Vec<i32>`, but code expects a `[i32]` slice. What now?"
 
@@ -287,7 +299,7 @@ impl Receiver for [char; 2] {
 }
 ```
 
-## Sanity check { data-transition="fade" }
+## Sanity check { data-transition="fade" .tight }
 
 ``` {.rust}
 trait Receiver {
@@ -303,8 +315,12 @@ impl Receiver for [char; 2] {
 
 . . .
 
+<!-- (save space on slide by putting directive into unrendered area.)
 ```rust
 #[test]
+```
+-->
+```rust
 fn demo_obvious_cases() {
     let a = ['a', '1']; let b = &['b', '4']; let c = &mut ['c', '7'];
     // [char; 2]        &[char; 2]           &mut [char; 2]
@@ -314,7 +330,6 @@ fn demo_obvious_cases() {
     println!("obvious: (a,b,c): {:?}", (a,b,c));
 }
 ```
-
 prints:
 
 . . .
@@ -535,6 +550,8 @@ Aside: What about when domain = range?
 Y -> Y <: X -> X
 ```
 
+<!-- FIXME TODO: try to add visualization of subtyping via Venn or puzzle pieces -->
+
 # Does Rust have variance? {.center}
 
 ## Does Rust have variance: experiment 1
@@ -655,27 +672,27 @@ fn test_mycell_short_lifetime() {
     let cell = MyCell::new(&X);
     step1(&cell);
 
-    fn step1<'a>(r_c1: &MyCell<&'a i32>) {
-        let val: i32 = 13;
-        step2(&val, r_c1);
-        println!("step1 r_c1.value: {}", r_c1.value);
-    }
+    fn step1<'a>(r_c1: &MyCell<&'a i32>) { let val: i32 = 13;
+                                           step2(&val, r_c1);
+                                           println!("step1 value: {}", r_c1.value); }
 
-    fn step2<'b>(r_val: &'b i32, r_c2: &MyCell<&'b i32>) {
-        r_c2.set(r_val);
-    }
+    fn step2<'b>(r_val: &'b i32, r_c2: &MyCell<&'b i32>) { r_c2.set(r_val); }
 
-    println!("  end cell.value: {}", cell.value);
+    println!("  end value: {}", cell.value);
 }
 ```
+
+. . .
+
+(DON'T PANIC: We're going to step through this.)
 
 . . .
 
 Output (some run on my machine):
 
 ```
-step1 r_c1.value: 13
-  end cell.value: 28672
+step1 value: 13
+  end value: 28672
 ```
 
 . . .
@@ -985,7 +1002,7 @@ fn promote<'a>(x: &'a i32) -> &'static i32 {
 ```
 ```art
  |
- : 'static (`fn promote` promises a reference valud for this long)
+ : 'static (`fn promote` promises a reference value for this long)
  :
  :    .------.
  :    |      |
@@ -1089,7 +1106,7 @@ mod promote_short_to_static {
         step1(&mut ptr);
     }
     fn step1<'a>(r1: &'a mut &'static i32) { let val: i32 = 13; step2(r, &val); }
-    fn step2<'b, T>(r2: &'b mut &'b T, r_val: &'b T) { *r = r_val; }
+    fn step2<'b, T>(r2: &'b mut &'b T, r_val: &'b T) { *r2 = r_val; }
 }
 ```
 
@@ -1117,8 +1134,8 @@ mod promote_short_to_static {
 
 ## Invariance!
 
-Insight: for any type `T` and any lifetime `'a`, `&'static T` is valid anywhere
-`&'a T` is.
+Insight: for any type `X` and any lifetime `'a`, `&'static mut X` is valid anywhere
+`&'a mut X` is.
 
 *But* we cannot generalize to `Y <: X`
 
@@ -1297,6 +1314,8 @@ That, combined with dereference of a `Copy` type, explains
 
 (Note: Parameters other than receiver do not get this special treatment)
 
+<!-- FIXME TODO: WHY -->
+
 ## Deref coercion
 
 When you have a type `&Y`, where `Y` can be dereferenced to yield `X`,
@@ -1309,7 +1328,21 @@ See [RFC 271: "Deref Conversions"][RFC 271]
 
 . . .
 
-That, combined with the `impl` such that `Vec<T>: Deref<Target=[T]>`, explains
+That, combined with `impl` such that `Vec<T>: Deref<Target=[T]>`, explains
+
+```art
+        &Vec<i32>
+            |
+            v
+  fn expect(&[i32])
+```
+
+<!-- Out of time
+
+## Auto Borrowing and Reborrowing
+
+(imm and mut)
+
 
 ```art
          &mut [i32]
@@ -1318,19 +1351,6 @@ That, combined with the `impl` such that `Vec<T>: Deref<Target=[T]>`, explains
   fn expect(&[i32])
 ```
 
-and
-
-```art
-        &mut Vec<i32>
-            |
-            v
-  fn expect(&[i32])
-```
-
-<!-- Out of time
-## Auto Borrowing and Reborrowing
-
-(imm and mut)
 -->
 
 ## Protocols
@@ -1356,11 +1376,13 @@ Are `PhaseOneErr` and `PhaseTwoErr` subtypes of `EndToEndErr`?
 
 . . .
 
-Answer: Magic is hidden behind the `try!`
+Answer: Magic is hidden behind the `try!` (and some trait impls)
 
 ----
 
-Answer: Magic is hidden behind the `try!`
+Answer: Magic is hidden behind the `try!` (and some trait impls)
+
+. . .
 
 ``` {.rust}
     let mir = try!(phase_1(a));
@@ -1378,14 +1400,53 @@ expands to:
         };
 ```
 
-inserting conversion via `std::convert::From`
-to transform specific error to whatever error is expected
+. . .
+
+(New `?` form today is same as `try!`; easier to
+show `try!` expansion)
+
+. . .
+
+inserts conversion via `std::convert::From`
+transforming specific error to whatever error is expected
+in context of expression
+
+----
+
+``` {.rust}
+            ::std::result::Result::Err(err) => {
+                return ::std::result::Result::Err(::std::convert::From::from(err))
+            }
+```
+
+inserts conversion via `std::convert::From`
+transforming specific error to whatever error is expected
 in context of expression
 
 . . .
 
-(New `?` form currently does same thing as `try!`; easier to
-get hands on expansion of `try!`)
+```rust
+enum EndToEndErr {
+    P1(PhaseOneErr),
+    P2(PhaseTwoErr),
+}
+
+impl From<PhaseOneErr> for EndToEndErr {
+    fn from(phase_1_err: PhaseOneErr) -> EndToEndErr {
+        EndToEndErr::P1(phase_1_err)
+    }
+}
+
+impl From<PhaseTwoErr> for EndToEndErr {
+    fn from(phase_2_err: PhaseTwoErr) -> EndToEndErr {
+        EndToEndErr::P2(phase_2_err)
+    }
+}
+```
+
+. . .
+
+(So, all the magic here is in macros and trait system.)
 
 ## Gotchas re: coercions
 
@@ -1443,20 +1504,25 @@ Compiler decides `I` is `Vec<i32>`
 
 # Conclusion  {.center}
 
-## Pop Quiz
+## Pop Quiz {.separated}
 
-* `&'static mut T` (?) `&'a mut T`
+---------------------     -------- ------------------
+`&'static mut T`           `<:` ?         `&'a mut T`
 
-* `&'static &'a mut T` (?) `&'a &'a mut T`
+`&'a &'static mut T`       `<:` ?     `&'a &'a mut T`
 
-* `&'a mut &'static T` (?) `&'a mut &'a T`
+`&'a mut &'static T`       `<:` ?     `&'a mut &'a T`
+---------------------     -------- ------------------
 
 . . .
 
-Real answer: How often do you *actually* have to
-answer those questions?
+One answer: How often do you *actually* answer such questions?
 
-(i.e., maybe subtyping does not matter much in Rust.)
+(be aware of subtyping, but need not be foremost in your mind)
+
+. . .
+
+In case you care: Yes, Yes, No
 
 ## Why does variance matter?
 
@@ -1471,11 +1537,15 @@ But you should not need to think about it at all if you are not writing
 
 ## More Info
 
-See RFCs, the Book, and the Rustonomicon.
+See RFCs
+
+The Book
+
+and the Rustonomicon
 
 And contribute back to them!
 
-## End Thoughts
+## End Thoughts {.center}
 
 * Keep asking questions
 
@@ -1485,4 +1555,4 @@ And contribute back to them!
 
 * Magic: As real as you want it to be
 
-## Thanks!
+## Thanks! {.center}

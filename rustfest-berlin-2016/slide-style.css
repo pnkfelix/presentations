@@ -28,3 +28,16 @@
 }
 
 .reveal .slide-number { font-size: 24pt; color: #ffffff; }
+
+.reveal .separated table {
+    border-collapse: separate;
+    border-spacing: 1rem;
+}
+.reveal .separated td {
+    border-bottom: none;
+}
+
+.reveal .tight p {
+    margin: inherit;
+    line-height: inherit;
+}
