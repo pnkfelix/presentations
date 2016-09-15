@@ -389,6 +389,34 @@ Does this make sense?
 
 # Is this subtyping? {.center}
 
+## View from OOP VM runtime hacker
+
+
+```art
+             .-------------------------.
+             |  ptr: NonZero<*const T> |
+             | ----------------------- |
+Vec<T> repr: |  cap: usize             |
+             | ----------------------- |
+             |  len: usize             |
+             '-------------------------'
+
+             .-------------------------.
+             | data: *const T          |
+  &[T] repr: | ----------------------- |
+             |  len: usize             |
+             '-------------------------'
+```
+
+. . .
+
+How could `Vec<T>` possible be a subtype of `&[T]`?
+They have incompatible representations.
+
+. . .
+
+(However, a language hacker's view may differ...)
+
 ## Is this subtyping? {.center}
 
 (*Temporarily* putting aside previous examples)
@@ -446,7 +474,7 @@ ceiling: Real -> Int
 twice(ceiling, 2.3) = ceiling(ceiling(2.3)) = 3.
 ```
 
-* This makes sense, right?
+* This makes sense, right? (Assume compatible runtime representation.)
 
 ## Textbook subtyping {.left_align data-transition="fade" }
 
@@ -505,9 +533,18 @@ aka `->` is *covariant* with respect to its return type.
 
 . . .
 
+Example instance:
+
+```art
+        Int <: Real
+---------------------------
+Real -> Int <: Real -> Real
+```
+. . .
+
 All caller can do is *get* an `X` from calling the function;
 
-So it is safe to narrow and use a `Y` as the return value.
+So it is safe to *narrow* and use a `Y` as the return value.
 
 ## Contravariant with respect to argument type {.left_align}
 
@@ -633,6 +670,17 @@ note:    found type `fn(&usize) -> &mut [i32]`
 ### "seems like" ... hmm
 
 # Misdirection {.center}
+
+## A Story
+
+Simon Sapin (paraphrased):
+
+> I had some code that does not compile. I do not
+> understand why, so to try to understand it, I
+> narrowed it down to a particular use of `Cell`.
+> But I didn't understand what was happening, so
+> I tried making my tiny version of `Cell`, and the
+> problem went away.
 
 ## The Sapin example
 
