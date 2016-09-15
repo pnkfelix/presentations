@@ -1276,8 +1276,10 @@ The earlier examples are not kind of subtyping that references have.
 
 For receiver for a method (i.e. the `x` in `x.m(...)`):
 
-Compiler will automatically insert borrows and dereferences
+Compiler will automatically insert a borrow or dereferences
 to find a type that provides method `m`.
+
+See also [StackOverflow Q](http://stackoverflow.com/questions/28519997/what-are-rusts-exact-auto-dereferencing-rules/28552082#28552082)
 
 . . .
 
