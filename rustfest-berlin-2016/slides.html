@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title></title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/mozilla-sandstone.css" id="theme">
+  <link rel="stylesheet" href="stripes.css"/>
+  <link rel="stylesheet" href="slide-style.css"/>
+  <link rel="stylesheet" href="code-style.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+
+<section id="subtyping-in-rust-and-clarkes-third-law" class="slide level2">
+<h1>Subtyping in Rust and Clarke's Third Law</h1>
+<h3 id="felix-klock-pnkfelix-mozilla-research">Felix Klock (<code>@pnkfelix</code>), Mozilla Research</h3>
+<h3 id="rust-fest-berlin-17-sept-2016">Rust Fest, Berlin; 17 Sept 2016</h3>
+<p>Slides: <a href="TODO">http://TODO</a></p>
+<p>(<kbd>space</kbd>: next slide; <kbd>shift</kbd><kbd>space</kbd>: previous slide; <kbd>esc</kbd>: overview; arrows navigate)</p>
+</section>
+<section><section id="advanced-tech-and-magic" class="titleslide slide level1"><h1>Advanced Tech and Magic</h1></section><section id="language-technology" class="slide level2">
+<h1>Language Technology</h1>
+<p>Lots of interesting tech in Rust</p>
+<ul>
+<li><p>Borrow Checker</p></li>
+<li><p>Trait and Object System</p></li>
+<li><p>Destructor Semantics</p></li>
+<li><p>L-value <code>match</code>-ing</p></li>
+</ul>
+<div class="fragment">
+<p>Any of above can look like magic</p>
+</div>
+<div class="fragment">
+<p>But, <em>subtyping</em> has characteristics of a magic show</p>
+<p>&quot;We all already know what subtyping is...&quot;</p>
+</div>
+</section><section id="aside-on-magicians-and-lying" class="slide level2">
+<h1>Aside: On Magicians and Lying</h1>
+<blockquote>
+<p>&quot;You can lie as entertainment, but still be honest and moral&quot;</p>
+<p>Penn Jillette, attributed to James Randi</p>
+</blockquote>
+<div class="fragment">
+<p>I'm probably going to lie to you several times during this presentation.</p>
+<p>(Sometimes exploratory science, sometimes magic show.)</p>
+</div>
+</section></section>
+<section><section id="what-is-subtyping" class="titleslide slide level1 center"><h1>What is subtyping?</h1></section><section id="why-do-we-care-about-subtyping" class="slide level2">
+<h1>Why do we care about subtyping?</h1>
+<p>Insisting types of inputs exactly match expected types leads compiler to reject programs that seem obviously well-behaved.</p>
+</section><section id="intuition-compatibility" class="slide level2">
+<h1>Intuition: &quot;Compatibility&quot;</h1>
+<ul>
+<li><p>&quot;Have a <code>&amp;mut Vec&lt;T&gt;</code>, but this function wants a <code>&amp;[T]</code> slice...&quot;</p></li>
+<li><p>&quot;Have a <code>String</code>, but this method is only defined on <code>str</code> ...&quot;</p></li>
+<li><p>&quot;Want to return <code>Err(IOErr)</code> but the return type is <code>Result&lt;(), ParseErr&gt;</code> ...&quot;</p></li>
+</ul>
+<div class="fragment">
+<p>Amazingly, &quot;try it and see&quot; often works.</p>
+</div>
+</section><section id="results-and-errs" class="slide level2">
+<h1>Results and Errs</h1>
+<p>&quot;Have a specific error, but result's error is more general. What now?&quot;</p>
+<h3 id="try-it-and-see">Try it and see</h3>
+<div class="fragment">
+<!--
+```rust
+struct Ast;
+struct Mir;
+struct Out;
+struct PhaseOneErr;
+struct PhaseTwoErr;
+fn phase_1(x: Ast) -> Result<Mir, PhaseOneErr> { unimplemented!() }
+fn phase_2(y: Mir) -> Result<Out, PhaseTwoErr> { unimplemented!() }
+```
+-->
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> phase_1(x: Ast) -&gt; <span class="dt">Result</span>&lt;Mir, PhaseOneErr&gt; { <span class="co">/* ... */</span> }
+<span class="kw">fn</span> phase_2(y: Mir) -&gt; <span class="dt">Result</span>&lt;Out, PhaseTwoErr&gt; { <span class="co">/* ... */</span> }</code></pre></div>
+</div>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> composed(a: Ast) -&gt; <span class="dt">Result</span>&lt;Out, EndToEndErr&gt; {
+    <span class="kw">let</span> b = <span class="pp">try!</span>(phase_1(a));
+    <span class="kw">let</span> c = <span class="pp">try!</span>(phase_2(b));
+    <span class="kw">return</span> <span class="cn">Ok</span>(c);
+}</code></pre></div>
+</div>
+<div class="fragment">
+<p>(we will look more at an instance of this example later)</p>
+</div>
+</section><section id="exploring-vectors-and-slices" class="slide level2 tight" data-transition="fade-out">
+<h1>Exploring Vectors and Slices</h1>
+<p><code>Vec&lt;T&gt;</code> and <code>[T]</code> <em>look</em> like subtyping</p>
+<p>&quot;Have a <code>Vec&lt;i32&gt;</code>, but code expects a <code>[i32]</code> slice. What now?&quot;</p>
+<h3 id="try-it-and-see-1">Try it and see</h3>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> rotate(nums: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) {
+    <span class="kw">let</span> len = nums.len();
+    <span class="kw">let</span> first = nums[<span class="dv">0</span>];
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="dv">1.</span>.len { nums[i-<span class="dv">1</span>] = nums[i]; }
+    nums[len-<span class="dv">1</span>] = first;
+}</code></pre></div>
+</div>
+<div class="fragment">
+<pre><code>fn demo_rotate() {
+    let v = vec![1, 2, 3];
+    rotate(v);
+    assert_eq!(v, &amp;[3, 1, 2]);
+}</code></pre>
+<p>does it compile?</p>
+</div>
+</section><section id="exploring-vectors-and-slices-1" class="slide level2 tight" data-transition="fade-in">
+<h1>Exploring Vectors and Slices</h1>
+<p><code>Vec&lt;T&gt;</code> and <code>[T]</code> <em>look</em> like subtyping</p>
+<p>&quot;Have a <code>Vec&lt;i32&gt;</code>, but code expects a <code>[i32]</code> slice. What now?&quot;</p>
+<h3 id="try-it-and-see-2">Try it and see</h3>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> rotate(nums: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) {
+    <span class="kw">let</span> len = nums.len();
+    <span class="kw">let</span> first = nums[<span class="dv">0</span>];
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="dv">1.</span>.len { nums[i-<span class="dv">1</span>] = nums[i]; }
+    nums[len-<span class="dv">1</span>] = first;
+}</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust compile_error stripes"><code class="sourceCode rust"><span class="kw">fn</span> demo_rotate() {
+    <span class="kw">let</span> v = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    rotate(v);
+    <span class="pp">assert_eq!</span>(v, &amp;[<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>]);
+}</code></pre></div>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> demo_rotate() {
+    <span class="kw">let</span> <span class="kw">mut</span> v = <span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>];
+    rotate(&amp;<span class="kw">mut</span> v);
+    <span class="pp">assert_eq!</span>(v, &amp;[<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>]);
+}</code></pre></div>
+</div>
+</section><section id="stripped-to-skeletal-form" class="slide level2">
+<h1>Stripped to skeletal form</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">mod</span> demo_vec_slice {
+    <span class="kw">fn</span> provide(m: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { expect(m); }
+    <span class="kw">fn</span> expect(_nums: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) { <span class="pp">unimplemented!</span>() }
+}</code></pre></div>
+<svg xmlns="http://www.w3.org/2000/svg" height="64" viewBox="0 0 210 64" baseProfile="full" version="1.1" width="210">
+  <path stroke="green" fill="none" stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="80">&amp;mut Vec&lt;i32></text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="56" text-anchor="start" x="20">fn expect(&amp;[i32])</text>
+</svg>
+</section><section id="exploring-references" class="slide level2">
+<h1>Exploring References</h1>
+<p>The reference types <code>&amp;mut T</code> and <code>&amp;T</code> look like candidates for having some sort of compatibility relationship.</p>
+<p>&quot;Have a <code>&amp;mut [i32]</code>, but code expects a <code>&amp;[i32]</code> slice. What now?&quot;</p>
+<h3 id="try-it-and-see-3">Try it and see</h3>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">mod</span> demo_mut_slice_imm_slice {
+    <span class="kw">fn</span> provide(m: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) { expect(m); }
+    <span class="kw">fn</span> expect(_nums: &amp;[<span class="dt">i32</span>]) { <span class="pp">unimplemented!</span>() }
+}</code></pre></div>
+<svg xmlns="http://www.w3.org/2000/svg" height="64" viewBox="0 0 190 64" baseProfile="full" version="1.1" width="190">
+  <path stroke="green" fill="none" stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="90">&amp;mut [i32]</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="56" text-anchor="start" x="20">fn expect(&amp;[i32])</text>
+</svg>
+<!--
+## Textbook subtyping { data-transition="fade-out" }
+
+Classic example: "Records"
+
+* "Have a record with these fields, want one with a subset of the fields"
+
+* A Rust analogue: "Have `(A, B, C)`, this function wants `(A, B)`"
+
+. . .
+
+### Try it and see
+
+```
+mod demo_subtuple {
+    fn provide<A, B, C>(tup: (A, B, C)) { expect(tup); }
+    fn expect<A, B>(_tup: (A, B)) { unimplemented!(); }
+}
+```
+
+does it compile?
+-->
+</div>
+</section><section id="methodology-and-methods" class="slide level2">
+<h1>Methodology and methods</h1>
+<p>If you have <code>self</code> or <code>Self</code>, you're (probably) talking about a method</p>
+<div class="fragment">
+<p>&quot;Have an X, but code expects a Y&quot;,<br/> for every X,Y from <code>{ Self, &amp;Self, &amp;mut Self }</code></p>
+<p>Let us try &quot;something simple&quot;: Methods on <code>char</code> arrays.</p>
+</div>
+</section><section id="magical-receivers" class="slide level2">
+<h1>Magical receivers</h1>
+<p>Review: Extending types with new methods</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">trait</span> AsciiIncr {
+    <span class="co">/// Increments `self` by one unit. (Only works for 7-bit ASCII characters though.)</span>
+    <span class="kw">fn</span> incr(&amp;<span class="kw">mut</span> <span class="kw">self</span>);
+}
+
+<span class="kw">impl</span> AsciiIncr <span class="kw">for</span> <span class="dt">char</span> {
+    <span class="kw">fn</span> incr(&amp;<span class="kw">mut</span> <span class="kw">self</span>) { *<span class="kw">self</span> = (*<span class="kw">self</span> <span class="kw">as</span> <span class="dt">u8</span> + <span class="dv">1</span>) <span class="kw">as</span> <span class="dt">char</span> }
+}</code></pre></div>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> check_ascii_incr() {
+    <span class="kw">let</span> <span class="kw">mut</span> c: <span class="dt">char</span> = <span class="ch">&#39;a&#39;</span>;
+    c.incr();
+    <span class="pp">assert_eq!</span>(c, <span class="ch">&#39;b&#39;</span>);
+}</code></pre></div>
+<!--
+. . .
+
+Q: Why not just use this function, instead of messing with traits?
+```rust
+fn ascii_incr(c: &mut char) { *c = (*c as u8 + 1) as char }
+```
+-->
+</div>
+</section><section id="exploring-ones-self" class="slide level2" data-transition="fade">
+<h1>Exploring one's self</h1>
+<p>Exploration: Mock up trivially simple traits, rather than get bogged down with code of &quot;useful&quot; traits (like <code>AsciiIncr</code>).</p>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">trait</span> Receiver {
+    <span class="kw">fn</span> by_ref(&amp;<span class="kw">self</span>); <span class="kw">fn</span> by_mut(&amp;<span class="kw">mut</span> <span class="kw">self</span>); <span class="kw">fn</span> by_val(<span class="kw">self</span>) <span class="kw">where</span> <span class="kw">Self</span>: <span class="bu">Sized</span>;
+}
+
+<span class="kw">impl</span> Receiver <span class="kw">for</span> [<span class="dt">char</span>; <span class="dv">2</span>] {
+    <span class="kw">fn</span> by_ref(&amp;<span class="kw">self</span>)     { <span class="pp">println!</span>(<span class="st">&quot;ref: {:?}&quot;</span>, <span class="kw">self</span>[<span class="dv">0</span>]); }
+    <span class="kw">fn</span> by_mut(&amp;<span class="kw">mut</span> <span class="kw">self</span>) { <span class="pp">println!</span>(<span class="st">&quot;mut: {:?}&quot;</span>, <span class="kw">self</span>[<span class="dv">0</span>]); <span class="kw">self</span>[<span class="dv">1</span>].incr(); }
+    <span class="kw">fn</span> by_val(<span class="kw">mut</span> <span class="kw">self</span>)  { <span class="pp">println!</span>(<span class="st">&quot;val: {:?}&quot;</span>, <span class="kw">self</span>[<span class="dv">0</span>]); <span class="kw">self</span>[<span class="dv">1</span>].incr(); }
+}</code></pre></div>
+</div>
+</section><section id="sanity-check" class="slide level2 tight" data-transition="fade">
+<h1>Sanity check</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">trait</span> Receiver {
+    <span class="kw">fn</span> by_ref(&amp;<span class="kw">self</span>); <span class="kw">fn</span> by_mut(&amp;<span class="kw">mut</span> <span class="kw">self</span>); <span class="kw">fn</span> by_val(<span class="kw">self</span>) <span class="kw">where</span> <span class="kw">Self</span>: <span class="bu">Sized</span>;
+}
+
+<span class="kw">impl</span> Receiver <span class="kw">for</span> [<span class="dt">char</span>; <span class="dv">2</span>] {
+    <span class="kw">fn</span> by_ref(&amp;<span class="kw">self</span>)     { <span class="pp">println!</span>(<span class="st">&quot;ref: {:?}&quot;</span>, <span class="kw">self</span>[<span class="dv">0</span>]); }
+    <span class="kw">fn</span> by_mut(&amp;<span class="kw">mut</span> <span class="kw">self</span>) { <span class="pp">println!</span>(<span class="st">&quot;mut: {:?}&quot;</span>, <span class="kw">self</span>[<span class="dv">0</span>]); <span class="kw">self</span>[<span class="dv">1</span>].incr(); }
+    <span class="kw">fn</span> by_val(<span class="kw">mut</span> <span class="kw">self</span>)  { <span class="pp">println!</span>(<span class="st">&quot;val: {:?}&quot;</span>, <span class="kw">self</span>[<span class="dv">0</span>]); <span class="kw">self</span>[<span class="dv">1</span>].incr(); }
+}</code></pre></div>
+<div class="fragment">
+<!-- (save space on slide by putting directive into unrendered area.)
+```rust
+#[test]
+```
+-->
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> demo_obvious_cases() {
+    <span class="kw">let</span> a = [<span class="ch">&#39;a&#39;</span>, <span class="ch">&#39;1&#39;</span>]; <span class="kw">let</span> b = &amp;[<span class="ch">&#39;b&#39;</span>, <span class="ch">&#39;4&#39;</span>]; <span class="kw">let</span> c = &amp;<span class="kw">mut</span> [<span class="ch">&#39;c&#39;</span>, <span class="ch">&#39;7&#39;</span>];
+    <span class="co">// [char; 2]        &amp;[char; 2]           &amp;mut [char; 2]</span>
+    a.by_val();
+                        b.by_ref();
+                                             c.by_mut();
+    <span class="pp">println!</span>(<span class="st">&quot;obvious: (a,b,c): {:?}&quot;</span>, (a,b,c));
+}</code></pre></div>
+<p>prints:</p>
+</div>
+<div class="fragment">
+<pre><code>val: &#39;a&#39;
+ref: &#39;b&#39;
+mut: &#39;c&#39;
+obvious: (a,b,c): ([&#39;a&#39;, &#39;1&#39;], [&#39;b&#39;, &#39;4&#39;], [&#39;c&#39;, &#39;8&#39;])</code></pre>
+</div>
+</section><section id="exploration" class="slide level2" data-transition="fade">
+<h1>Exploration</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">trait</span> Receiver {
+    <span class="kw">fn</span> by_ref(&amp;<span class="kw">self</span>); <span class="kw">fn</span> by_mut(&amp;<span class="kw">mut</span> <span class="kw">self</span>); <span class="kw">fn</span> by_val(<span class="kw">self</span>) <span class="kw">where</span> <span class="kw">Self</span>: <span class="bu">Sized</span>;
+}
+
+<span class="kw">impl</span> Receiver <span class="kw">for</span> [<span class="dt">char</span>; <span class="dv">2</span>] {
+    <span class="kw">fn</span> by_ref(&amp;<span class="kw">self</span>)     { <span class="pp">println!</span>(<span class="st">&quot;ref: {:?}&quot;</span>, <span class="kw">self</span>[<span class="dv">0</span>]); }
+    <span class="kw">fn</span> by_mut(&amp;<span class="kw">mut</span> <span class="kw">self</span>) { <span class="pp">println!</span>(<span class="st">&quot;mut: {:?}&quot;</span>, <span class="kw">self</span>[<span class="dv">0</span>]); <span class="kw">self</span>[<span class="dv">1</span>].incr(); }
+    <span class="kw">fn</span> by_val(<span class="kw">mut</span> <span class="kw">self</span>)  { <span class="pp">println!</span>(<span class="st">&quot;val: {:?}&quot;</span>, <span class="kw">self</span>[<span class="dv">0</span>]); <span class="kw">self</span>[<span class="dv">1</span>].incr(); }
+}</code></pre></div>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> demo_interesting_cases() {
+    <span class="kw">let</span> <span class="kw">mut</span> a = [<span class="ch">&#39;a&#39;</span>, <span class="ch">&#39;1&#39;</span>]; <span class="kw">let</span> b = &amp;[<span class="ch">&#39;b&#39;</span>, <span class="ch">&#39;4&#39;</span>]; <span class="kw">let</span> c = &amp;<span class="kw">mut</span> [<span class="ch">&#39;c&#39;</span>, <span class="ch">&#39;7&#39;</span>];
+    <span class="co">// [char; 2]            &amp;[char; 2]           &amp;mut [char; 2]</span>
+    a.by_val();             b.by_val();          c.by_val();
+    a.by_ref();             b.by_ref();          c.by_ref();
+    a.by_mut();             <span class="co">/*  ...  */</span>          c.by_mut();
+    <span class="pp">println!</span>(<span class="st">&quot;interesting: (a,b,c): {:?}&quot;</span>, (a,b,c));
+}</code></pre></div>
+</div>
+<div class="fragment">
+<p>Only <code>b.by_mut()</code> rejected by compiler.</p>
+</div>
+</section><section id="observation" class="slide level2 center left_align">
+<h1>Observation</h1>
+<p>For receiver for a method (i.e. the <code>x</code> in <code>x.m(...)</code>):</p>
+<ul>
+<li class="fragment">only going from <code>&amp;[char; n]</code> to <code>&amp;mut [char; n]</code> is disallowed</li>
+<li class="fragment">can go from <code>[char; n]</code> to <code>&amp;mut [char; n]</code></li>
+<li class="fragment"><code>&amp;[char; n]</code> to <code>[char; n]</code></li>
+<li class="fragment">et cetera</li>
+</ul>
+<div class="fragment">
+<p>Does this make sense?</p>
+<p>(How can we go from a reference to a value?)</p>
+</div>
+</section></section>
+<section><section id="is-this-subtyping" class="titleslide slide level1 center"><h1>Is this subtyping?</h1></section><section id="view-from-oop-vm-runtime-hacker" class="slide level2">
+<h1>View from OOP VM runtime hacker</h1>
+<svg xmlns="http://www.w3.org/2000/svg" height="208" viewBox="0 0 400 208" baseProfile="full" version="1.1" width="400">
+  <rect ry="8" height="96" rx="5" stroke="red" fill="none" y="8" stroke-width="2" width="260" x="135" />
+  <rect ry="8" height="64" rx="5" stroke="red" fill="none" y="136" stroke-width="2" width="260" x="135" />
+  <path stroke="green" fill="none" stroke-width="2" d="M 150,40 L 160,40L 380,40" />
+  <path stroke="green" fill="none" stroke-width="2" d="M 150,72 L 160,72L 380,72" />
+  <path stroke="green" fill="none" stroke-width="2" d="M 150,168 L 160,168L 380,168" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="24" text-anchor="start" x="160">ptr: NonZero&lt;*const T> </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="56" text-anchor="start" x="0">Vec&lt;T> repr: </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="56" text-anchor="start" x="160">cap: usize             </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="88" text-anchor="start" x="160">len: usize             </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="152" text-anchor="start" x="150">data: *const T          </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="168" text-anchor="start" x="20">&amp;[T] repr: </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="184" text-anchor="start" x="160">len: usize             </text>
+</svg>
+<div class="fragment">
+<p>How could <code>Vec&lt;T&gt;</code> possible be a subtype of <code>&amp;[T]</code>? They have incompatible representations.</p>
+</div>
+<div class="fragment">
+<p>(However, a language hacker's view may differ...)</p>
+</div>
+</section><section id="is-this-subtyping-1" class="slide level2 center">
+<h1>Is this subtyping?</h1>
+<p>(<em>Temporarily</em> putting aside previous examples)</p>
+</section><section id="textbook-subtyping" class="slide level2">
+<h1>Textbook subtyping</h1>
+<p>Classic example: &quot;Records&quot;</p>
+<ul>
+<li><p>&quot;Have a record with these fields, want one with a subset of the fields&quot;</p></li>
+<li><p>A Rust analogue: &quot;Have <code>(A, B, C)</code>, this function wants <code>(A, B)</code>&quot;</p></li>
+</ul>
+<h3 id="try-it-and-see-4">Try it and see</h3>
+<div class="sourceCode"><pre class="sourceCode rust compile_error stripes"><code class="sourceCode rust"><span class="kw">mod</span> demo_subtuple {
+    <span class="kw">fn</span> provide&lt;A, B, C&gt;(tup: (A, B, C)) { expect(tup); }
+    <span class="kw">fn</span> expect&lt;A, B&gt;(_tup: (A, B)) { <span class="pp">unimplemented!</span>(); }
+}</code></pre></div>
+<div class="fragment">
+<p>(Q: Why might disallowing this be a good idea for a language like Rust?)</p>
+</div>
+</section><section id="textbook-subtyping-1" class="slide level2 left_align">
+<h1>Textbook subtyping</h1>
+<p>Academic example: Functions</p>
+<ul>
+<li>Assume types <code>Int</code>, <code>Real</code> where <code>Int &lt;: Real</code></li>
+</ul>
+<svg xmlns="http://www.w3.org/2000/svg" height="160" viewBox="0 0 540 160" baseProfile="full" version="1.1" width="540">
+  <rect ry="8" height="144" rx="5" stroke="red" fill="none" y="8" stroke-width="2" width="370" x="165" />
+  <rect ry="8" height="64" rx="5" stroke="red" fill="none" y="72" stroke-width="2" width="280" x="195" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="180">Real …, -7.2, ⅓, ½, 3.14, π, …     </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="104" text-anchor="start" x="210">Int …, -1, 0, 1, 2, 3, …  </text>
+</svg>
+<ul>
+<li>&quot;Have a function of type <code>Real -&gt; Int</code>, want one like <code>Real -&gt; Real</code>&quot;</li>
+</ul>
+<div class="fragment">
+<pre><code>twice: (Real -&gt; Real) Real -&gt; Real
+twice(f, r) = f(f(r))
+
+ceiling: Real -&gt; Int
+
+twice(ceiling, 2.3) = ceiling(ceiling(2.3)) = 3.</code></pre>
+<ul>
+<li>This makes sense, right? (Assume compatible runtime representation.)</li>
+</ul>
+</div>
+</section><section id="textbook-subtyping-2" class="slide level2 left_align" data-transition="fade">
+<h1>Textbook subtyping</h1>
+<ul>
+<li><p>&quot;Have a function of type <code>Real -&gt; Int</code>, want one like <code>Real -&gt; Real</code>&quot;</p></li>
+<li><p>This makes sense, right?</p></li>
+</ul>
+<p>&quot;Client says they can handle a production of any real number, so it is safe to provide something that will only produce integer values.&quot;</p>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">class</span> Real             { Real <span class="fu">increment</span>() { <span class="co">/* ... */</span> } }
+<span class="kw">class</span> Int <span class="kw">extends</span> Real {  Int <span class="fu">increment</span>() { <span class="co">/* ... */</span> } }</code></pre></div>
+</div>
+<div class="fragment">
+<p>or, more accurately,</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="kw">class</span> RealFun                { Real <span class="fu">operation</span>(Real x) { <span class="co">/* ... */</span> } }
+<span class="kw">class</span> IntFun <span class="kw">extends</span> RealFun {  Int <span class="fu">operation</span>(Real x) { <span class="co">/* ... */</span> } }</code></pre></div>
+<ul>
+<li>(tidbit: Sun added <em>covariant return types</em> back in Java SE 5, 2004)</li>
+</ul>
+</div>
+</section><section id="gentzen-style-subtyping-deduction-rules" class="slide level2">
+<h1>Gentzen-style subtyping deduction rules</h1>
+<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 0 170 48" baseProfile="full" version="1.1" width="170">
+  <path stroke="green" fill="none" stroke-width="2" d="M 0,24 L 10,24L 170,24" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="20">precondition</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="10">postcondition</text>
+</svg>
+<div class="fragment">
+<p>Example:</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 0 200 48" baseProfile="full" version="1.1" width="200">
+  <path stroke="green" fill="none" stroke-width="2" d="M 0,24 L 10,24L 200,24" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="20">A true    B true</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="30">(A and B) true</text>
+</svg>
+</div>
+</section><section id="a-rule-for-function-values" class="slide level2">
+<h1>A rule for function values</h1>
+<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 0 170 48" baseProfile="full" version="1.1" width="170">
+  <path stroke="green" fill="none" stroke-width="2" d="M 0,24 L 10,24L 170,24" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="50">Y &lt;: X</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="0">A -> Y &lt;: A -> X</text>
+</svg>
+<p>aka <code>-&gt;</code> is <em>covariant</em> with respect to its return type.</p>
+<div class="fragment">
+<p>Example instance:</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 0 270 48" baseProfile="full" version="1.1" width="270">
+  <path stroke="green" fill="none" stroke-width="2" d="M 0,24 L 10,24L 270,24" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="80">Int &lt;: Real</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="0">Real -> Int &lt;: Real -> Real</text>
+</svg>
+</div>
+<div class="fragment">
+<p>All caller can do is <em>get</em> an <code>X</code> from calling the function;</p>
+<p>So it is safe to <em>narrow</em> and use a <code>Y</code> as the return value.</p>
+</div>
+</section><section id="contravariant-with-respect-to-argument-type" class="slide level2 left_align">
+<h1>Contravariant with respect to argument type</h1>
+<ul>
+<li><p>&quot;Have a function of type <code>Real -&gt; Int</code>, want one like <code>Int -&gt; Int</code>&quot;</p></li>
+<li><p>Sometimes unintuitive</p></li>
+</ul>
+<p>&quot;Client says they will only feed integer values into the function, so it is safe to provide something that can consume any real number.&quot;</p>
+<div class="fragment">
+<ul>
+<li>Not supported by languages like Java; conflicts with method overloading.</li>
+</ul>
+</div>
+</section><section id="a-more-general-rule-with-contravariance" class="slide level2">
+<h1>A more general rule with contravariance</h1>
+<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 0 170 48" baseProfile="full" version="1.1" width="170">
+  <path stroke="green" fill="none" stroke-width="2" d="M 0,24 L 10,24L 170,24" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="0">Y &lt;: X    B &lt;: A</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="0">A -> Y &lt;: B -> X</text>
+</svg>
+<p>aka <code>-&gt;</code> is covariant with respect to its return type, and <code>-&gt;</code> is <em>contravariant</em> with respect to its argument type.</p>
+<div class="fragment">
+<p>All caller can do is feed in more specific <code>B</code> (and get out more general <code>X</code>).</p>
+<p>So it is safe to be more liberal and accept any <code>A</code> at all, and guarantee the more specific <code>Y</code> as return value.</p>
+</div>
+<div class="fragment">
+<p>Aside: What about when domain = range?</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 0 160 48" baseProfile="full" version="1.1" width="160">
+  <path stroke="green" fill="none" stroke-width="2" d="M 0,24 L 10,24L 160,24" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="70">???</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="0">Y -> Y &lt;: X -> X</text>
+</svg>
+<!-- FIXME TODO: try to add visualization of subtyping via Venn or puzzle pieces -->
+</div>
+</section></section>
+<section><section id="does-rust-have-variance" class="titleslide slide level1 center"><h1>Does Rust have variance?</h1></section><section id="does-rust-have-variance-experiment-1" class="slide level2">
+<h1>Does Rust have variance: experiment 1</h1>
+<svg xmlns="http://www.w3.org/2000/svg" height="80" viewBox="0 0 620 80" baseProfile="full" version="1.1" width="620">
+  <path stroke="green" fill="none" stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <path stroke-dasharray="5,2" id="q" stroke="green" fill="none" stroke-width="2" d="M 395,16 L 395,32L 395,48L 395,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="100">&amp;Vec&lt;i32>                   fn (&amp;usize) -> &amp;Vec&lt;i32></text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="410">?</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="72" text-anchor="start" x="20">fn expect(&amp;[i32])     fn expect_hof(fn (&amp;usize) -> &amp;[i32])</text>
+</svg>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">mod</span> demo_variance_and_vec_slice {
+    <span class="kw">fn</span> provide(m: &amp;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { expect(m); }
+    <span class="kw">fn</span> expect(_nums: &amp;[<span class="dt">i32</span>]) { <span class="pp">unimplemented!</span>() }
+}</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust compile_error stripes"><code class="sourceCode rust"><span class="kw">mod</span> demo_variance_and_vec_slice_hof {
+    <span class="kw">fn</span> provide_hof(f: <span class="kw">fn</span> (&amp;<span class="dt">usize</span>) -&gt; &amp;<span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { expect_hof(f); }
+    <span class="kw">fn</span> expect_hof(_f: <span class="kw">fn</span> (&amp;<span class="dt">usize</span>) -&gt; &amp;[<span class="dt">i32</span>]) { <span class="pp">unimplemented!</span>(); }
+}</code></pre></div>
+<pre><code>error: mismatched types [E0308]
+fn provide_hof(f: fn (&amp;usize) -&gt; &amp;Vec&lt;i32&gt;) { expect_hof(f); }
+                                                         ^
+note: expected type `fn(&amp;usize) -&gt; &amp;[i32]`
+note:    found type `fn(&amp;usize) -&gt; &amp;std::vec::Vec&lt;i32&gt;`</code></pre>
+<p>(&quot;hof&quot; stands for &quot;higher-order function&quot;)</p>
+</div>
+</section><section id="does-rust-have-variance-experiment-2" class="slide level2">
+<h1>Does Rust have variance: experiment 2</h1>
+<svg xmlns="http://www.w3.org/2000/svg" height="80" viewBox="0 0 610 80" baseProfile="full" version="1.1" width="610">
+  <path stroke="green" fill="none" stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <path stroke-dasharray="5,2" id="q" stroke="green" fill="none" stroke-width="2" d="M 375,16 L 375,32L 375,48L 375,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="90">&amp;mut [i32]                 fn (&amp;usize) -> &amp;mut [i32]</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="390">?</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="72" text-anchor="start" x="20">fn expect(&amp;[i32])     fn expect_hof(fn (&amp;usize) -> &amp;[i32])</text>
+</svg>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">mod</span> demo_variance_and_mut_slice {
+    <span class="kw">fn</span> provide(m: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) { expect(m); }
+    <span class="kw">fn</span> expect(_nums: &amp;[<span class="dt">i32</span>]) { <span class="pp">unimplemented!</span>() }
+}</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust compile_error stripes"><code class="sourceCode rust"><span class="kw">mod</span> demo_variance_and_mut_slice_hof {
+    <span class="kw">fn</span> provide_hof(f: <span class="kw">fn</span> (&amp;<span class="dt">usize</span>) -&gt; &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) { expect_hof(f); }
+    <span class="kw">fn</span> expect_hof(_f: <span class="kw">fn</span> (&amp;<span class="dt">usize</span>) -&gt; &amp;[<span class="dt">i32</span>]) { <span class="pp">unimplemented!</span>(); }
+}</code></pre></div>
+<pre><code>error: mismatched types [E0308]
+fn provide_hof(f: fn (&amp;usize) -&gt; &amp;mut [i32]) { expect_hof(f); }
+                                                          ^
+note: expected type `fn(&amp;usize) -&gt; &amp;[i32]`
+note:    found type `fn(&amp;usize) -&gt; &amp;mut [i32]`</code></pre>
+</div>
+</section><section id="seems-like-rust-does-not-have-covariance" class="slide level2 center">
+<h1>Seems like Rust does not have (co)variance</h1>
+<div class="fragment">
+<h3 id="seems-like-...-hmm">&quot;seems like&quot; ... hmm</h3>
+</div>
+</section></section>
+<section><section id="misdirection" class="titleslide slide level1 center"><h1>Misdirection</h1></section><section id="a-story" class="slide level2">
+<h1>A Story</h1>
+<p>Simon Sapin (paraphrased):</p>
+<blockquote>
+<p>I had some code that does not compile. I do not understand why, so to try to understand it, I narrowed it down to a particular use of <code>Cell</code>. But I didn't understand what was happening, so I tried making my tiny version of <code>Cell</code>, and the problem went away.</p>
+</blockquote>
+</section><section id="the-sapin-example" class="slide level2">
+<h1>The Sapin example</h1>
+<p>Let's try to implement <code>std::cell::Cell</code>, in user code.</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">struct</span> MyCell&lt;T&gt; {
+    value: T,
+}
+
+<span class="kw">impl</span>&lt;T: <span class="bu">Copy</span>&gt; MyCell&lt;T&gt; {
+    <span class="kw">fn</span> new(x: T) -&gt; MyCell&lt;T&gt; { MyCell { value: x } }
+    <span class="kw">fn</span> get(&amp;<span class="kw">self</span>) -&gt; T { <span class="kw">self</span>.value }
+    <span class="kw">fn</span> set(&amp;<span class="kw">self</span>, value: T) {
+        <span class="kw">use</span> std::ptr;
+        <span class="kw">unsafe</span> {
+            ptr::write(&amp;<span class="kw">self</span>.value <span class="kw">as</span> *<span class="kw">const</span> _ <span class="kw">as</span> *<span class="kw">mut</span> _, value);
+        }
+    }
+}</code></pre></div>
+<p>Is this use of <code>unsafe</code> sound?</p>
+<div class="fragment">
+<p>(Actually <em>completely</em> broken; reasons include compiler details regarding aliasing info; we'll focus on another subtle one here.)</p>
+</div>
+</section><section class="slide level2">
+
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> test_mycell_short_lifetime() {
+    <span class="kw">let</span> cell = MyCell::new(&amp;X);
+    step1(&amp;cell);
+
+    <span class="kw">fn</span> step1&lt;<span class="ot">&#39;a</span>&gt;(r_c1: &amp;MyCell&lt;&amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>&gt;) { <span class="kw">let</span> val: <span class="dt">i32</span> = <span class="dv">13</span>;
+                                           step2(&amp;val, r_c1);
+                                           <span class="pp">println!</span>(<span class="st">&quot;step1 value: {}&quot;</span>, r_c1.value); }
+
+    <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
+
+    <span class="pp">println!</span>(<span class="st">&quot;  end value: {}&quot;</span>, cell.value);
+}</code></pre></div>
+<div class="fragment">
+<p>(DON'T PANIC: We're going to step through this.)</p>
+</div>
+<div class="fragment">
+<p>Output (some run on my machine):</p>
+<pre><code>step1 value: 13
+  end value: 28672</code></pre>
+</div>
+<div class="fragment">
+<p>(<code>28672</code>??? Bogus!) Where does this garbage come from?</p>
+</div>
+</section><section id="section" class="slide level2" data-transition="fade" data-transition-speed="fast">
+<h1></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> test_mycell_short_lifetime() {
+    <span class="kw">let</span> cell = MyCell::new(&amp;X);
+    step1(&amp;cell);
+    <span class="kw">fn</span> step1&lt;<span class="ot">&#39;a</span>&gt;(r_c1: &amp;MyCell&lt;&amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>&gt;) { <span class="kw">let</span> val: <span class="dt">i32</span> = <span class="dv">13</span>; step2(&amp;val, r_c1); }
+    <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
+}</code></pre></div>
+<div class="fragment">
+<p>before <code>step1(&amp;cell);</code>:</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="96" viewBox="0 0 470 96" baseProfile="full" version="1.1" width="470">
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 190,88 L 200,88L 210,88L 220,88Q 225,88 225,80L 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="290">(static data area)</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="50">(Stack)          </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="290">X: 10</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="72" text-anchor="start" x="50">cell = MyCell    </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="88" text-anchor="start" x="120">value  </text>
+</svg>
+</div>
+</section><section id="section-1" class="slide level2" data-transition="fade" data-transition-speed="fast">
+<h1></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> test_mycell_short_lifetime() {
+    <span class="kw">let</span> cell = MyCell::new(&amp;X);
+    step1(&amp;cell);
+    <span class="kw">fn</span> step1&lt;<span class="ot">&#39;a</span>&gt;(r_c1: &amp;MyCell&lt;&amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>&gt;) { <span class="kw">let</span> val: <span class="dt">i32</span> = <span class="dv">13</span>; step2(&amp;val, r_c1); }
+    <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
+}</code></pre></div>
+<p>before <code>step2(&amp;val, r_c1);</code>:</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="176" viewBox="0 0 470 176" baseProfile="full" version="1.1" width="470">
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 190,88 L 200,88L 210,88L 220,88Q 225,88 225,80L 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 40,136 L 30,136L 20,136Q 15,136 15,128L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path stroke="green" fill="none" stroke-width="2" d="M 50,104 L 60,104L 90,104" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="290">(static data area)</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="50">(Stack)          </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="290">X: 10</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="72" text-anchor="start" x="50">cell = MyCell    </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="88" text-anchor="start" x="120">value  </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="136" text-anchor="start" x="50">r_c1</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="168" text-anchor="start" x="60">val  13</text>
+</svg>
+</section><section id="section-2" class="slide level2" data-transition="fade" data-transition-speed="fast">
+<h1></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> test_mycell_short_lifetime() {
+    <span class="kw">let</span> cell = MyCell::new(&amp;X);
+    step1(&amp;cell);
+    <span class="kw">fn</span> step1&lt;<span class="ot">&#39;a</span>&gt;(r_c1: &amp;MyCell&lt;&amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>&gt;) { <span class="kw">let</span> val: <span class="dt">i32</span> = <span class="dv">13</span>; step2(&amp;val, r_c1); }
+    <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
+}</code></pre></div>
+<p>before <code>r_c2.set(r_val)</code>:</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="272" viewBox="0 0 470 272" baseProfile="full" version="1.1" width="470">
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 190,88 L 200,88L 210,88L 220,88Q 225,88 225,80L 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 40,136 L 30,136L 20,136L 15,136L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path stroke="green" fill="none" stroke-width="2" d="M 50,104 L 60,104L 90,104" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 15,136L 15,160L 15,192L 15,208L 15,224L 15,256Q 15,264 20,264Q 20,264 30,264L 40,264" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 160,168L 220,168Q 225,168 225,176L 225,192L 225,208L 225,224Q 225,232 220,232Q 220,232 210,232L 100,232" />
+  <path stroke="green" fill="none" stroke-width="2" d="M 50,200 L 60,200L 90,200" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="290">(static data area)</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="50">(Stack)          </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="290">X: 10</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="72" text-anchor="start" x="50">cell = MyCell    </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="88" text-anchor="start" x="120">value  </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="136" text-anchor="start" x="50">r_c1</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="168" text-anchor="start" x="60">val  13 </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="232" text-anchor="start" x="40">r_val </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="264" text-anchor="start" x="50">r_c2</text>
+</svg>
+</section><section id="section-3" class="slide level2" data-transition="fade" data-transition-speed="fast">
+<h1></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> test_mycell_short_lifetime() {
+    <span class="kw">let</span> cell = MyCell::new(&amp;X);
+    step1(&amp;cell);
+    <span class="kw">fn</span> step1&lt;<span class="ot">&#39;a</span>&gt;(r_c1: &amp;MyCell&lt;&amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>&gt;) { <span class="kw">let</span> val: <span class="dt">i32</span> = <span class="dv">13</span>; step2(&amp;val, r_c1); }
+    <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
+}</code></pre></div>
+<p>after <code>r_c2.set(r_val)</code>:</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="272" viewBox="0 0 470 272" baseProfile="full" version="1.1" width="470">
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 40,136 L 30,136L 20,136L 15,136L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 190,88 L 200,88L 220,88Q 225,88 225,96L 225,112L 225,128L 225,160L 225,168L 225,192L 225,208L 225,224Q 225,232 220,232Q 220,232 210,232L 100,232" />
+  <path stroke="green" fill="none" stroke-width="2" d="M 50,104 L 60,104L 90,104" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 15,136L 15,160L 15,176L 15,192L 15,256Q 15,264 20,264Q 20,264 30,264L 40,264" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 160,168L 200,168L 210,168L 220,168L 225,168" />
+  <path stroke="green" fill="none" stroke-width="2" d="M 50,200 L 60,200L 90,200" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="290">(static data area)</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="50">(Stack)                 X: 10</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="72" text-anchor="start" x="50">cell = MyCell</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="88" text-anchor="start" x="120">value  </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="136" text-anchor="start" x="50">r_c1             </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="168" text-anchor="start" x="60">val  13 </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="232" text-anchor="start" x="40">r_val </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="264" text-anchor="start" x="50">r_c2</text>
+</svg>
+</section><section id="section-4" class="slide level2" data-transition="fade" data-transition-speed="fast">
+<h1></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> test_mycell_short_lifetime() {
+    <span class="kw">let</span> cell = MyCell::new(&amp;X);
+    step1(&amp;cell);
+    <span class="kw">fn</span> step1&lt;<span class="ot">&#39;a</span>&gt;(r_c1: &amp;MyCell&lt;&amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>&gt;) { <span class="kw">let</span> val: <span class="dt">i32</span> = <span class="dv">13</span>; step2(&amp;val, r_c1); }
+    <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
+}</code></pre></div>
+<p>after <code>step2</code> returns:</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="176" viewBox="0 0 470 176" baseProfile="full" version="1.1" width="470">
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 40,136 L 30,136L 20,136Q 15,136 15,128L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 190,88 L 200,88L 220,88Q 225,88 225,96L 225,112L 225,128L 225,160Q 225,168 220,168Q 220,168 210,168L 150,168L 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3" />
+  <path stroke="green" fill="none" stroke-width="2" d="M 50,104 L 60,104L 90,104" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="290">(static data area)</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="50">(Stack)                 X: 10</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="72" text-anchor="start" x="50">cell = MyCell</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="88" text-anchor="start" x="120">value  </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="136" text-anchor="start" x="50">r_c1             </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="168" text-anchor="start" x="60">val  13 </text>
+</svg>
+</section><section id="section-5" class="slide level2" data-transition="fade-in" data-transition-speed="fast">
+<h1></h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> test_mycell_short_lifetime() {
+    <span class="kw">let</span> cell = MyCell::new(&amp;X);
+    step1(&amp;cell);
+    <span class="kw">fn</span> step1&lt;<span class="ot">&#39;a</span>&gt;(r_c1: &amp;MyCell&lt;&amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>&gt;) { <span class="kw">let</span> val: <span class="dt">i32</span> = <span class="dv">13</span>; step2(&amp;val, r_c1); }
+    <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
+}</code></pre></div>
+<p>after <code>step1</code> returns:</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="176" viewBox="0 0 470 176" baseProfile="full" version="1.1" width="470">
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 190,88 L 200,88L 220,88Q 225,88 225,96L 225,112L 225,128L 225,144L 225,160Q 225,168 220,168Q 220,168 210,168L 150,168L 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="290">(static data area)</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="50">(Stack)                 X: 10</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="72" text-anchor="start" x="50">cell = MyCell</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="88" text-anchor="start" x="120">value  </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="168" text-anchor="start" x="60">???     </text>
+</svg>
+<div class="fragment">
+<p>Either <code>MyCell</code> is broken, or the compiler is.</p>
+</div>
+</section><section id="is-cell-also-broken" class="slide level2 center">
+<h1>Is <code>Cell</code> also broken?</h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error stripes"><code class="sourceCode rust"><span class="kw">mod</span> test_stdcell_short_lifetime {
+    <span class="kw">use</span> std::cell::Cell;
+    <span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
+
+    <span class="at">#[</span>test<span class="at">]</span>
+    <span class="kw">fn</span> test_stdcell_short_lifetime() {
+        <span class="kw">let</span> cell = Cell::new(&amp;X);
+        step1(&amp;cell);
+    }
+    <span class="kw">fn</span> step1&lt;<span class="ot">&#39;a</span>&gt;(r_c1: &amp;Cell&lt;&amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>&gt;) { <span class="kw">let</span> val: <span class="dt">i32</span> = <span class="dv">13</span>; step2(&amp;val, r_c1); }
+    <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;Cell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
+}</code></pre></div>
+<div class="fragment">
+<p>Compiler output:</p>
+<pre><code>error: `val` does not live long enough
+step2(&amp;val, r_c1);
+       ^~~
+note: reference must be valid for the lifetime &#39;a as defined on the block at 775:39...
+fn step1&lt;&#39;a&gt;(r_c1: &amp;Cell&lt;&amp;&#39;a i32&gt;) {
+                                   ^
+note: ...but borrowed value is only valid for the block suffix following statement 0 at 776:26
+    let val: i32 = 13;
+                      ^</code></pre>
+</div>
+</section><section id="difference-between-mycell-and-cell" class="slide level2">
+<h1>Difference between <code>MyCell</code> and <code>Cell</code>?</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">struct</span> MyCell&lt;T&gt; {
+    value: T,
+}
+
+<span class="kw">pub</span> <span class="kw">struct</span> Cell&lt;T&gt; {
+    value: UnsafeCell&lt;T&gt;,
+}
+
+<span class="at">#[</span>lang <span class="at">=</span> <span class="st">&quot;unsafe_cell&quot;</span><span class="at">]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> UnsafeCell&lt;T: ?<span class="bu">Sized</span>&gt; {
+    value: T,
+}</code></pre></div>
+<div class="fragment">
+<p><code>MyCell</code> just holds a <code>T</code>, while <code>Cell</code> holds an <code>UnsafeCell&lt;T&gt;</code>, which is a &quot;language item&quot; known specially to the compiler.</p>
+</div>
+</section><section id="why-accept-mycell-and-reject-cell" class="slide level2 center">
+<h1>Why accept <code>MyCell</code> and reject <code>Cell</code>?</h1>
+<div class="fragment">
+<h3 id="subtyping-and-variance"><em>Subtyping</em> and <em>variance</em></h3>
+</div>
+</section></section>
+<section><section id="yes-rust-has-subtyping" class="titleslide slide level1 center"><h1>Yes, Rust has Subtyping</h1></section><section id="yes-rust-has-subtyping-1" class="slide level2">
+<h1>Yes, Rust has Subtyping</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="co">/// Picks either `x` or `y`, based on some internal choice.</span>
+<span class="kw">fn</span> pick&lt;<span class="ot">&#39;a</span>&gt;(x: &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>, y: &amp;<span class="ot">&#39;static</span> <span class="dt">i32</span>) -&gt; &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span> {
+    <span class="kw">if</span> *x &gt; <span class="dv">0</span> { x } <span class="kw">else</span> { y }
+}
+
+<span class="kw">static</span> GLOBAL: <span class="dt">i32</span> = <span class="dv">100</span>;
+
+<span class="at">#[</span>test<span class="at">]</span> <span class="kw">fn</span> pick_test() { <span class="kw">let</span> temp: <span class="dt">i32</span> = <span class="dv">200</span>; pick(&amp;temp, &amp;GLOBAL); }</code></pre></div>
+<svg xmlns="http://www.w3.org/2000/svg" height="192" viewBox="0 0 660 192" baseProfile="full" version="1.1" width="660">
+  <rect ry="8" height="96" rx="5" stroke="red" fill="none" y="56" stroke-width="2" width="70" x="65" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 15,0 L 15,16L 15,32L 15,48L 15,64L 15,80L 15,96L 15,112L 15,128L 15,144L 15,160L 15,176L 15,192" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 185,80 L 185,96L 185,112L 185,128" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="24" text-anchor="start" x="30">'static (`*y` guaranteed to live at least this long)</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="88" text-anchor="start" x="190">'a (`*x` guaranteed to live at least this long)</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="104" text-anchor="start" x="80">temp </text>
+</svg>
+<div class="fragment">
+<p>The value <code>y: &amp;'static i32</code> is able to be returned as a <code>&amp;'a i32</code>.</p>
+<p>This is sound because <code>'static</code> outlives <code>'a</code></p>
+<ul>
+<li>(syntax: <code>'static: 'a</code>, pronounced &quot;outlives&quot;)</li>
+</ul>
+</div>
+</section><section id="and-the-other-direction" class="slide level2">
+<h1>And the other direction?</h1>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> promote&lt;<span class="ot">&#39;a</span>&gt;(x: &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>) -&gt; &amp;<span class="ot">&#39;static</span> <span class="dt">i32</span> {
+    <span class="kw">return</span> x;
+}
+
+<span class="at">#[</span>test<span class="at">]</span> <span class="kw">fn</span> promote_test() { <span class="kw">let</span> temp: <span class="dt">i32</span> = <span class="dv">200</span>; promote(&amp;temp); }</code></pre></div>
+<svg xmlns="http://www.w3.org/2000/svg" height="192" viewBox="0 0 660 192" baseProfile="full" version="1.1" width="660">
+  <rect ry="8" height="96" rx="5" stroke="red" fill="none" y="56" stroke-width="2" width="70" x="65" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 15,0 L 15,16L 15,32L 15,48L 15,64L 15,80L 15,96L 15,112L 15,128L 15,144L 15,160L 15,176L 15,192" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 175,80 L 175,96L 175,112L 175,128" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="24" text-anchor="start" x="30">'static (`fn promote` promises a reference value for this long)</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="88" text-anchor="start" x="180">'a (`*x` only promises to live this long)</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="104" text-anchor="start" x="80">temp </text>
+</svg>
+<div class="fragment">
+<p>Not legal to return <code>&amp;'a i32</code> as a <code>&amp;'static i32</code> for arbitrary <code>'a</code>; otherwise, dangling pointers.</p>
+</div>
+</section><section id="references-revisited" class="slide level2">
+<h1>References revisited</h1>
+<p>Insight: For <em>any</em> type <code>T</code> and any lifetime <code>'a</code>, clearly <code>&amp;'static T</code> should be valid anywhere that <code>&amp;'a T</code> is.</p>
+<div class="fragment">
+<svg xmlns="http://www.w3.org/2000/svg" height="80" viewBox="0 0 230 80" baseProfile="full" version="1.1" width="230">
+  <path stroke="green" fill="none" stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="90">&amp;'static [i32]</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="72" text-anchor="start" x="20">fn expect(&amp;[i32])</text>
+</svg>
+</div>
+<div class="fragment">
+<p>Gentzen style</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 0 210 48" baseProfile="full" version="1.1" width="210">
+  <path stroke="green" fill="none" stroke-width="2" d="M 0,24 L 10,24L 210,24" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="10">'static outlives 'a</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="10">&amp;'static T &lt;: &amp;'a T</text>
+</svg>
+</div>
+</section><section id="a-more-general-rule" class="slide level2">
+<h1>A more general rule</h1>
+<p>For any type <code>T</code> and lifetimes <code>'a</code>, <code>'b</code>, if <code>'b</code> outlives <code>'a</code>, then <code>&amp;'b T</code> should be valid anywhere <code>&amp;'a T</code> is.</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 0 210 48" baseProfile="full" version="1.1" width="210">
+  <path stroke="green" fill="none" stroke-width="2" d="M 0,24 L 10,24L 210,24" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="40">'b outlives 'a</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="40">&amp;'b T &lt;: &amp;'a T</text>
+</svg>
+</section><section id="further-generalization" class="slide level2">
+<h1>Further generalization</h1>
+<p>Already established we should have <code>&amp;'static T &lt;: &amp;'a T</code>.</p>
+<div class="fragment">
+<p>What about <code>&amp;'a &amp;'static T</code> and <code>&amp;'a &amp;'a T</code>?</p>
+<p>Should <code>&amp;'a &amp;'static T &lt;: &amp;'a &amp;'a T</code> ...?</p>
+</div>
+<div class="fragment">
+<p>Intuition: All you can do with a <code>&amp;X</code> is <em>read</em> data from the <code>X</code> it holds.</p>
+<p>Analogous to a function <code>A -&gt; Y &lt;: A -&gt; X</code></p>
+</div>
+<div class="fragment">
+<svg xmlns="http://www.w3.org/2000/svg" height="64" viewBox="0 0 310 64" baseProfile="full" version="1.1" width="310">
+  <path stroke="green" fill="none" stroke-width="2" d="M 20,40 L 30,40L 310,40" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="60">'b outlives 'a</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="24" text-anchor="start" x="110">Y &lt;: X</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="56" text-anchor="start" x="70">&amp;'b Y &lt;: &amp;'a X</text>
+</svg>
+</div>
+<div class="fragment">
+<p><code>&amp;X</code> is <em>covariant</em> with respect to <code>X</code></p>
+</div>
+<div class="fragment">
+<p>But that's <code>&amp;X</code>; what about <code>&amp;mut X</code>?</p>
+</div>
+</section><section id="what-about-mut-references" class="slide level2">
+<h1>What about mut references</h1>
+<p>Should <code>&amp;'a mut &amp;'static T &lt;: &amp;'a mut &amp;'a T</code> ...?</p>
+<div class="fragment">
+<p>Allowing that exposes:</p>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">mod</span> promote_short_to_static {
+    <span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
+    <span class="kw">fn</span> test() {
+        <span class="kw">let</span> <span class="kw">mut</span> ptr: &amp;<span class="ot">&#39;static</span> <span class="dt">i32</span> = &amp;<span class="kw">mut</span> X;
+        step1(&amp;<span class="kw">mut</span> ptr);
+    }
+    <span class="kw">fn</span> step1&lt;<span class="ot">&#39;a</span>&gt;(r1: &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> &amp;<span class="ot">&#39;static</span> <span class="dt">i32</span>) { <span class="kw">let</span> val: <span class="dt">i32</span> = <span class="dv">13</span>; step2(r, &amp;val); }
+    <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>, T&gt;(r2: &amp;<span class="ot">&#39;b</span> <span class="kw">mut</span> &amp;<span class="ot">&#39;b</span> T, r_val: &amp;<span class="ot">&#39;b</span> T) { *r2 = r_val; }
+}</code></pre></div>
+</div>
+<div class="fragment">
+<svg xmlns="http://www.w3.org/2000/svg" height="272" viewBox="0 0 470 272" baseProfile="full" version="1.1" width="470">
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 100,72 L 110,72L 220,72Q 225,72 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 40,136 L 30,136L 20,136L 15,136L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path stroke="green" fill="none" stroke-width="2" d="M 50,104 L 60,104L 90,104" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 15,136L 15,160L 15,176L 15,192L 15,256Q 15,264 20,264Q 20,264 30,264L 40,264" />
+  <path stroke-dasharray="5,2" stroke="green" fill="none" stroke-width="2" d="M 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 160,168L 200,168L 210,168L 220,168Q 225,168 225,176L 225,192L 225,208L 225,224Q 225,232 220,232Q 220,232 210,232L 100,232" />
+  <path stroke="green" fill="none" stroke-width="2" d="M 50,200 L 60,200L 90,200" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="290">(static data area)</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="50">(Stack)          </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="290">X: 10</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="72" text-anchor="start" x="50">ptr  </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="136" text-anchor="start" x="50">r1</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="168" text-anchor="start" x="60">val  13 </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="232" text-anchor="start" x="40">r_val </text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="264" text-anchor="start" x="50">r2</text>
+</svg>
+</div>
+</section><section id="invariance" class="slide level2">
+<h1>Invariance!</h1>
+<p>Insight: for any type <code>X</code> and any lifetime <code>'a</code>, <code>&amp;'static mut X</code> is valid anywhere <code>&amp;'a mut X</code> is.</p>
+<p><em>But</em> we cannot generalize to <code>Y &lt;: X</code></p>
+<div class="fragment">
+<p>Intuition: Once you allow mutation through a reference, the type itself must remain fixed.</p>
+</div>
+</section><section id="other-languages" class="slide level2">
+<h1>Other languages</h1>
+<p>Java example: Does this compile? (FYI <code>Float &lt;: Number</code>)</p>
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="dt">static</span> <span class="dt">void</span> <span class="fu">modify_array</span>(Number[] numArray) { numArray[<span class="dv">0</span>] = <span class="kw">new</span> Float(<span class="fl">3.14</span>); }</code></pre></div>
+<div class="fragment">
+<p>Java array <code>T[]</code> is <em>covariant</em> with respect to <code>T</code>.</p>
+</div>
+<div class="fragment">
+<p>What happens here?</p>
+<!-- FIXME consider adding *caution* signal orange CSS here. -->
+<div class="sourceCode"><pre class="sourceCode java"><code class="sourceCode java"><span class="dt">static</span> <span class="dt">void</span> <span class="fu">mut_array</span>() {
+    Integer[] intArray = <span class="kw">new</span> Integer[<span class="dv">1</span>]; <span class="fu">modify_array</span>(intArray); }</code></pre></div>
+</div>
+<div class="fragment">
+<pre><code>Exception in thread &quot;main&quot; java.lang.ArrayStoreException: java.lang.Float
+    at Examples.modify_array(Examples.java:25)
+    at Examples.mut_array(Examples.java:21)
+    at Examples.main(Examples.java:9)</code></pre>
+</div>
+<div class="fragment">
+<p>(Old <del>wart</del> historical artifact; predates Java support for generics.)</p>
+</div>
+</section><section id="are-rust-function-types-variant" class="slide level2">
+<h1>Are Rust function types variant?</h1>
+<svg xmlns="http://www.w3.org/2000/svg" height="80" viewBox="0 0 630 80" baseProfile="full" version="1.1" width="630">
+  <path stroke="green" fill="none" stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <path stroke-dasharray="5,2" id="q" stroke="green" fill="none" stroke-width="2" d="M 375,16 L 375,32L 375,48L 375,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="100">&amp;'static i32              fn (&amp;usize) -> &amp;'static i32</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="40" text-anchor="start" x="390">?</text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="72" text-anchor="start" x="20">fn expect(&amp;i32)     fn expect_hof(fn (&amp;usize) -> &amp;i32)</text>
+</svg>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">mod</span> demo_variance_and_static_ref {
+    <span class="kw">fn</span> provide(m: &amp;<span class="ot">&#39;static</span> <span class="dt">i32</span>) { <span class="kw">let</span> val = <span class="dv">13</span>; expect(&amp;val, m); }
+    <span class="kw">fn</span> expect&lt;<span class="ot">&#39;a</span>&gt;(_: &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>, _r: &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>) { <span class="pp">unimplemented!</span>() }
+}
+
+<span class="kw">mod</span> demo_variance_and_static_ref_hof {
+    <span class="kw">fn</span> prov_hof(f: <span class="kw">fn</span>(&amp;<span class="dt">usize</span>) -&gt; &amp;<span class="ot">&#39;static</span> <span class="dt">i32</span>) { <span class="kw">let</span> val = <span class="dv">13</span>; exp_hof(&amp;val, f); }
+    <span class="kw">fn</span> exp_hof&lt;<span class="ot">&#39;a</span>&gt;(_: &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>, _f: <span class="kw">fn</span> (&amp;<span class="ot">&#39;a</span> <span class="dt">usize</span>) -&gt; &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>) { <span class="pp">unimplemented!</span>() }
+}</code></pre></div>
+</div>
+<div class="fragment">
+<p>Compiles!</p>
+</div>
+<div class="fragment">
+<p>Functions even contravariant with respect to their argument types</p>
+<p>(Rust does not have method overloading so no conflict there)</p>
+</div>
+</section></section>
+<section><section id="behind-the-curtain-variance" class="titleslide slide level1 center"><h1>Behind the curtain: variance</h1></section><section id="where-does-variance-come-from" class="slide level2">
+<h1>Where does variance come from?</h1>
+<p>Compiler deduces the variance of a type (with respect to its type parameters) based on the structure of that type.</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">struct</span> OuterInline&lt;T&gt; { one: T, inner: InnerInline&lt;T&gt; }
+<span class="kw">struct</span> InnerInline&lt;T&gt; { data: T }</code></pre></div>
+<p><code>InnerInline</code> and <code>OuterInline</code> both covariant with respect to <code>T</code></p>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">struct</span> OuterRef&lt;<span class="ot">&#39;a</span>, T: <span class="ot">&#39;a</span>&gt; { one: &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> T, inner: InnerRef&lt;<span class="ot">&#39;a</span>, T&gt; }
+<span class="kw">struct</span> InnerRef&lt;<span class="ot">&#39;a</span>, T: <span class="ot">&#39;a</span>&gt; { data: &amp;<span class="ot">&#39;a</span> T }</code></pre></div>
+<p><code>InnerRef</code> is covariant w.r.t. <code>T</code>, while <code>OuterRef</code> is <em>invariant</em> w.r.t. <code>T</code></p>
+</div>
+<div class="fragment">
+<p>If compiler sees a <code>PhantomData&lt;SomeType&gt;</code>, it traverses the structure of <code>SomeType</code> as if it were embedded directly.</p>
+</div>
+</section><section id="whats-up-with-cell-unsafecell" class="slide level2">
+<h1>What's up with <code>Cell</code>, <code>UnsafeCell</code></h1>
+<p><code>UnsafeCell&lt;T&gt;</code> is <em>invariant</em> with respect to <code>T</code>, (and that bubbles out to <code>Cell&lt;T&gt;</code>).</p>
+</section><section id="whats-up-with-mycell" class="slide level2">
+<h1>What's up with <code>MyCell</code></h1>
+<p>Structural definition of <code>MyCell</code> alone implies it is <em>covariant</em> w.r.t. <code>T</code></p>
+<p>This (broken) method violates rules associated with covariance:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">    <span class="kw">fn</span> set(&amp;<span class="kw">self</span>, value: T) {
+        <span class="kw">use</span> std::ptr;
+        <span class="kw">unsafe</span> {
+            ptr::write(&amp;<span class="kw">self</span>.value <span class="kw">as</span> *<span class="kw">const</span> _ <span class="kw">as</span> *<span class="kw">mut</span> _, value);
+        }
+    }</code></pre></div>
+<div class="fragment">
+<p>Must impose <em>invariance</em></p>
+</div>
+<div class="fragment">
+<p>Use <code>PhantomData&lt;fn (T) -&gt; T&gt;</code> in <code>MyCell&lt;T&gt;</code>: one way</p>
+<p>Use <code>UnsafeCell&lt;T&gt;</code> in <code>MyCell&lt;T&gt;</code>: better way</p>
+</div>
+</section></section>
+<section><section id="behind-the-curtain-duck-subtyping" class="titleslide slide level1 center"><h1>Behind the curtain: &quot;duck subtyping&quot;</h1></section><section id="examples-from-beginning" class="slide level2 center">
+<h1>Examples from beginning</h1>
+<p>The earlier examples are not kind of subtyping that references have.</p>
+<figure>
+<img src="rabbit_hat_wand.svg" />
+</figure>
+</section><section id="what-is-actually-happening" class="slide level2 center">
+<h1>What is actually happening?</h1>
+</section><section id="coercions-auto-borrowing-protocols" class="slide level2 center">
+<h1>Coercions, Auto-Borrowing, Protocols</h1>
+</section></section>
+<section><section id="coercions" class="titleslide slide level1 center"><h1>Coercions</h1></section><section id="receiver-coercion" class="slide level2">
+<h1>Receiver coercion</h1>
+<p>For receiver for a method (i.e. the <code>x</code> in <code>x.m(...)</code>):</p>
+<p>Compiler will automatically insert a borrow or dereferences to find a type that provides method <code>m</code>.</p>
+<p>See also <a href="http://stackoverflow.com/questions/28519997/what-are-rusts-exact-auto-dereferencing-rules/28552082#28552082">StackOverflow Q</a></p>
+<div class="fragment">
+<p>That, combined with dereference of a <code>Copy</code> type, explains</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">    <span class="kw">let</span> <span class="kw">mut</span> a = [<span class="ch">&#39;a&#39;</span>, <span class="ch">&#39;1&#39;</span>]; <span class="kw">let</span> b = &amp;[<span class="ch">&#39;b&#39;</span>, <span class="ch">&#39;4&#39;</span>]; <span class="kw">let</span> c = &amp;<span class="kw">mut</span> [<span class="ch">&#39;c&#39;</span>, <span class="ch">&#39;7&#39;</span>];
+    <span class="co">// [char; 2]            &amp;[char; 2]           &amp;mut [char; 2]</span>
+    a.by_val();             b.by_val();          c.by_val();
+    a.by_ref();             b.by_ref();          c.by_ref();
+    a.by_mut();             <span class="co">/*  ...  */</span>          c.by_mut();
+    <span class="pp">println!</span>(<span class="st">&quot;interesting: (a,b,c): {:?}&quot;</span>, (a,b,c));</code></pre></div>
+</div>
+<div class="fragment">
+<p>(Note: Parameters other than receiver do not get this special treatment)</p>
+<!-- FIXME TODO: WHY -->
+</div>
+</section><section id="deref-coercion" class="slide level2">
+<h1>Deref coercion</h1>
+<p>When you have a type <code>&amp;Y</code>, where <code>Y</code> can be dereferenced to yield <code>X</code>, then compiler will automatically coerce <code>&amp;Y</code> to <code>&amp;X</code> by inserting necessary derefers.</p>
+<p>See <a href="https://github.com/rust-lang/rfcs/blob/master/text/0241-deref-conversions.md">RFC 271: &quot;Deref Conversions&quot;</a></p>
+<div class="fragment">
+<p>That, combined with <code>impl</code> such that <code>Vec&lt;T&gt;: Deref&lt;Target=[T]&gt;</code>, explains</p>
+<svg xmlns="http://www.w3.org/2000/svg" height="64" viewBox="0 0 190 64" baseProfile="full" version="1.1" width="190">
+  <path stroke="green" fill="none" stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="80">&amp;Vec&lt;i32></text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="56" text-anchor="start" x="20">fn expect(&amp;[i32])</text>
+</svg>
+<!-- Out of time
+
+## Auto Borrowing and Reborrowing
+
+(imm and mut)
+
+
+```art
+         &mut [i32]
+            |
+            v
+  fn expect(&[i32])
+```
+
+-->
+</div>
+</section><section id="protocols" class="slide level2">
+<h1>Protocols</h1>
+<p>How did we get <code>EndToEndErr</code> from the results of <code>phase_1</code>/<code>phase_2</code>?</p>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> phase_1(x: Ast) -&gt; <span class="dt">Result</span>&lt;Mir, PhaseOneErr&gt; { <span class="co">/* ... */</span> }
+<span class="kw">fn</span> phase_2(y: Mir) -&gt; <span class="dt">Result</span>&lt;Out, PhaseTwoErr&gt; { <span class="co">/* ... */</span> }
+
+<span class="kw">fn</span> composed(a: Ast) -&gt; <span class="dt">Result</span>&lt;Out, EndToEndErr&gt; {
+    <span class="kw">let</span> mir = <span class="pp">try!</span>(phase_1(a));
+    <span class="kw">let</span> out = <span class="pp">try!</span>(phase_2(mir));
+    <span class="kw">return</span> <span class="cn">Ok</span>(out);
+}</code></pre></div>
+</div>
+<div class="fragment">
+<p>Are <code>PhaseOneErr</code> and <code>PhaseTwoErr</code> subtypes of <code>EndToEndErr</code>?</p>
+</div>
+<div class="fragment">
+<p>Answer: Magic is hidden behind the <code>try!</code> (and some trait impls)</p>
+</div>
+</section><section class="slide level2">
+
+<p>Answer: Magic is hidden behind the <code>try!</code> (and some trait impls)</p>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">    <span class="kw">let</span> mir = <span class="pp">try!</span>(phase_1(a));</code></pre></div>
+<p>expands to:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">    <span class="kw">let</span> mir =
+        <span class="kw">match</span> phase_1(a) {
+            ::std::result::<span class="dt">Result</span>::<span class="cn">Ok</span>(val) =&gt; val,
+            ::std::result::<span class="dt">Result</span>::<span class="cn">Err</span>(err) =&gt; {
+                <span class="kw">return</span> ::std::result::<span class="dt">Result</span>::<span class="cn">Err</span>(::std::convert::From::from(err))
+            }
+        };</code></pre></div>
+</div>
+<div class="fragment">
+<p>(New <code>?</code> form today is same as <code>try!</code>; easier to show <code>try!</code> expansion)</p>
+</div>
+<div class="fragment">
+<p>inserts conversion via <code>std::convert::From</code> transforming specific error to whatever error is expected in context of expression</p>
+</div>
+</section><section class="slide level2">
+
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">            ::std::result::<span class="dt">Result</span>::<span class="cn">Err</span>(err) =&gt; {
+                <span class="kw">return</span> ::std::result::<span class="dt">Result</span>::<span class="cn">Err</span>(::std::convert::From::from(err))
+            }</code></pre></div>
+<p>inserts conversion via <code>std::convert::From</code> transforming specific error to whatever error is expected in context of expression</p>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">enum</span> EndToEndErr {
+    P1(PhaseOneErr),
+    P2(PhaseTwoErr),
+}
+
+<span class="kw">impl</span> From&lt;PhaseOneErr&gt; <span class="kw">for</span> EndToEndErr {
+    <span class="kw">fn</span> from(phase_1_err: PhaseOneErr) -&gt; EndToEndErr {
+        EndToEndErr::P1(phase_1_err)
+    }
+}
+
+<span class="kw">impl</span> From&lt;PhaseTwoErr&gt; <span class="kw">for</span> EndToEndErr {
+    <span class="kw">fn</span> from(phase_2_err: PhaseTwoErr) -&gt; EndToEndErr {
+        EndToEndErr::P2(phase_2_err)
+    }
+}</code></pre></div>
+</div>
+<div class="fragment">
+<p>(So, all the magic here is in macros and trait system.)</p>
+</div>
+</section><section id="gotchas-re-coercions" class="slide level2">
+<h1>Gotchas re: coercions</h1>
+<p>Compiler needs the expected type.</p>
+<p>E.g. this compiles and runs:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> process1(input: &amp;[<span class="dt">i32</span>]) { }
+<span class="kw">fn</span> foo() { process1(&amp;<span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]); }</code></pre></div>
+<p>but this fails at compile time:</p>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">trait</span> Input { }
+<span class="kw">impl</span> Input <span class="kw">for</span> [<span class="dt">i32</span>] { }
+<span class="kw">fn</span> process2&lt;I&gt;(input: &amp;I) <span class="kw">where</span> I: Input { }
+<span class="kw">fn</span> bar() { process2(&amp;<span class="pp">vec!</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]); }</code></pre></div>
+</section><section id="why" class="slide level2">
+<h1>Why?</h1>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> process1(input: &amp;[<span class="dt">i32</span>]) { }</code></pre></div>
+<svg xmlns="http://www.w3.org/2000/svg" height="64" viewBox="0 0 170 64" baseProfile="full" version="1.1" width="170">
+  <path stroke="green" fill="none" stroke-width="2" d="M 105,16 L 105,32L 105,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="70">&amp;Vec&lt;i32></text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="56" text-anchor="start" x="10">process1(&amp;[i32])</text>
+</svg>
+<p>Compiler sees input + expected types</p>
+<ul>
+<li>adds <code>&amp;Vec -&gt; &amp;[i32]</code> coercion</li>
+</ul>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> process2&lt;I&gt;(input: &amp;I) <span class="kw">where</span> I: Input { }</code></pre></div>
+<svg xmlns="http://www.w3.org/2000/svg" height="64" viewBox="0 0 180 64" baseProfile="full" version="1.1" width="180">
+  <path stroke="green" fill="none" stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="8" text-anchor="start" x="90">&amp;Vec&lt;i32></text>
+  <text dominant-baseline="middle" font-family="Menlo" font-size="16" fill="black" xml:space="preserve" y="56" text-anchor="start" x="30">process2(&amp;I)</text>
+</svg>
+<p>Compiler decides <code>I</code> is <code>Vec&lt;i32&gt;</code></p>
+<ul>
+<li>tries to find <code>impl Input for Vec&lt;i32&gt;</code></li>
+</ul>
+</div>
+</section></section>
+<section><section id="conclusion" class="titleslide slide level1 center"><h1>Conclusion</h1></section><section id="pop-quiz" class="slide level2 separated">
+<h1>Pop Quiz</h1>
+<table style="width:74%;">
+<colgroup>
+<col style="width: 36%" />
+<col style="width: 12%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>&amp;'static mut T</code></td>
+<td style="text-align: center;"><code>&lt;:</code> ?</td>
+<td style="text-align: right;"><code>&amp;'a mut T</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>&amp;'a &amp;'static mut T</code></td>
+<td style="text-align: center;"><code>&lt;:</code> ?</td>
+<td style="text-align: right;"><code>&amp;'a &amp;'a mut T</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>&amp;'a mut &amp;'static T</code></td>
+<td style="text-align: center;"><code>&lt;:</code> ?</td>
+<td style="text-align: right;"><code>&amp;'a mut &amp;'a T</code></td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<p>One answer: How often do you <em>actually</em> answer such questions?</p>
+<p>(be aware of subtyping, but need not be foremost in your mind)</p>
+</div>
+<div class="fragment">
+<p>In case you care: Yes, Yes, No</p>
+</div>
+</section><section id="why-does-variance-matter" class="slide level2">
+<h1>Why does variance matter?</h1>
+<p>Getting covariance vs invariance right matters for soundness</p>
+<div class="fragment">
+<p>But you should not need to think about it at all if you are not writing <code>unsafe { ... }</code></p>
+<p>(it is solely compiler's job until <code>unsafe</code> gets involved)</p>
+</div>
+</section><section id="more-info" class="slide level2">
+<h1>More Info</h1>
+<p>See RFCs</p>
+<p>The Book</p>
+<p>and the Rustonomicon</p>
+<p>And contribute back to them!</p>
+</section><section id="end-thoughts" class="slide level2 center">
+<h1>End Thoughts</h1>
+<ul>
+<li><p>Keep asking questions</p></li>
+<li><p>&quot;Show me the code!&quot;</p></li>
+<li><p>Do the experiments</p></li>
+<li><p>Magic: As real as you want it to be</p></li>
+</ul>
+</section><section id="thanks" class="slide level2 center">
+<h1>Thanks!</h1>
+</section></section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display the page number of the current slide
+        slideNumber: 'c / t',
+        // Vertical centering of slides
+        center: false,
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
