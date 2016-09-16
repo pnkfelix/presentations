@@ -3,9 +3,38 @@
 ### Felix Klock (`@pnkfelix`), Mozilla Research
 ### Rust Fest, Berlin; 17 Sept 2016
 
-Slides: [http://TODO](TODO)
+Slides: [`http://bit.ly/2cMFbYB`](http://bit.ly/2cMFbYB)
 
-(<kbd>space</kbd>: next slide; <kbd>shift</kbd><kbd>space</kbd>: previous slide; <kbd>esc</kbd>: overview; arrows navigate)
+<table>
+<tr>
+<td><kbd class="key">space</kbd>                              </td>
+<td>next slide</td>
+</tr>
+<tr>
+<td>
+<kbd class="key">shift</kbd><kbd class="key">space</kbd>
+</td>
+<td>
+previous slide
+</td>
+</tr>
+<tr>
+<td>
+<kbd class="key">esc</kbd>
+</td>
+<td>
+overview
+</td>
+</tr>
+<tr>
+<td>
+arrows
+</td>
+<td>
+navigate
+</td>
+</tr>
+</table>
 
 # Advanced Tech and Magic
 
@@ -410,7 +439,7 @@ Vec<T> repr: |  cap: usize             |
 
 . . .
 
-How could `Vec<T>` possible be a subtype of `&[T]`?
+How could `Vec<T>` possibly be a subtype of `&[T]`?
 They have incompatible representations.
 
 . . .
