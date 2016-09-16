@@ -72,9 +72,58 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h3 id="felix-klock-pnkfelix-mozilla-research">Felix Klock (<code>@pnkfelix</code>), Mozilla Research</h3>
 <h3 id="rust-fest-berlin-17-sept-2016">Rust Fest, Berlin; 17 Sept 2016</h3>
 <p>Slides: <a href="http://bit.ly/2cMFbYB"><code>http://bit.ly/2cMFbYB</code></a></p>
-<p>(<kbd>space</kbd>: next slide; <kbd>shift</kbd><kbd>space</kbd>: previous slide; <kbd>esc</kbd>: overview; arrows navigate)</p>
+<table>
+<tr>
+<td>
+<kbd class="key">space</kbd>
+</td>
+<td>
+next slide
+</td>
+</tr>
+<tr>
+<td>
+<kbd class="key">shift</kbd><kbd class="key">space</kbd>
+</td>
+<td>
+previous slide
+</td>
+</tr>
+<tr>
+<td>
+<kbd class="key">esc</kbd>
+</td>
+<td>
+overview
+</td>
+</tr>
+<tr>
+<td>
+arrows
+</td>
+<td>
+navigate
+</td>
+</tr>
+</table>
 </section>
-<section><section id="advanced-tech-and-magic" class="titleslide slide level1"><h1>Advanced Tech and Magic</h1></section><section id="language-technology" class="slide level2">
+<section id="advanced-tech-and-magic" class="slide level2">
+<h1>Advanced Tech and Magic</h1>
+<blockquote>
+<p>Any sufficiently advanced technology is indistinguishable from magic.</p>
+<p>Third Law, Arthur C. Clarke</p>
+</blockquote>
+<div class="fragment">
+<blockquote>
+<p>The only way of discovering the limits of the possible is to venture a little way past them into the impossible.</p>
+<p>Second Law, Arthur C. Clarke</p>
+</blockquote>
+</div>
+<div class="fragment">
+<p>(Clarke's <a href="https://en.wikipedia.org/wiki/Clarke%27s_three_laws">first law</a> is an impossible statement about elderly scientists.)</p>
+</div>
+</section>
+<section id="language-technology" class="slide level2">
 <h1>Language Technology</h1>
 <p>Lots of interesting tech in Rust</p>
 <ul>
@@ -90,7 +139,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>But, <em>subtyping</em> has characteristics of a magic show</p>
 <p>&quot;We all already know what subtyping is...&quot;</p>
 </div>
-</section><section id="aside-on-magicians-and-lying" class="slide level2">
+</section>
+<section id="aside-on-magicians-and-lying" class="slide level2">
 <h1>Aside: On Magicians and Lying</h1>
 <blockquote>
 <p>&quot;You can lie as entertainment, but still be honest and moral&quot;</p>
@@ -100,7 +150,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>I'm probably going to lie to you several times during this presentation.</p>
 <p>(Sometimes exploratory science, sometimes magic show.)</p>
 </div>
-</section></section>
+</section>
 <section><section id="what-is-subtyping" class="titleslide slide level1 center"><h1>What is subtyping?</h1></section><section id="why-do-we-care-about-subtyping" class="slide level2">
 <h1>Why do we care about subtyping?</h1>
 <p>Insisting types of inputs exactly match expected types leads compiler to reject programs that seem obviously well-behaved.</p>
@@ -117,7 +167,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </section><section id="results-and-errs" class="slide level2">
 <h1>Results and Errs</h1>
 <p>&quot;Have a specific error, but result's error is more general. What now?&quot;</p>
-<h3 id="try-it-and-see">Try it and see</h3>
+<h3 id="try-itresult_err_gist-and-see"><a href="https://play.rust-lang.org/?gist=744b51178a92f8c15cf1dca226e08680">Try it</a> and see</h3>
 <div class="fragment">
 <!--
 ```rust
@@ -147,7 +197,7 @@ fn phase_2(y: Mir) -> Result<Out, PhaseTwoErr> { unimplemented!() }
 <h1>Exploring Vectors and Slices</h1>
 <p><code>Vec&lt;T&gt;</code> and <code>[T]</code> <em>look</em> like subtyping</p>
 <p>&quot;Have a <code>Vec&lt;i32&gt;</code>, but code expects a <code>[i32]</code> slice. What now?&quot;</p>
-<h3 id="try-it-and-see-1">Try it and see</h3>
+<h3 id="try-itvec_slice_gist-and-see"><a href="https://play.rust-lang.org/?gist=9bfb91fd850713445f42c8ef607c9c10">Try it</a> and see</h3>
 <div class="fragment">
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> rotate(nums: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) {
     <span class="kw">let</span> len = nums.len();
@@ -168,7 +218,7 @@ fn phase_2(y: Mir) -> Result<Out, PhaseTwoErr> { unimplemented!() }
 <h1>Exploring Vectors and Slices</h1>
 <p><code>Vec&lt;T&gt;</code> and <code>[T]</code> <em>look</em> like subtyping</p>
 <p>&quot;Have a <code>Vec&lt;i32&gt;</code>, but code expects a <code>[i32]</code> slice. What now?&quot;</p>
-<h3 id="try-it-and-see-2">Try it and see</h3>
+<h3 id="try-itvec_slice_gist-and-see-1"><a href="https://play.rust-lang.org/?gist=9bfb91fd850713445f42c8ef607c9c10">Try it</a> and see</h3>
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> rotate(nums: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) {
     <span class="kw">let</span> len = nums.len();
     <span class="kw">let</span> first = nums[<span class="dv">0</span>];
@@ -187,31 +237,31 @@ fn phase_2(y: Mir) -> Result<Out, PhaseTwoErr> { unimplemented!() }
     <span class="pp">assert_eq!</span>(v, &amp;[<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>]);
 }</code></pre></div>
 </div>
-</section><section id="stripped-to-skeletal-form" class="slide level2">
-<h1>Stripped to skeletal form</h1>
+</section><section id="strippedvec_slice_stripped-to-skeletal-form" class="slide level2">
+<h1><a href="https://play.rust-lang.org/?gist=eec18313e9e454a60b6859954b75f414">Stripped</a> to skeletal form</h1>
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">mod</span> demo_vec_slice {
     <span class="kw">fn</span> provide(m: &amp;<span class="kw">mut</span> <span class="dt">Vec</span>&lt;<span class="dt">i32</span>&gt;) { expect(m); }
     <span class="kw">fn</span> expect(_nums: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) { <span class="pp">unimplemented!</span>() }
 }</code></pre></div>
-<svg baseProfile="full" height="64" version="1.1" viewBox="0 0 210 64" xmlns="http://www.w3.org/2000/svg" width="210">
-  <path stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="80" xml:space="preserve" text-anchor="start">&amp;mut Vec&lt;i32></text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="56" font-size="16" x="20" xml:space="preserve" text-anchor="start">fn expect(&amp;[i32])</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 210 64" height="64" version="1.1" width="210">
+  <path fill="none" stroke="green" stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="80" font-family="Menlo">&amp;mut Vec&lt;i32></text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="56" font-size="16" x="20" font-family="Menlo">fn expect(&amp;[i32])</text>
 </svg>
 </section><section id="exploring-references" class="slide level2">
 <h1>Exploring References</h1>
 <p>The reference types <code>&amp;mut T</code> and <code>&amp;T</code> look like candidates for having some sort of compatibility relationship.</p>
 <p>&quot;Have a <code>&amp;mut [i32]</code>, but code expects a <code>&amp;[i32]</code> slice. What now?&quot;</p>
-<h3 id="try-it-and-see-3">Try it and see</h3>
+<h3 id="try-itmut_imm_slice-and-see"><a href="https://play.rust-lang.org/?gist=536ad61bf7f63ffd654a47db80ecbd02">Try it</a> and see</h3>
 <div class="fragment">
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">mod</span> demo_mut_slice_imm_slice {
     <span class="kw">fn</span> provide(m: &amp;<span class="kw">mut</span> [<span class="dt">i32</span>]) { expect(m); }
     <span class="kw">fn</span> expect(_nums: &amp;[<span class="dt">i32</span>]) { <span class="pp">unimplemented!</span>() }
 }</code></pre></div>
-<svg baseProfile="full" height="64" version="1.1" viewBox="0 0 190 64" xmlns="http://www.w3.org/2000/svg" width="190">
-  <path stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="90" xml:space="preserve" text-anchor="start">&amp;mut [i32]</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="56" font-size="16" x="20" xml:space="preserve" text-anchor="start">fn expect(&amp;[i32])</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 190 64" height="64" version="1.1" width="190">
+  <path fill="none" stroke="green" stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="90" font-family="Menlo">&amp;mut [i32]</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="56" font-size="16" x="20" font-family="Menlo">fn expect(&amp;[i32])</text>
 </svg>
 <!--
 ## Textbook subtyping { data-transition="fade-out" }
@@ -245,7 +295,7 @@ does it compile?
 </div>
 </section><section id="magical-receivers" class="slide level2">
 <h1>Magical receivers</h1>
-<p>Review: Extending types with new methods</p>
+<p><a href="https://play.rust-lang.org/?gist=555b603e6931ba51e68a79b307a0517b">Review</a>: Extending types with new methods</p>
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">trait</span> AsciiIncr {
     <span class="co">/// Increments `self` by one unit. (Only works for 7-bit ASCII characters though.)</span>
     <span class="kw">fn</span> incr(&amp;<span class="kw">mut</span> <span class="kw">self</span>);
@@ -284,8 +334,8 @@ fn ascii_incr(c: &mut char) { *c = (*c as u8 + 1) as char }
     <span class="kw">fn</span> by_val(<span class="kw">mut</span> <span class="kw">self</span>)  { <span class="pp">println!</span>(<span class="st">&quot;val: {:?}&quot;</span>, <span class="kw">self</span>[<span class="dv">0</span>]); <span class="kw">self</span>[<span class="dv">1</span>].incr(); }
 }</code></pre></div>
 </div>
-</section><section id="sanity-check" class="slide level2 tight" data-transition="fade">
-<h1>Sanity check</h1>
+</section><section id="sanity-checksanity_check" class="slide level2 tight" data-transition="fade">
+<h1><a href="https://play.rust-lang.org/?gist=ea5cc1973f3d867b1837fdd4b7d95e71">Sanity check</a></h1>
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">trait</span> Receiver {
     <span class="kw">fn</span> by_ref(&amp;<span class="kw">self</span>); <span class="kw">fn</span> by_mut(&amp;<span class="kw">mut</span> <span class="kw">self</span>); <span class="kw">fn</span> by_val(<span class="kw">self</span>) <span class="kw">where</span> <span class="kw">Self</span>: <span class="bu">Sized</span>;
 }
@@ -317,8 +367,8 @@ ref: &#39;b&#39;
 mut: &#39;c&#39;
 obvious: (a,b,c): ([&#39;a&#39;, &#39;1&#39;], [&#39;b&#39;, &#39;4&#39;], [&#39;c&#39;, &#39;8&#39;])</code></pre>
 </div>
-</section><section id="exploration" class="slide level2" data-transition="fade">
-<h1>Exploration</h1>
+</section><section id="explorationexplore_recv" class="slide level2" data-transition="fade">
+<h1><a href="https://play.rust-lang.org/?gist=db981260d7e9d9d2cc5c9454573b10e7">Exploration</a></h1>
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">trait</span> Receiver {
     <span class="kw">fn</span> by_ref(&amp;<span class="kw">self</span>); <span class="kw">fn</span> by_mut(&amp;<span class="kw">mut</span> <span class="kw">self</span>); <span class="kw">fn</span> by_val(<span class="kw">self</span>) <span class="kw">where</span> <span class="kw">Self</span>: <span class="bu">Sized</span>;
 }
@@ -358,19 +408,19 @@ obvious: (a,b,c): ([&#39;a&#39;, &#39;1&#39;], [&#39;b&#39;, &#39;4&#39;], [&#39
 </section></section>
 <section><section id="is-this-subtyping" class="titleslide slide level1 center"><h1>Is this subtyping?</h1></section><section id="view-from-oop-vm-runtime-hacker" class="slide level2">
 <h1>View from OOP VM runtime hacker</h1>
-<svg baseProfile="full" height="208" version="1.1" viewBox="0 0 400 208" xmlns="http://www.w3.org/2000/svg" width="400">
-  <rect stroke-width="2" ry="8" rx="5" height="96" fill="none" y="8" x="135" width="260" stroke="red" />
-  <rect stroke-width="2" ry="8" rx="5" height="64" fill="none" y="136" x="135" width="260" stroke="red" />
-  <path stroke-width="2" d="M 150,40 L 160,40L 380,40" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 150,72 L 160,72L 380,72" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 150,168 L 160,168L 380,168" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="24" font-size="16" x="160" xml:space="preserve" text-anchor="start">ptr: NonZero&lt;*const T> </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="56" font-size="16" x="0" xml:space="preserve" text-anchor="start">Vec&lt;T> repr: </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="56" font-size="16" x="160" xml:space="preserve" text-anchor="start">cap: usize             </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="88" font-size="16" x="160" xml:space="preserve" text-anchor="start">len: usize             </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="152" font-size="16" x="150" xml:space="preserve" text-anchor="start">data: *const T          </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="168" font-size="16" x="20" xml:space="preserve" text-anchor="start">&amp;[T] repr: </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="184" font-size="16" x="160" xml:space="preserve" text-anchor="start">len: usize             </text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 400 208" height="208" version="1.1" width="400">
+  <rect rx="5" fill="none" stroke="red" y="8" ry="8" stroke-width="2" x="135" height="96" width="260" />
+  <rect rx="5" fill="none" stroke="red" y="136" ry="8" stroke-width="2" x="135" height="64" width="260" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 150,40 L 160,40L 380,40" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 150,72 L 160,72L 380,72" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 150,168 L 160,168L 380,168" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="24" font-size="16" x="160" font-family="Menlo">ptr: NonZero&lt;*const T> </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="56" font-size="16" x="0" font-family="Menlo">Vec&lt;T> repr: </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="56" font-size="16" x="160" font-family="Menlo">cap: usize             </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="88" font-size="16" x="160" font-family="Menlo">len: usize             </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="152" font-size="16" x="150" font-family="Menlo">data: *const T          </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="168" font-size="16" x="20" font-family="Menlo">&amp;[T] repr: </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="184" font-size="16" x="160" font-family="Menlo">len: usize             </text>
 </svg>
 <div class="fragment">
 <p>How could <code>Vec&lt;T&gt;</code> possibly be a subtype of <code>&amp;[T]</code>? They have incompatible representations.</p>
@@ -388,7 +438,7 @@ obvious: (a,b,c): ([&#39;a&#39;, &#39;1&#39;], [&#39;b&#39;, &#39;4&#39;], [&#39
 <li><p>&quot;Have a record with these fields, want one with a subset of the fields&quot;</p></li>
 <li><p>A Rust analogue: &quot;Have <code>(A, B, C)</code>, this function wants <code>(A, B)</code>&quot;</p></li>
 </ul>
-<h3 id="try-it-and-see-4">Try it and see</h3>
+<h3 id="try-itdemo_subtuple_err-and-see"><a href="https://play.rust-lang.org/?gist=c0aaaee54247f2fd24aef5e1e48d2261">Try it</a> and see</h3>
 <div class="sourceCode"><pre class="sourceCode rust compile_error stripes"><code class="sourceCode rust"><span class="kw">mod</span> demo_subtuple {
     <span class="kw">fn</span> provide&lt;A, B, C&gt;(tup: (A, B, C)) { expect(tup); }
     <span class="kw">fn</span> expect&lt;A, B&gt;(_tup: (A, B)) { <span class="pp">unimplemented!</span>(); }
@@ -402,31 +452,76 @@ obvious: (a,b,c): ([&#39;a&#39;, &#39;1&#39;], [&#39;b&#39;, &#39;4&#39;], [&#39
 <ul>
 <li>Assume types <code>Int</code>, <code>Real</code> where <code>Int &lt;: Real</code></li>
 </ul>
-<svg baseProfile="full" height="160" version="1.1" viewBox="0 0 540 160" xmlns="http://www.w3.org/2000/svg" width="540">
-  <rect stroke-width="2" ry="8" rx="5" height="144" fill="none" y="8" x="165" width="370" stroke="red" />
-  <rect stroke-width="2" ry="8" rx="5" height="64" fill="none" y="72" x="195" width="280" stroke="red" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="180" xml:space="preserve" text-anchor="start">Real …, -7.2, ⅓, ½, 3.14, π, …     </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="104" font-size="16" x="210" xml:space="preserve" text-anchor="start">Int …, -1, 0, 1, 2, 3, …  </text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 540 160" height="160" version="1.1" width="540">
+  <rect rx="5" fill="none" stroke="red" y="8" ry="8" stroke-width="2" x="165" height="144" width="370" />
+  <rect rx="5" fill="none" stroke="red" y="72" ry="8" stroke-width="2" x="195" height="64" width="280" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="180" font-family="Menlo">Real …, -7.2, ⅓, ½, 3.14, π, …     </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="104" font-size="16" x="210" font-family="Menlo">Int …, -1, 0, 1, 2, 3, …  </text>
 </svg>
 <ul>
+<li><p>&quot;Have a function <code>f</code> of type <code>Real -&gt; Int</code>, want one like <code>Real -&gt; Real</code>&quot;</p></li>
+<li><p>i.e., is it legal to pass <code>f</code> as if it is a <code>Real -&gt; Real</code>?</p></li>
+<li><p>What about a function <code>g</code> of type <code>Int -&gt; Int</code>? Can that be passed as <code>Real -&gt; Real</code>?</p></li>
+</ul>
+</section><section id="textbook-subtyping-2" class="slide level2 left_align">
+<h1>Textbook subtyping</h1>
+<ul>
+<li>&quot;Have a function of type <code>Int -&gt; Int</code>, want one like <code>Real -&gt; Real</code>&quot;</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Won't work: <code>g: Int -&gt; Int</code> <em>assumes</em> input is always an <code>Int</code>, yet client taking <code>Real -&gt; Real</code> is free to apply it to -7.2 or ⅓ or π.</li>
+</ul>
+<pre><code>twice: (Real -&gt; Real) Real -&gt; Real
+twice(f, r) = f(f(r))
+
+num_divisors: Int -&gt; Int
+num_divisors(4)  = |{1, 2, 4}| = 3
+num_divisors(12) = |{1, 2, 3, 4, 6, 12}| = 6
+
+twice(num_divisors, 2.3) = num_divisors(num_divisors(2.3))
+                         = num_divisors(???)
+                         = ill-defined!</code></pre>
+<ul>
+<li><del><code>Int -&gt; Int</code> &lt;: <code>Real -&gt; Real</code></del></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
 <li>&quot;Have a function of type <code>Real -&gt; Int</code>, want one like <code>Real -&gt; Real</code>&quot;</li>
+</ul>
+</div>
+</section><section id="textbook-subtyping-3" class="slide level2 left_align">
+<h1>Textbook subtyping</h1>
+<ul>
+<li><p><del><code>Int -&gt; Int</code> &lt;: <code>Real -&gt; Real</code></del></p></li>
+<li><p>&quot;Have a function of type <code>Real -&gt; Int</code>, want one like <code>Real -&gt; Real</code>&quot;</p></li>
 </ul>
 <div class="fragment">
 <pre><code>twice: (Real -&gt; Real) Real -&gt; Real
 twice(f, r) = f(f(r))
 
-ceiling: Real -&gt; Int
-
-twice(ceiling, 2.3) = ceiling(ceiling(2.3)) = 3.</code></pre>
+ceil_plus: Real -&gt; Int
+ceil_plus(x) = ⌈x⌉ + 1</code></pre>
+</div>
+<div class="fragment">
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 880 64" height="64" version="1.1" width="880">
+  <path fill="none" stroke="green" stroke-width="2" d="M 75,16 L 75,32L 75,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 195,16 L 195,32L 195,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="60" font-family="Menlo">ceil_plus   2.3: Real</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="56" font-size="16" x="0" font-family="Menlo">twice( f,           r)  = ceil_plus(ceil_plus(2.3)) = ceil_plus(⌈2.3⌉ + 1) = ⌈4⌉ + 1 = 5</text>
+</svg>
 <ul>
 <li>This makes sense, right? (Assume compatible runtime representation.)</li>
 </ul>
 </div>
-</section><section id="textbook-subtyping-2" class="slide level2 left_align" data-transition="fade">
+<div class="fragment">
+<p>&quot;Client says they can handle a production of any real number, so it is safe to provide something that will only produce integer values.&quot;</p>
+</div>
+</section><section id="textbook-subtyping-4" class="slide level2 left_align" data-transition="fade">
 <h1>Textbook subtyping</h1>
 <ul>
-<li><p>&quot;Have a function of type <code>Real -&gt; Int</code>, want one like <code>Real -&gt; Real</code>&quot;</p></li>
-<li><p>This makes sense, right?</p></li>
+<li>&quot;Have a function of type <code>Real -&gt; Int</code>, want one like <code>Real -&gt; Real</code>&quot;</li>
 </ul>
 <p>&quot;Client says they can handle a production of any real number, so it is safe to provide something that will only produce integer values.&quot;</p>
 <div class="fragment">
@@ -443,33 +538,33 @@ twice(ceiling, 2.3) = ceiling(ceiling(2.3)) = 3.</code></pre>
 </div>
 </section><section id="gentzen-style-subtyping-deduction-rules" class="slide level2">
 <h1>Gentzen-style subtyping deduction rules</h1>
-<svg baseProfile="full" height="48" version="1.1" viewBox="0 0 170 48" xmlns="http://www.w3.org/2000/svg" width="170">
-  <path stroke-width="2" d="M 0,24 L 10,24L 170,24" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="20" xml:space="preserve" text-anchor="start">precondition</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="10" xml:space="preserve" text-anchor="start">postcondition</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 170 48" height="48" version="1.1" width="170">
+  <path fill="none" stroke="green" stroke-width="2" d="M 0,24 L 10,24L 170,24" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="20" font-family="Menlo">precondition</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="10" font-family="Menlo">postcondition</text>
 </svg>
 <div class="fragment">
 <p>Example:</p>
-<svg baseProfile="full" height="48" version="1.1" viewBox="0 0 200 48" xmlns="http://www.w3.org/2000/svg" width="200">
-  <path stroke-width="2" d="M 0,24 L 10,24L 200,24" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="20" xml:space="preserve" text-anchor="start">A true    B true</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="30" xml:space="preserve" text-anchor="start">(A and B) true</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 200 48" height="48" version="1.1" width="200">
+  <path fill="none" stroke="green" stroke-width="2" d="M 0,24 L 10,24L 200,24" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="20" font-family="Menlo">A true    B true</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="30" font-family="Menlo">(A and B) true</text>
 </svg>
 </div>
 </section><section id="a-rule-for-function-values" class="slide level2">
 <h1>A rule for function values</h1>
-<svg baseProfile="full" height="48" version="1.1" viewBox="0 0 170 48" xmlns="http://www.w3.org/2000/svg" width="170">
-  <path stroke-width="2" d="M 0,24 L 10,24L 170,24" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="50" xml:space="preserve" text-anchor="start">Y &lt;: X</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="0" xml:space="preserve" text-anchor="start">A -> Y &lt;: A -> X</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 170 48" height="48" version="1.1" width="170">
+  <path fill="none" stroke="green" stroke-width="2" d="M 0,24 L 10,24L 170,24" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="50" font-family="Menlo">Y &lt;: X</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="0" font-family="Menlo">A -> Y &lt;: A -> X</text>
 </svg>
 <p>aka <code>-&gt;</code> is <em>covariant</em> with respect to its return type.</p>
 <div class="fragment">
 <p>Example instance:</p>
-<svg baseProfile="full" height="48" version="1.1" viewBox="0 0 270 48" xmlns="http://www.w3.org/2000/svg" width="270">
-  <path stroke-width="2" d="M 0,24 L 10,24L 270,24" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="80" xml:space="preserve" text-anchor="start">Int &lt;: Real</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="0" xml:space="preserve" text-anchor="start">Real -> Int &lt;: Real -> Real</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 270 48" height="48" version="1.1" width="270">
+  <path fill="none" stroke="green" stroke-width="2" d="M 0,24 L 10,24L 270,24" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="80" font-family="Menlo">Int &lt;: Real</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="0" font-family="Menlo">Real -> Int &lt;: Real -> Real</text>
 </svg>
 </div>
 <div class="fragment">
@@ -490,10 +585,10 @@ twice(ceiling, 2.3) = ceiling(ceiling(2.3)) = 3.</code></pre>
 </div>
 </section><section id="a-more-general-rule-with-contravariance" class="slide level2">
 <h1>A more general rule with contravariance</h1>
-<svg baseProfile="full" height="48" version="1.1" viewBox="0 0 170 48" xmlns="http://www.w3.org/2000/svg" width="170">
-  <path stroke-width="2" d="M 0,24 L 10,24L 170,24" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="0" xml:space="preserve" text-anchor="start">Y &lt;: X    B &lt;: A</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="0" xml:space="preserve" text-anchor="start">A -> Y &lt;: B -> X</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 170 48" height="48" version="1.1" width="170">
+  <path fill="none" stroke="green" stroke-width="2" d="M 0,24 L 10,24L 170,24" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="0" font-family="Menlo">Y &lt;: X    B &lt;: A</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="0" font-family="Menlo">A -> Y &lt;: B -> X</text>
 </svg>
 <p>aka <code>-&gt;</code> is covariant with respect to its return type, and <code>-&gt;</code> is <em>contravariant</em> with respect to its argument type.</p>
 <div class="fragment">
@@ -502,22 +597,22 @@ twice(ceiling, 2.3) = ceiling(ceiling(2.3)) = 3.</code></pre>
 </div>
 <div class="fragment">
 <p>Aside: What about when domain = range?</p>
-<svg baseProfile="full" height="48" version="1.1" viewBox="0 0 160 48" xmlns="http://www.w3.org/2000/svg" width="160">
-  <path stroke-width="2" d="M 0,24 L 10,24L 160,24" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="70" xml:space="preserve" text-anchor="start">???</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="0" xml:space="preserve" text-anchor="start">Y -> Y &lt;: X -> X</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 160 48" height="48" version="1.1" width="160">
+  <path fill="none" stroke="green" stroke-width="2" d="M 0,24 L 10,24L 160,24" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="70" font-family="Menlo">???</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="0" font-family="Menlo">Y -> Y &lt;: X -> X</text>
 </svg>
 <!-- FIXME TODO: try to add visualization of subtyping via Venn or puzzle pieces -->
 </div>
 </section></section>
-<section><section id="does-rust-have-variance" class="titleslide slide level1 center"><h1>Does Rust have variance?</h1></section><section id="does-rust-have-variance-experiment-1" class="slide level2">
-<h1>Does Rust have variance: experiment 1</h1>
-<svg baseProfile="full" height="80" version="1.1" viewBox="0 0 620 80" xmlns="http://www.w3.org/2000/svg" width="620">
-  <path stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" fill="none" stroke="green" />
-  <path stroke-width="2" id="q" d="M 395,16 L 395,32L 395,48L 395,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="100" xml:space="preserve" text-anchor="start">&amp;Vec&lt;i32>                   fn (&amp;usize) -> &amp;Vec&lt;i32></text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="410" xml:space="preserve" text-anchor="start">?</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="72" font-size="16" x="20" xml:space="preserve" text-anchor="start">fn expect(&amp;[i32])     fn expect_hof(fn (&amp;usize) -> &amp;[i32])</text>
+<section><section id="does-rust-have-variance" class="titleslide slide level1 center"><h1>Does Rust have variance?</h1></section><section id="does-rust-have-variance-experiment-1vec_slice_variance" class="slide level2">
+<h1>Does Rust have variance: <a href="https://play.rust-lang.org/?gist=4777475b64e41e21863ed3dd35a76212">experiment 1</a></h1>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 620 80" height="80" version="1.1" width="620">
+  <path fill="none" stroke="green" stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <path id="q" fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 395,16 L 395,32L 395,48L 395,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="100" font-family="Menlo">&amp;Vec&lt;i32>                   fn (&amp;usize) -> &amp;Vec&lt;i32></text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="410" font-family="Menlo">?</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="72" font-size="16" x="20" font-family="Menlo">fn expect(&amp;[i32])     fn expect_hof(fn (&amp;usize) -> &amp;[i32])</text>
 </svg>
 <div class="fragment">
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">mod</span> demo_variance_and_vec_slice {
@@ -535,14 +630,14 @@ note: expected type `fn(&amp;usize) -&gt; &amp;[i32]`
 note:    found type `fn(&amp;usize) -&gt; &amp;std::vec::Vec&lt;i32&gt;`</code></pre>
 <p>(&quot;hof&quot; stands for &quot;higher-order function&quot;)</p>
 </div>
-</section><section id="does-rust-have-variance-experiment-2" class="slide level2">
-<h1>Does Rust have variance: experiment 2</h1>
-<svg baseProfile="full" height="80" version="1.1" viewBox="0 0 610 80" xmlns="http://www.w3.org/2000/svg" width="610">
-  <path stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" fill="none" stroke="green" />
-  <path stroke-width="2" id="q" d="M 375,16 L 375,32L 375,48L 375,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="90" xml:space="preserve" text-anchor="start">&amp;mut [i32]                 fn (&amp;usize) -> &amp;mut [i32]</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="390" xml:space="preserve" text-anchor="start">?</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="72" font-size="16" x="20" xml:space="preserve" text-anchor="start">fn expect(&amp;[i32])     fn expect_hof(fn (&amp;usize) -> &amp;[i32])</text>
+</section><section id="does-rust-have-variance-experiment-2mut_imm_slice_variance" class="slide level2">
+<h1>Does Rust have variance: <a href="https://play.rust-lang.org/?gist=1c7ac483ca7490058bc2b8ef22c1f712">experiment 2</a></h1>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 610 80" height="80" version="1.1" width="610">
+  <path fill="none" stroke="green" stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <path id="q" fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 375,16 L 375,32L 375,48L 375,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="90" font-family="Menlo">&amp;mut [i32]                 fn (&amp;usize) -> &amp;mut [i32]</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="390" font-family="Menlo">?</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="72" font-size="16" x="20" font-family="Menlo">fn expect(&amp;[i32])     fn expect_hof(fn (&amp;usize) -> &amp;[i32])</text>
 </svg>
 <div class="fragment">
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">mod</span> demo_variance_and_mut_slice {
@@ -594,6 +689,7 @@ note:    found type `fn(&amp;usize) -&gt; &amp;mut [i32]`</code></pre>
 </div>
 </section><section class="slide level2">
 
+<!-- https://play.rust-lang.org/?gist=704f577e66e64a62bfb53bbb833b9c4e -->
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
 
 <span class="at">#[</span>test<span class="at">]</span>
@@ -610,7 +706,7 @@ note:    found type `fn(&amp;usize) -&gt; &amp;mut [i32]`</code></pre>
     <span class="pp">println!</span>(<span class="st">&quot;  end value: {}&quot;</span>, cell.value);
 }</code></pre></div>
 <div class="fragment">
-<p>(DON'T PANIC: We're going to step through this.)</p>
+<p>(<a href="https://play.rust-lang.org/?gist=704f577e66e64a62bfb53bbb833b9c4e">DON'T PANIC</a>: We're going to step through this.)</p>
 </div>
 <div class="fragment">
 <p>Output (some run on my machine):</p>
@@ -633,13 +729,13 @@ note:    found type `fn(&amp;usize) -&gt; &amp;mut [i32]`</code></pre>
 }</code></pre></div>
 <div class="fragment">
 <p>before <code>step1(&amp;cell);</code>:</p>
-<svg baseProfile="full" height="96" version="1.1" viewBox="0 0 470 96" xmlns="http://www.w3.org/2000/svg" width="470">
-  <path stroke-width="2" d="M 190,88 L 200,88L 210,88L 220,88Q 225,88 225,80L 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" xml:space="preserve" text-anchor="start">(static data area)</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" xml:space="preserve" text-anchor="start">(Stack)          </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="290" xml:space="preserve" text-anchor="start">X: 10</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" xml:space="preserve" text-anchor="start">cell = MyCell    </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" xml:space="preserve" text-anchor="start">value  </text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 470 96" height="96" version="1.1" width="470">
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 190,88 L 200,88L 210,88L 220,88Q 225,88 225,80L 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" font-family="Menlo">(static data area)</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" font-family="Menlo">(Stack)          </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="290" font-family="Menlo">X: 10</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" font-family="Menlo">cell = MyCell    </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" font-family="Menlo">value  </text>
 </svg>
 </div>
 </section><section id="section-1" class="slide level2" data-transition="fade" data-transition-speed="fast">
@@ -654,17 +750,17 @@ note:    found type `fn(&amp;usize) -&gt; &amp;mut [i32]`</code></pre>
     <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
 }</code></pre></div>
 <p>before <code>step2(&amp;val, r_c1);</code>:</p>
-<svg baseProfile="full" height="176" version="1.1" viewBox="0 0 470 176" xmlns="http://www.w3.org/2000/svg" width="470">
-  <path stroke-width="2" d="M 190,88 L 200,88L 210,88L 220,88Q 225,88 225,80L 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 40,136 L 30,136L 20,136Q 15,136 15,128L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 50,104 L 60,104L 90,104" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" xml:space="preserve" text-anchor="start">(static data area)</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" xml:space="preserve" text-anchor="start">(Stack)          </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="290" xml:space="preserve" text-anchor="start">X: 10</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" xml:space="preserve" text-anchor="start">cell = MyCell    </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" xml:space="preserve" text-anchor="start">value  </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="136" font-size="16" x="50" xml:space="preserve" text-anchor="start">r_c1</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" xml:space="preserve" text-anchor="start">val  13</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 470 176" height="176" version="1.1" width="470">
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 190,88 L 200,88L 210,88L 220,88Q 225,88 225,80L 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 40,136 L 30,136L 20,136Q 15,136 15,128L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 50,104 L 60,104L 90,104" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" font-family="Menlo">(static data area)</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" font-family="Menlo">(Stack)          </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="290" font-family="Menlo">X: 10</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" font-family="Menlo">cell = MyCell    </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" font-family="Menlo">value  </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="136" font-size="16" x="50" font-family="Menlo">r_c1</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" font-family="Menlo">val  13</text>
 </svg>
 </section><section id="section-2" class="slide level2" data-transition="fade" data-transition-speed="fast">
 <h1></h1>
@@ -678,22 +774,22 @@ note:    found type `fn(&amp;usize) -&gt; &amp;mut [i32]`</code></pre>
     <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
 }</code></pre></div>
 <p>before <code>r_c2.set(r_val)</code>:</p>
-<svg baseProfile="full" height="272" version="1.1" viewBox="0 0 470 272" xmlns="http://www.w3.org/2000/svg" width="470">
-  <path stroke-width="2" d="M 190,88 L 200,88L 210,88L 220,88Q 225,88 225,80L 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 40,136 L 30,136L 20,136L 15,136L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 50,104 L 60,104L 90,104" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 15,136L 15,160L 15,192L 15,208L 15,224L 15,256Q 15,264 20,264Q 20,264 30,264L 40,264" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 160,168L 220,168Q 225,168 225,176L 225,192L 225,208L 225,224Q 225,232 220,232Q 220,232 210,232L 100,232" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 50,200 L 60,200L 90,200" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" xml:space="preserve" text-anchor="start">(static data area)</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" xml:space="preserve" text-anchor="start">(Stack)          </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="290" xml:space="preserve" text-anchor="start">X: 10</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" xml:space="preserve" text-anchor="start">cell = MyCell    </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" xml:space="preserve" text-anchor="start">value  </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="136" font-size="16" x="50" xml:space="preserve" text-anchor="start">r_c1</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" xml:space="preserve" text-anchor="start">val  13 </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="232" font-size="16" x="40" xml:space="preserve" text-anchor="start">r_val </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="264" font-size="16" x="50" xml:space="preserve" text-anchor="start">r_c2</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 470 272" height="272" version="1.1" width="470">
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 190,88 L 200,88L 210,88L 220,88Q 225,88 225,80L 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 40,136 L 30,136L 20,136L 15,136L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 50,104 L 60,104L 90,104" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 15,136L 15,160L 15,192L 15,208L 15,224L 15,256Q 15,264 20,264Q 20,264 30,264L 40,264" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 160,168L 220,168Q 225,168 225,176L 225,192L 225,208L 225,224Q 225,232 220,232Q 220,232 210,232L 100,232" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 50,200 L 60,200L 90,200" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" font-family="Menlo">(static data area)</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" font-family="Menlo">(Stack)          </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="290" font-family="Menlo">X: 10</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" font-family="Menlo">cell = MyCell    </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" font-family="Menlo">value  </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="136" font-size="16" x="50" font-family="Menlo">r_c1</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" font-family="Menlo">val  13 </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="232" font-size="16" x="40" font-family="Menlo">r_val </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="264" font-size="16" x="50" font-family="Menlo">r_c2</text>
 </svg>
 </section><section id="section-3" class="slide level2" data-transition="fade" data-transition-speed="fast">
 <h1></h1>
@@ -707,21 +803,21 @@ note:    found type `fn(&amp;usize) -&gt; &amp;mut [i32]`</code></pre>
     <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
 }</code></pre></div>
 <p>after <code>r_c2.set(r_val)</code>:</p>
-<svg baseProfile="full" height="272" version="1.1" viewBox="0 0 470 272" xmlns="http://www.w3.org/2000/svg" width="470">
-  <path stroke-width="2" d="M 40,136 L 30,136L 20,136L 15,136L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 190,88 L 200,88L 220,88Q 225,88 225,96L 225,112L 225,128L 225,160L 225,168L 225,192L 225,208L 225,224Q 225,232 220,232Q 220,232 210,232L 100,232" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 50,104 L 60,104L 90,104" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 15,136L 15,160L 15,176L 15,192L 15,256Q 15,264 20,264Q 20,264 30,264L 40,264" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 160,168L 200,168L 210,168L 220,168L 225,168" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 50,200 L 60,200L 90,200" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" xml:space="preserve" text-anchor="start">(static data area)</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" xml:space="preserve" text-anchor="start">(Stack)                 X: 10</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" xml:space="preserve" text-anchor="start">cell = MyCell</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" xml:space="preserve" text-anchor="start">value  </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="136" font-size="16" x="50" xml:space="preserve" text-anchor="start">r_c1             </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" xml:space="preserve" text-anchor="start">val  13 </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="232" font-size="16" x="40" xml:space="preserve" text-anchor="start">r_val </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="264" font-size="16" x="50" xml:space="preserve" text-anchor="start">r_c2</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 470 272" height="272" version="1.1" width="470">
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 40,136 L 30,136L 20,136L 15,136L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 190,88 L 200,88L 220,88Q 225,88 225,96L 225,112L 225,128L 225,160L 225,168L 225,192L 225,208L 225,224Q 225,232 220,232Q 220,232 210,232L 100,232" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 50,104 L 60,104L 90,104" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 15,136L 15,160L 15,176L 15,192L 15,256Q 15,264 20,264Q 20,264 30,264L 40,264" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 160,168L 200,168L 210,168L 220,168L 225,168" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 50,200 L 60,200L 90,200" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" font-family="Menlo">(static data area)</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" font-family="Menlo">(Stack)                 X: 10</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" font-family="Menlo">cell = MyCell</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" font-family="Menlo">value  </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="136" font-size="16" x="50" font-family="Menlo">r_c1             </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" font-family="Menlo">val  13 </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="232" font-size="16" x="40" font-family="Menlo">r_val </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="264" font-size="16" x="50" font-family="Menlo">r_c2</text>
 </svg>
 </section><section id="section-4" class="slide level2" data-transition="fade" data-transition-speed="fast">
 <h1></h1>
@@ -735,16 +831,16 @@ note:    found type `fn(&amp;usize) -&gt; &amp;mut [i32]`</code></pre>
     <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
 }</code></pre></div>
 <p>after <code>step2</code> returns:</p>
-<svg baseProfile="full" height="176" version="1.1" viewBox="0 0 470 176" xmlns="http://www.w3.org/2000/svg" width="470">
-  <path stroke-width="2" d="M 40,136 L 30,136L 20,136Q 15,136 15,128L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 190,88 L 200,88L 220,88Q 225,88 225,96L 225,112L 225,128L 225,160Q 225,168 220,168Q 220,168 210,168L 150,168L 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 50,104 L 60,104L 90,104" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" xml:space="preserve" text-anchor="start">(static data area)</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" xml:space="preserve" text-anchor="start">(Stack)                 X: 10</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" xml:space="preserve" text-anchor="start">cell = MyCell</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" xml:space="preserve" text-anchor="start">value  </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="136" font-size="16" x="50" xml:space="preserve" text-anchor="start">r_c1             </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" xml:space="preserve" text-anchor="start">val  13 </text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 470 176" height="176" version="1.1" width="470">
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 40,136 L 30,136L 20,136Q 15,136 15,128L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 190,88 L 200,88L 220,88Q 225,88 225,96L 225,112L 225,128L 225,160Q 225,168 220,168Q 220,168 210,168L 150,168L 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 50,104 L 60,104L 90,104" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" font-family="Menlo">(static data area)</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" font-family="Menlo">(Stack)                 X: 10</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" font-family="Menlo">cell = MyCell</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" font-family="Menlo">value  </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="136" font-size="16" x="50" font-family="Menlo">r_c1             </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" font-family="Menlo">val  13 </text>
 </svg>
 </section><section id="section-5" class="slide level2" data-transition="fade-in" data-transition-speed="fast">
 <h1></h1>
@@ -758,19 +854,19 @@ note:    found type `fn(&amp;usize) -&gt; &amp;mut [i32]`</code></pre>
     <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>&gt;(r_val: &amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>, r_c2: &amp;MyCell&lt;&amp;<span class="ot">&#39;b</span> <span class="dt">i32</span>&gt;) { r_c2.set(r_val); }
 }</code></pre></div>
 <p>after <code>step1</code> returns:</p>
-<svg baseProfile="full" height="176" version="1.1" viewBox="0 0 470 176" xmlns="http://www.w3.org/2000/svg" width="470">
-  <path stroke-width="2" d="M 190,88 L 200,88L 220,88Q 225,88 225,96L 225,112L 225,128L 225,144L 225,160Q 225,168 220,168Q 220,168 210,168L 150,168L 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" xml:space="preserve" text-anchor="start">(static data area)</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" xml:space="preserve" text-anchor="start">(Stack)                 X: 10</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" xml:space="preserve" text-anchor="start">cell = MyCell</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" xml:space="preserve" text-anchor="start">value  </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" xml:space="preserve" text-anchor="start">???     </text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 470 176" height="176" version="1.1" width="470">
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 190,88 L 200,88L 220,88Q 225,88 225,96L 225,112L 225,128L 225,144L 225,160Q 225,168 220,168Q 220,168 210,168L 150,168L 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" font-family="Menlo">(static data area)</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" font-family="Menlo">(Stack)                 X: 10</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" font-family="Menlo">cell = MyCell</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="88" font-size="16" x="120" font-family="Menlo">value  </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" font-family="Menlo">???     </text>
 </svg>
 <div class="fragment">
 <p>Either <code>MyCell</code> is broken, or the compiler is.</p>
 </div>
-</section><section id="is-cell-also-broken" class="slide level2 center">
-<h1>Is <code>Cell</code> also broken?</h1>
+</section><section id="is-cell-alsoshow_cell_cfail-broken" class="slide level2 center">
+<h1>Is <code>Cell</code> <a href="https://play.rust-lang.org/?gist=ddc78b073a4b50147b343358138d47d7">also</a> broken?</h1>
 <div class="sourceCode"><pre class="sourceCode rust compile_error stripes"><code class="sourceCode rust"><span class="kw">mod</span> test_stdcell_short_lifetime {
     <span class="kw">use</span> std::cell::Cell;
     <span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
@@ -818,8 +914,8 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 <h3 id="subtyping-and-variance"><em>Subtyping</em> and <em>variance</em></h3>
 </div>
 </section></section>
-<section><section id="yes-rust-has-subtyping" class="titleslide slide level1 center"><h1>Yes, Rust has Subtyping</h1></section><section id="yes-rust-has-subtyping-1" class="slide level2">
-<h1>Yes, Rust has Subtyping</h1>
+<section><section id="yes-rust-has-subtyping" class="titleslide slide level1 center"><h1>Yes, Rust has Subtyping</h1></section><section id="yes-rust-has-subtypingref_subtyping_demo" class="slide level2">
+<h1>Yes, <a href="https://play.rust-lang.org/?gist=b8cfc470abf30aa283e91197e9cf0a4b">Rust has Subtyping</a></h1>
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="co">/// Picks either `x` or `y`, based on some internal choice.</span>
 <span class="kw">fn</span> pick&lt;<span class="ot">&#39;a</span>&gt;(x: &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>, y: &amp;<span class="ot">&#39;static</span> <span class="dt">i32</span>) -&gt; &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span> {
     <span class="kw">if</span> *x &gt; <span class="dv">0</span> { x } <span class="kw">else</span> { y }
@@ -828,13 +924,13 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 <span class="kw">static</span> GLOBAL: <span class="dt">i32</span> = <span class="dv">100</span>;
 
 <span class="at">#[</span>test<span class="at">]</span> <span class="kw">fn</span> pick_test() { <span class="kw">let</span> temp: <span class="dt">i32</span> = <span class="dv">200</span>; pick(&amp;temp, &amp;GLOBAL); }</code></pre></div>
-<svg baseProfile="full" height="192" version="1.1" viewBox="0 0 660 192" xmlns="http://www.w3.org/2000/svg" width="660">
-  <rect stroke-width="2" ry="8" rx="5" height="96" fill="none" y="56" x="65" width="70" stroke="red" />
-  <path stroke-width="2" d="M 15,0 L 15,16L 15,32L 15,48L 15,64L 15,80L 15,96L 15,112L 15,128L 15,144L 15,160L 15,176L 15,192" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 185,80 L 185,96L 185,112L 185,128" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="24" font-size="16" x="30" xml:space="preserve" text-anchor="start">'static (`*y` guaranteed to live at least this long)</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="88" font-size="16" x="190" xml:space="preserve" text-anchor="start">'a (`*x` guaranteed to live at least this long)</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="104" font-size="16" x="80" xml:space="preserve" text-anchor="start">temp </text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 660 192" height="192" version="1.1" width="660">
+  <rect rx="5" fill="none" stroke="red" y="56" ry="8" stroke-width="2" x="65" height="96" width="70" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 15,0 L 15,16L 15,32L 15,48L 15,64L 15,80L 15,96L 15,112L 15,128L 15,144L 15,160L 15,176L 15,192" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 185,80 L 185,96L 185,112L 185,128" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="24" font-size="16" x="30" font-family="Menlo">'static (`*y` guaranteed to live at least this long)</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="88" font-size="16" x="190" font-family="Menlo">'a (`*x` guaranteed to live at least this long)</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="104" font-size="16" x="80" font-family="Menlo">temp </text>
 </svg>
 <div class="fragment">
 <p>The value <code>y: &amp;'static i32</code> is able to be returned as a <code>&amp;'a i32</code>.</p>
@@ -843,20 +939,20 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 <li>(syntax: <code>'static: 'a</code>, pronounced &quot;outlives&quot;)</li>
 </ul>
 </div>
-</section><section id="and-the-other-direction" class="slide level2">
-<h1>And the other direction?</h1>
+</section><section id="and-the-other-directionpromote_cfail_demo" class="slide level2">
+<h1>And the <a href="https://play.rust-lang.org/?gist=9ed292d53082dae990111c9f897502bb">other direction</a>?</h1>
 <div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> promote&lt;<span class="ot">&#39;a</span>&gt;(x: &amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>) -&gt; &amp;<span class="ot">&#39;static</span> <span class="dt">i32</span> {
     <span class="kw">return</span> x;
 }
 
 <span class="at">#[</span>test<span class="at">]</span> <span class="kw">fn</span> promote_test() { <span class="kw">let</span> temp: <span class="dt">i32</span> = <span class="dv">200</span>; promote(&amp;temp); }</code></pre></div>
-<svg baseProfile="full" height="192" version="1.1" viewBox="0 0 660 192" xmlns="http://www.w3.org/2000/svg" width="660">
-  <rect stroke-width="2" ry="8" rx="5" height="96" fill="none" y="56" x="65" width="70" stroke="red" />
-  <path stroke-width="2" d="M 15,0 L 15,16L 15,32L 15,48L 15,64L 15,80L 15,96L 15,112L 15,128L 15,144L 15,160L 15,176L 15,192" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 175,80 L 175,96L 175,112L 175,128" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="24" font-size="16" x="30" xml:space="preserve" text-anchor="start">'static (`fn promote` promises a reference value for this long)</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="88" font-size="16" x="180" xml:space="preserve" text-anchor="start">'a (`*x` only promises to live this long)</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="104" font-size="16" x="80" xml:space="preserve" text-anchor="start">temp </text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 660 192" height="192" version="1.1" width="660">
+  <rect rx="5" fill="none" stroke="red" y="56" ry="8" stroke-width="2" x="65" height="96" width="70" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 15,0 L 15,16L 15,32L 15,48L 15,64L 15,80L 15,96L 15,112L 15,128L 15,144L 15,160L 15,176L 15,192" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 175,80 L 175,96L 175,112L 175,128" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="24" font-size="16" x="30" font-family="Menlo">'static (`fn promote` promises a reference value for this long)</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="88" font-size="16" x="180" font-family="Menlo">'a (`*x` only promises to live this long)</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="104" font-size="16" x="80" font-family="Menlo">temp </text>
 </svg>
 <div class="fragment">
 <p>Not legal to return <code>&amp;'a i32</code> as a <code>&amp;'static i32</code> for arbitrary <code>'a</code>; otherwise, dangling pointers.</p>
@@ -865,33 +961,33 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 <h1>References revisited</h1>
 <p>Insight: For <em>any</em> type <code>T</code> and any lifetime <code>'a</code>, clearly <code>&amp;'static T</code> should be valid anywhere that <code>&amp;'a T</code> is.</p>
 <div class="fragment">
-<svg baseProfile="full" height="80" version="1.1" viewBox="0 0 230 80" xmlns="http://www.w3.org/2000/svg" width="230">
-  <path stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="90" xml:space="preserve" text-anchor="start">&amp;'static [i32]</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="72" font-size="16" x="20" xml:space="preserve" text-anchor="start">fn expect(&amp;[i32])</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 230 80" height="80" version="1.1" width="230">
+  <path fill="none" stroke="green" stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="90" font-family="Menlo">&amp;'static [i32]</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="72" font-size="16" x="20" font-family="Menlo">fn expect(&amp;[i32])</text>
 </svg>
 </div>
 <div class="fragment">
 <p>Gentzen style</p>
-<svg baseProfile="full" height="48" version="1.1" viewBox="0 0 210 48" xmlns="http://www.w3.org/2000/svg" width="210">
-  <path stroke-width="2" d="M 0,24 L 10,24L 210,24" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="10" xml:space="preserve" text-anchor="start">'static outlives 'a</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="10" xml:space="preserve" text-anchor="start">&amp;'static T &lt;: &amp;'a T</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 210 48" height="48" version="1.1" width="210">
+  <path fill="none" stroke="green" stroke-width="2" d="M 0,24 L 10,24L 210,24" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="10" font-family="Menlo">'static outlives 'a</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="10" font-family="Menlo">&amp;'static T &lt;: &amp;'a T</text>
 </svg>
 </div>
 </section><section id="a-more-general-rule" class="slide level2">
 <h1>A more general rule</h1>
 <p>For any type <code>T</code> and lifetimes <code>'a</code>, <code>'b</code>, if <code>'b</code> outlives <code>'a</code>, then <code>&amp;'b T</code> should be valid anywhere <code>&amp;'a T</code> is.</p>
-<svg baseProfile="full" height="48" version="1.1" viewBox="0 0 210 48" xmlns="http://www.w3.org/2000/svg" width="210">
-  <path stroke-width="2" d="M 0,24 L 10,24L 210,24" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="40" xml:space="preserve" text-anchor="start">'b outlives 'a</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="40" xml:space="preserve" text-anchor="start">&amp;'b T &lt;: &amp;'a T</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 210 48" height="48" version="1.1" width="210">
+  <path fill="none" stroke="green" stroke-width="2" d="M 0,24 L 10,24L 210,24" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="40" font-family="Menlo">'b outlives 'a</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="40" font-family="Menlo">&amp;'b T &lt;: &amp;'a T</text>
 </svg>
 </section><section id="further-generalization" class="slide level2">
 <h1>Further generalization</h1>
 <p>Already established we should have <code>&amp;'static T &lt;: &amp;'a T</code>.</p>
 <div class="fragment">
-<p>What about <code>&amp;'a &amp;'static T</code> and <code>&amp;'a &amp;'a T</code>?</p>
+<p>What about a reference <em>to</em> a reference?</p>
 <p>Should <code>&amp;'a &amp;'static T &lt;: &amp;'a &amp;'a T</code> ...?</p>
 </div>
 <div class="fragment">
@@ -899,11 +995,11 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 <p>Analogous to a function <code>A -&gt; Y &lt;: A -&gt; X</code></p>
 </div>
 <div class="fragment">
-<svg baseProfile="full" height="64" version="1.1" viewBox="0 0 310 64" xmlns="http://www.w3.org/2000/svg" width="310">
-  <path stroke-width="2" d="M 20,40 L 30,40L 310,40" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="60" xml:space="preserve" text-anchor="start">'b outlives 'a</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="24" font-size="16" x="110" xml:space="preserve" text-anchor="start">Y &lt;: X</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="56" font-size="16" x="70" xml:space="preserve" text-anchor="start">&amp;'b Y &lt;: &amp;'a X</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 310 64" height="64" version="1.1" width="310">
+  <path fill="none" stroke="green" stroke-width="2" d="M 20,40 L 30,40L 310,40" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="60" font-family="Menlo">'b outlives 'a</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="24" font-size="16" x="110" font-family="Menlo">Y &lt;: X</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="56" font-size="16" x="70" font-family="Menlo">&amp;'b Y &lt;: &amp;'a X</text>
 </svg>
 </div>
 <div class="fragment">
@@ -916,33 +1012,33 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 <h1>What about mut references</h1>
 <p>Should <code>&amp;'a mut &amp;'static T &lt;: &amp;'a mut &amp;'a T</code> ...?</p>
 <div class="fragment">
-<p>Allowing that exposes:</p>
+<p>Allowing that <a href="https://play.rust-lang.org/?gist=f93578cc4f20298616f8badf68aac500">exposes</a>:</p>
 <div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">mod</span> promote_short_to_static {
     <span class="kw">static</span> X: <span class="dt">i32</span> = <span class="dv">10</span>;
     <span class="kw">fn</span> test() {
         <span class="kw">let</span> <span class="kw">mut</span> ptr: &amp;<span class="ot">&#39;static</span> <span class="dt">i32</span> = &amp;<span class="kw">mut</span> X;
         step1(&amp;<span class="kw">mut</span> ptr);
     }
-    <span class="kw">fn</span> step1&lt;<span class="ot">&#39;a</span>&gt;(r1: &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> &amp;<span class="ot">&#39;static</span> <span class="dt">i32</span>) { <span class="kw">let</span> val: <span class="dt">i32</span> = <span class="dv">13</span>; step2(r, &amp;val); }
+    <span class="kw">fn</span> step1&lt;<span class="ot">&#39;a</span>&gt;(r1: &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> &amp;<span class="ot">&#39;static</span> <span class="dt">i32</span>) { <span class="kw">let</span> val: <span class="dt">i32</span> = <span class="dv">13</span>; step2(r1, &amp;val); }
     <span class="kw">fn</span> step2&lt;<span class="ot">&#39;b</span>, T&gt;(r2: &amp;<span class="ot">&#39;b</span> <span class="kw">mut</span> &amp;<span class="ot">&#39;b</span> T, r_val: &amp;<span class="ot">&#39;b</span> T) { *r2 = r_val; }
 }</code></pre></div>
 </div>
 <div class="fragment">
-<svg baseProfile="full" height="272" version="1.1" viewBox="0 0 470 272" xmlns="http://www.w3.org/2000/svg" width="470">
-  <path stroke-width="2" d="M 100,72 L 110,72L 220,72Q 225,72 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 40,136 L 30,136L 20,136L 15,136L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 50,104 L 60,104L 90,104" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 15,136L 15,160L 15,176L 15,192L 15,256Q 15,264 20,264Q 20,264 30,264L 40,264" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 160,168L 200,168L 210,168L 220,168Q 225,168 225,176L 225,192L 225,208L 225,224Q 225,232 220,232Q 220,232 210,232L 100,232" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <path stroke-width="2" d="M 50,200 L 60,200L 90,200" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" xml:space="preserve" text-anchor="start">(static data area)</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" xml:space="preserve" text-anchor="start">(Stack)          </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="290" xml:space="preserve" text-anchor="start">X: 10</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" xml:space="preserve" text-anchor="start">ptr  </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="136" font-size="16" x="50" xml:space="preserve" text-anchor="start">r1</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" xml:space="preserve" text-anchor="start">val  13 </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="232" font-size="16" x="40" xml:space="preserve" text-anchor="start">r_val </text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="264" font-size="16" x="50" xml:space="preserve" text-anchor="start">r2</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 470 272" height="272" version="1.1" width="470">
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 100,72 L 110,72L 220,72Q 225,72 225,64L 225,48Q 225,40 230,40Q 230,40 240,40L 270,40L 275,40 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 40,136 L 30,136L 20,136L 15,136L 15,112L 15,96L 15,80Q 15,72 20,72Q 20,72 30,72L 35,72 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 50,104 L 60,104L 90,104" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 15,136L 15,160L 15,176L 15,192L 15,256Q 15,264 20,264Q 20,264 30,264L 40,264" />
+  <path fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 145,168 l -3,0 m 3,-3 l -3,3 l 3,3 m 0,-3L 160,168L 200,168L 210,168L 220,168Q 225,168 225,176L 225,192L 225,208L 225,224Q 225,232 220,232Q 220,232 210,232L 100,232" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 50,200 L 60,200L 90,200" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="290" font-family="Menlo">(static data area)</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="50" font-family="Menlo">(Stack)          </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="290" font-family="Menlo">X: 10</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="72" font-size="16" x="50" font-family="Menlo">ptr  </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="136" font-size="16" x="50" font-family="Menlo">r1</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="168" font-size="16" x="60" font-family="Menlo">val  13 </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="232" font-size="16" x="40" font-family="Menlo">r_val </text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="264" font-size="16" x="50" font-family="Menlo">r2</text>
 </svg>
 </div>
 </section><section id="invariance" class="slide level2">
@@ -976,12 +1072,12 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 </div>
 </section><section id="are-rust-function-types-variant" class="slide level2">
 <h1>Are Rust function types variant?</h1>
-<svg baseProfile="full" height="80" version="1.1" viewBox="0 0 630 80" xmlns="http://www.w3.org/2000/svg" width="630">
-  <path stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" fill="none" stroke="green" />
-  <path stroke-width="2" id="q" d="M 375,16 L 375,32L 375,48L 375,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" stroke-dasharray="5,2" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="100" xml:space="preserve" text-anchor="start">&amp;'static i32              fn (&amp;usize) -> &amp;'static i32</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="40" font-size="16" x="390" xml:space="preserve" text-anchor="start">?</text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="72" font-size="16" x="20" xml:space="preserve" text-anchor="start">fn expect(&amp;i32)     fn expect_hof(fn (&amp;usize) -> &amp;i32)</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 630 80" height="80" version="1.1" width="630">
+  <path fill="none" stroke="green" stroke-width="2" d="M 125,16 L 125,32L 125,48L 125,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <path id="q" fill="none" stroke="green" stroke-width="2" stroke-dasharray="5,2" d="M 375,16 L 375,32L 375,48L 375,56 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="100" font-family="Menlo">&amp;'static i32              fn (&amp;usize) -> &amp;'static i32</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="40" font-size="16" x="390" font-family="Menlo">?</text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="72" font-size="16" x="20" font-family="Menlo">fn expect(&amp;i32)     fn expect_hof(fn (&amp;usize) -> &amp;i32)</text>
 </svg>
 <div class="fragment">
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">mod</span> demo_variance_and_static_ref {
@@ -995,7 +1091,7 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 }</code></pre></div>
 </div>
 <div class="fragment">
-<p>Compiles!</p>
+<p><a href="https://play.rust-lang.org/?gist=52bc0ea4b6d2b5fad2781aeccaf18e38">Compiles</a>!</p>
 </div>
 <div class="fragment">
 <p>Functions even contravariant with respect to their argument types</p>
@@ -1072,10 +1168,10 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 <p>See <a href="https://github.com/rust-lang/rfcs/blob/master/text/0241-deref-conversions.md">RFC 271: &quot;Deref Conversions&quot;</a></p>
 <div class="fragment">
 <p>That, combined with <code>impl</code> such that <code>Vec&lt;T&gt;: Deref&lt;Target=[T]&gt;</code>, explains</p>
-<svg baseProfile="full" height="64" version="1.1" viewBox="0 0 190 64" xmlns="http://www.w3.org/2000/svg" width="190">
-  <path stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="80" xml:space="preserve" text-anchor="start">&amp;Vec&lt;i32></text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="56" font-size="16" x="20" xml:space="preserve" text-anchor="start">fn expect(&amp;[i32])</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 190 64" height="64" version="1.1" width="190">
+  <path fill="none" stroke="green" stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="80" font-family="Menlo">&amp;Vec&lt;i32></text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="56" font-size="16" x="20" font-family="Menlo">fn expect(&amp;[i32])</text>
 </svg>
 <!-- Out of time
 
@@ -1092,6 +1188,16 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 ```
 
 -->
+</div>
+</section><section id="auto-reborrows" class="slide level2">
+<h1>Auto reborrows</h1>
+<p>As if things weren't confusing enough ...</p>
+<p>If you pass a mutable <code>value</code> reference into an expression context that is itself inferred to be expecting a reference, the compiler will automatically insert <code>&amp;mut *value</code>.</p>
+<div class="fragment">
+<p>Main effect of this: passing a <code>&amp;mut T</code> does not always <em>move</em> it; sometimes it implicitly reborrows (so that you can mutate the <code>&amp;mut</code> after the call, rather than losing access to it).</p>
+</div>
+<div class="fragment">
+<p>See <a href="https://bluss.github.io/rust/fun/2015/10/11/stuff-the-identity-function-does/">bluss &quot;Stuff the Identity Function Does&quot;</a></p>
 </div>
 </section><section id="protocols" class="slide level2">
 <h1>Protocols</h1>
@@ -1159,8 +1265,8 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 <div class="fragment">
 <p>(So, all the magic here is in macros and trait system.)</p>
 </div>
-</section><section id="gotchas-re-coercions" class="slide level2">
-<h1>Gotchas re: coercions</h1>
+</section><section id="gotchas-re-coercions-and-auto-reborrows" class="slide level2">
+<h1>Gotchas re: coercions and auto-(re)borrows</h1>
 <p>Compiler needs the expected type.</p>
 <p>E.g. this compiles and runs:</p>
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> process1(input: &amp;[<span class="dt">i32</span>]) { }
@@ -1173,10 +1279,10 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 </section><section id="why" class="slide level2">
 <h1>Why?</h1>
 <div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> process1(input: &amp;[<span class="dt">i32</span>]) { }</code></pre></div>
-<svg baseProfile="full" height="64" version="1.1" viewBox="0 0 170 64" xmlns="http://www.w3.org/2000/svg" width="170">
-  <path stroke-width="2" d="M 105,16 L 105,32L 105,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="70" xml:space="preserve" text-anchor="start">&amp;Vec&lt;i32></text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="56" font-size="16" x="10" xml:space="preserve" text-anchor="start">process1(&amp;[i32])</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 170 64" height="64" version="1.1" width="170">
+  <path fill="none" stroke="green" stroke-width="2" d="M 105,16 L 105,32L 105,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="70" font-family="Menlo">&amp;Vec&lt;i32></text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="56" font-size="16" x="10" font-family="Menlo">process1(&amp;[i32])</text>
 </svg>
 <p>Compiler sees input + expected types</p>
 <ul>
@@ -1184,10 +1290,10 @@ note: ...but borrowed value is only valid for the block suffix following stateme
 </ul>
 <div class="fragment">
 <div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">fn</span> process2&lt;I&gt;(input: &amp;I) <span class="kw">where</span> I: Input { }</code></pre></div>
-<svg baseProfile="full" height="64" version="1.1" viewBox="0 0 180 64" xmlns="http://www.w3.org/2000/svg" width="180">
-  <path stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" fill="none" stroke="green" />
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="8" font-size="16" x="90" xml:space="preserve" text-anchor="start">&amp;Vec&lt;i32></text>
-  <text font-family="Menlo" fill="black" dominant-baseline="middle" y="56" font-size="16" x="30" xml:space="preserve" text-anchor="start">process2(&amp;I)</text>
+<svg xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 180 64" height="64" version="1.1" width="180">
+  <path fill="none" stroke="green" stroke-width="2" d="M 125,16 L 125,32L 125,40 l 0,5 m -3,-5 l 3, 5 l 3,-5 m -3,0" />
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="8" font-size="16" x="90" font-family="Menlo">&amp;Vec&lt;i32></text>
+  <text xml:space="preserve" text-anchor="start" fill="black" dominant-baseline="middle" y="56" font-size="16" x="30" font-family="Menlo">process2(&amp;I)</text>
 </svg>
 <p>Compiler decides <code>I</code> is <code>Vec&lt;i32&gt;</code></p>
 <ul>
