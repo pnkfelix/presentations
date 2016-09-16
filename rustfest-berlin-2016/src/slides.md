@@ -36,7 +36,22 @@ navigate
 </tr>
 </table>
 
-# Advanced Tech and Magic
+## Advanced Tech and Magic
+
+> Any sufficiently advanced technology is indistinguishable from magic.
+>
+> Third Law, Arthur C. Clarke
+
+. . .
+
+> The only way of discovering the limits of the possible is to venture a little way
+> past them into the impossible.
+>
+> Second Law, Arthur C. Clarke
+
+. . .
+
+(Clarke's [first law](https://en.wikipedia.org/wiki/Clarke%27s_three_laws) is an impossible statement about elderly scientists.)
 
 ## Language Technology
 
@@ -96,7 +111,9 @@ Amazingly, "try it and see" often works.
 
 "Have a specific error, but result's error is more general. What now?"
 
-### Try it and see
+### [Try it][result_err_gist] and see
+
+[result_err_gist]: https://play.rust-lang.org/?gist=744b51178a92f8c15cf1dca226e08680
 
 . . .
 
@@ -137,7 +154,9 @@ fn composed(a: Ast) -> Result<Out, EndToEndErr> {
 
 "Have a `Vec<i32>`, but code expects a `[i32]` slice. What now?"
 
-### Try it and see
+### [Try it][vec_slice_gist] and see
+
+[vec_slice_gist]: https://play.rust-lang.org/?gist=9bfb91fd850713445f42c8ef607c9c10
 
 . . .
 
@@ -168,7 +187,7 @@ does it compile?
 
 "Have a `Vec<i32>`, but code expects a `[i32]` slice. What now?"
 
-### Try it and see
+### [Try it][vec_slice_gist] and see
 
 ``` {.rust}
 fn rotate(nums: &mut [i32]) {
@@ -199,7 +218,9 @@ fn demo_rotate() {
 
 . . .
 
-## Stripped to skeletal form
+## [Stripped][vec_slice_stripped] to skeletal form
+
+[vec_slice_stripped]: https://play.rust-lang.org/?gist=eec18313e9e454a60b6859954b75f414
 
 ```rust
 mod demo_vec_slice {
@@ -222,8 +243,9 @@ having some sort of compatibility relationship.
 
 "Have a `&mut [i32]`, but code expects a `&[i32]` slice. What now?"
 
-### Try it and see
+### [Try it][mut_imm_slice] and see
 
+[mut_imm_slice]: https://play.rust-lang.org/?gist=536ad61bf7f63ffd654a47db80ecbd02
 . . .
 
 ```rust
@@ -276,7 +298,9 @@ Let us try "something simple": Methods on `char` arrays.
 
 ## Magical receivers
 
-Review: Extending types with new methods
+[Review][ext_types_via_trait]: Extending types with new methods
+
+[ext_types_via_trait]: https://play.rust-lang.org/?gist=555b603e6931ba51e68a79b307a0517b
 
 ```rust
 trait AsciiIncr {
@@ -328,7 +352,9 @@ impl Receiver for [char; 2] {
 }
 ```
 
-## Sanity check { data-transition="fade" .tight }
+## [Sanity check][sanity_check] { data-transition="fade" .tight }
+
+[sanity_check]: https://play.rust-lang.org/?gist=ea5cc1973f3d867b1837fdd4b7d95e71
 
 ``` {.rust}
 trait Receiver {
@@ -370,7 +396,9 @@ mut: 'c'
 obvious: (a,b,c): (['a', '1'], ['b', '4'], ['c', '8'])
 ```
 
-## Exploration { data-transition="fade" }
+## [Exploration][explore_recv] { data-transition="fade" }
+
+[explore_recv]: https://play.rust-lang.org/?gist=db981260d7e9d9d2cc5c9454573b10e7
 
 ``` {.rust}
 trait Receiver {
@@ -458,7 +486,9 @@ Classic example: "Records"
 
 * A Rust analogue: "Have `(A, B, C)`, this function wants `(A, B)`"
 
-### Try it and see
+### [Try it][demo_subtuple_err] and see
+
+[demo_subtuple_err]: https://play.rust-lang.org/?gist=c0aaaee54247f2fd24aef5e1e48d2261
 
 ``` {.rust .compile_error .stripes}
 mod demo_subtuple {
@@ -490,6 +520,45 @@ Academic example: Functions
                 '------------------------------------'
 ```
 
+* "Have a function `f` of type `Real -> Int`, want one like `Real -> Real`"
+
+* i.e., is it legal to pass `f` as if it is a `Real -> Real`?
+
+* What about a function `g` of type `Int -> Int`? Can that be passed as `Real -> Real`?
+
+## Textbook subtyping {.left_align}
+
+* "Have a function of type `Int -> Int`, want one like `Real -> Real`"
+
+. . .
+
+* Won't work: `g: Int -> Int` *assumes* input is always an `Int`, yet
+  client taking `Real -> Real` is free to apply it to -7.2 or ⅓ or π.
+
+```
+twice: (Real -> Real) Real -> Real
+twice(f, r) = f(f(r))
+
+num_divisors: Int -> Int
+num_divisors(4)  = |{1, 2, 4}| = 3
+num_divisors(12) = |{1, 2, 3, 4, 6, 12}| = 6
+
+twice(num_divisors, 2.3) = num_divisors(num_divisors(2.3))
+                         = num_divisors(???)
+                         = ill-defined!
+```
+
+* ~~`Int -> Int` <: `Real -> Real`~~
+
+. . .
+
+* "Have a function of type `Real -> Int`, want one like `Real -> Real`"
+
+
+## Textbook subtyping {.left_align}
+
+* ~~`Int -> Int` <: `Real -> Real`~~
+
 * "Have a function of type `Real -> Int`, want one like `Real -> Real`"
 
 . . .
@@ -498,18 +567,29 @@ Academic example: Functions
 twice: (Real -> Real) Real -> Real
 twice(f, r) = f(f(r))
 
-ceiling: Real -> Int
+ceil_plus: Real -> Int
+ceil_plus(x) = ⌈x⌉ + 1
+```
 
-twice(ceiling, 2.3) = ceiling(ceiling(2.3)) = 3.
+. . .
+
+```art
+      ceil_plus   2.3: Real
+       |           |
+       v           v
+twice( f,           r)  = ceil_plus(ceil_plus(2.3)) = ceil_plus(⌈2.3⌉ + 1) = ⌈4⌉ + 1 = 5
 ```
 
 * This makes sense, right? (Assume compatible runtime representation.)
 
+. . .
+
+"Client says they can handle a production of any real number, so it is safe to provide
+something that will only produce integer values."
+
 ## Textbook subtyping {.left_align data-transition="fade" }
 
 * "Have a function of type `Real -> Int`, want one like `Real -> Real`"
-
-* This makes sense, right?
 
 "Client says they can handle a production of any real number, so it is safe to provide
 something that will only produce integer values."
@@ -620,7 +700,9 @@ Y -> Y <: X -> X
 
 # Does Rust have variance? {.center}
 
-## Does Rust have variance: experiment 1
+## Does Rust have variance: [experiment 1][vec_slice_variance]
+
+[vec_slice_variance]: https://play.rust-lang.org/?gist=4777475b64e41e21863ed3dd35a76212
 
 ```art
           &Vec<i32>                   fn (&usize) -> &Vec<i32>
@@ -656,7 +738,9 @@ note:    found type `fn(&usize) -> &std::vec::Vec<i32>`
 
 ("hof" stands for "higher-order function")
 
-## Does Rust have variance: experiment 2
+## Does Rust have variance: [experiment 2][mut_imm_slice_variance]
+
+[mut_imm_slice_variance]: https://play.rust-lang.org/?gist=1c7ac483ca7490058bc2b8ef22c1f712
 
 ```art
          &mut [i32]                 fn (&usize) -> &mut [i32]
@@ -741,6 +825,8 @@ regarding aliasing info; we'll focus on another subtle one here.)
 
 ----
 
+<!-- https://play.rust-lang.org/?gist=704f577e66e64a62bfb53bbb833b9c4e -->
+
 ```rust
 static X: i32 = 10;
 
@@ -761,7 +847,9 @@ fn test_mycell_short_lifetime() {
 
 . . .
 
-(DON'T PANIC: We're going to step through this.)
+([DON'T PANIC][dont_panic_link]: We're going to step through this.)
+
+[dont_panic_link]: https://play.rust-lang.org/?gist=704f577e66e64a62bfb53bbb833b9c4e
 
 . . .
 
@@ -969,7 +1057,9 @@ after `step1` returns:
 
 Either `MyCell` is broken, or the compiler is.
 
-## Is `Cell` also broken? {.center}
+## Is `Cell` [also][show_cell_cfail] broken? {.center}
+
+[show_cell_cfail]: https://play.rust-lang.org/?gist=ddc78b073a4b50147b343358138d47d7
 
 ``` {.rust .compile_error .stripes}
 mod test_stdcell_short_lifetime {
@@ -1032,7 +1122,9 @@ which is a "language item" known specially to the compiler.
 
 # Yes, Rust has Subtyping {.center}
 
-## Yes, Rust has Subtyping
+## Yes, [Rust has Subtyping][ref_subtyping_demo]
+
+[ref_subtyping_demo]: https://play.rust-lang.org/?gist=b8cfc470abf30aa283e91197e9cf0a4b
 
 ```rust
 /// Picks either `x` or `y`, based on some internal choice.
@@ -1068,7 +1160,9 @@ This is sound because `'static` outlives `'a`
 
   * (syntax: `'static: 'a`, pronounced "outlives")
 
-## And the other direction?
+## And the [other direction][promote_cfail_demo]?
+
+[promote_cfail_demo]: https://play.rust-lang.org/?gist=9ed292d53082dae990111c9f897502bb
 
 ``` {.rust .compile_error }
 fn promote<'a>(x: &'a i32) -> &'static i32 {
@@ -1139,7 +1233,7 @@ Already established we should have `&'static T <: &'a T`.
 
 . . .
 
-What about `&'a &'static T` and `&'a &'a T`?
+What about a reference *to* a reference?
 
 Should `&'a &'static T <: &'a &'a T` ...?
 
@@ -1168,11 +1262,13 @@ But that's `&X`; what about `&mut X`?
 
 ## What about mut references
 
+[mut_refs_cfail_demo]: https://play.rust-lang.org/?gist=f93578cc4f20298616f8badf68aac500
+
 Should `&'a mut &'static T <: &'a mut &'a T` ...?
 
 . . .
 
-Allowing that exposes:
+Allowing that [exposes][mut_refs_cfail_demo]:
 
 
 ``` {.rust .compile_error}
@@ -1182,7 +1278,7 @@ mod promote_short_to_static {
         let mut ptr: &'static i32 = &mut X;
         step1(&mut ptr);
     }
-    fn step1<'a>(r1: &'a mut &'static i32) { let val: i32 = 13; step2(r, &val); }
+    fn step1<'a>(r1: &'a mut &'static i32) { let val: i32 = 13; step2(r1, &val); }
     fn step2<'b, T>(r2: &'b mut &'b T, r_val: &'b T) { *r2 = r_val; }
 }
 ```
@@ -1283,7 +1379,9 @@ mod demo_variance_and_static_ref_hof {
 
 . . .
 
-Compiles!
+[Compiles][variance_and_static_ref_demo]!
+
+[variance_and_static_ref_demo]: https://play.rust-lang.org/?gist=52bc0ea4b6d2b5fad2781aeccaf18e38
 
 . . .
 
@@ -1430,6 +1528,24 @@ That, combined with `impl` such that `Vec<T>: Deref<Target=[T]>`, explains
 
 -->
 
+## Auto reborrows
+
+As if things weren't confusing enough ...
+
+If you pass a mutable `value` reference into an expression context that is
+itself inferred to be expecting a reference, the compiler will automatically
+insert `&mut *value`.
+
+. . .
+
+Main effect of this: passing a `&mut T` does not always *move* it;
+sometimes it implicitly reborrows (so that you can mutate the `&mut`
+after the call, rather than losing access to it).
+
+. . .
+
+See [bluss "Stuff the Identity Function Does"](https://bluss.github.io/rust/fun/2015/10/11/stuff-the-identity-function-does/)
+
 ## Protocols
 
 How did we get `EndToEndErr` from the results of `phase_1`/`phase_2`?
@@ -1525,7 +1641,7 @@ impl From<PhaseTwoErr> for EndToEndErr {
 
 (So, all the magic here is in macros and trait system.)
 
-## Gotchas re: coercions
+## Gotchas re: coercions and auto-(re)borrows
 
 Compiler needs the expected type.
 
