@@ -88,6 +88,16 @@ presentation.
 
 (Sometimes exploratory science, sometimes magic show.)
 
+## Poll {.center .left_align}
+
+Raise your hand if you ...
+
+>- know what [http://play.rust-lang.org](http://play.rust-lang.org) is?
+
+>- know difference between a slice of `T` (i.e. `&[T]`) and a `Vec<T>`?
+
+>- know what `PhantomData<T>` is?
+
 # What is subtyping? {.center}
 
 ## Why do we care about subtyping?
@@ -163,9 +173,9 @@ fn composed(a: Ast) -> Result<Out, EndToEndErr> {
 ```rust
 fn rotate(nums: &mut [i32]) {
     let len = nums.len();
-    let first = nums[0];
-    for i in 1..len { nums[i-1] = nums[i]; }
-    nums[len-1] = first;
+    let first = nums[0];                     // save first number
+    for i in 1..len { nums[i-1] = nums[i]; } // shift up all other numbers
+    nums[len-1] = first;                     // put saved number at end
 }
 ```
 
@@ -175,7 +185,7 @@ fn rotate(nums: &mut [i32]) {
 fn demo_rotate() {
     let v = vec![1, 2, 3];
     rotate(v);
-    assert_eq!(v, &[3, 1, 2]);
+    assert_eq!(v, &[2, 3, 1]);
 }
 ```
 
@@ -192,9 +202,9 @@ does it compile?
 ``` {.rust}
 fn rotate(nums: &mut [i32]) {
     let len = nums.len();
-    let first = nums[0];
-    for i in 1..len { nums[i-1] = nums[i]; }
-    nums[len-1] = first;
+    let first = nums[0];                     // save first number
+    for i in 1..len { nums[i-1] = nums[i]; } // shift up all other numbers
+    nums[len-1] = first;                     // put saved number at end
 }
 ```
 
@@ -208,11 +218,17 @@ fn demo_rotate() {
 
 . . .
 
+<!--
+```rust
+#[test]
+```
+-->
+
 ```rust
 fn demo_rotate() {
     let mut v = vec![1, 2, 3];
     rotate(&mut v);
-    assert_eq!(v, &[3, 1, 2]);
+    assert_eq!(v, &[2, 3, 1]);
 }
 ```
 
@@ -235,6 +251,10 @@ mod demo_vec_slice {
             v
   fn expect(&[i32])
 ```
+
+. . .
+
+"If it compiles, it works"
 
 ## Exploring References
 
