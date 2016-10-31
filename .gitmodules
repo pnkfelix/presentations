@@ -11,3 +11,6 @@
 [submodule "rust-marcomms-agency-day/reveal.js"]
 	path = rust-marcomms-agency-day/reveal.js
 	url = https://github.com/pnkfelix/reveal.js.git
+[submodule "rust-paris-meetup-oct2016/reveal.js"]
+	path = rust-paris-meetup-oct2016/reveal.js
+	url = git@github.com:pnkfelix/reveal.js.git
