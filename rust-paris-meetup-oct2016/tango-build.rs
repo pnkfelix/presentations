@@ -76,6 +76,7 @@ fn run_mon_artiste(id: &str, content: &str) -> String {
         x_scale: 10, y_scale: 16,
         font_family: "Menlo".to_string(), font_size: 16,
         show_gridlines: false,
+        infer_rect_elements: true,
         name: (if id == "" { "rustfest" } else { id }).to_string(),
     };
     let s = content.parse::<Grid>().unwrap().into_scene(&Default::default());
