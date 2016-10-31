@@ -3,7 +3,7 @@
 ### Felix Klock (`@pnkfelix`), Mozilla Research
 ### Rust Paris Meetup; 31 Oct 2016
 
-<!-- Slides: [`http://bit.ly/2cMFbYB`](http://bit.ly/2cMFbYB) -->
+Slides: [`http://bit.ly/2eeHVg0`](http://bit.ly/2eeHVg0)
 
 <table>
 <tr>
