@@ -925,61 +925,8 @@ Are `PhaseOneErr` and `PhaseTwoErr` subtypes of `EndToEndErr`?
 
 . . .
 
-Answer: Magic is hidden behind the `try!` (and some trait impls)
-
-## Gotchas re: coercions and auto-(re)borrows
-
-Compiler needs the expected type.
-
-E.g. this compiles and runs:
-```rust
-fn process1(input: &[i32]) { }
-fn foo() { process1(&vec![1, 2, 3]); }
-```
-
-but this fails at compile time:
-
-``` {.rust .compile_error }
-trait Input { }
-impl Input for [i32] { }
-fn process2<I>(input: &I) where I: Input { }
-fn bar() { process2(&vec![1, 2, 3]); }
-```
-
-## Why?
-
-
-``` {.rust}
-fn process1(input: &[i32]) { }
-```
-
-```art
-       &Vec<i32>
-          |
-          v
- process1(&[i32])
-```
-
-Compiler sees input + expected types
-
- * adds `&Vec -> &[i32]` coercion
-
-. . .
-
-``` {.rust .compile_error }
-fn process2<I>(input: &I) where I: Input { }
-```
-
-```art
-         &Vec<i32>
-            |
-            v
-   process2(&I)
-```
-
-Compiler decides `I` is `Vec<i32>`
-
- * tries to find `impl Input for Vec<i32>`
+Answer: Magic is hidden behind the `try!` and some trait impls
+(see Rust Fest talk for details)
 
 # Conclusion  {.center}
 
