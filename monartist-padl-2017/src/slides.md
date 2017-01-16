@@ -653,8 +653,7 @@ A fun project I did while I was on paternity leave.
 
 Where can you get it?
 
-Once the frontend is done, I will put out a 1.0 release (fatherhood
-has been a distraction).
+Once frontend is done, will put out a 1.0 release (fatherhood: distracting)
 
 For now you can find it at:
 
