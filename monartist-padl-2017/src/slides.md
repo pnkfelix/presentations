@@ -210,9 +210,9 @@ Solution: Allow attribute injection via markup.
 
 ```
 .-----+     .-----+     .-----+
-|     |[a]  |     |[b]  |     |[c]
+|     |[a]  |[b]  |     |     |
 '-- --+     '-   -+     '-----+
-
+                         [c]
 [a]: stroke="blue" stroke-width="20"
 [b]: stroke="red" stroke-width="4" stroke-dasharray="10,1,10,5"
 [c]: fill="yellow"
@@ -220,9 +220,9 @@ Solution: Allow attribute injection via markup.
 
 ```art
 .-----+     +-----.     +-----.
-|     |[a]  |     |[b]  |     |[c]
+|     |[a]  |[b]  |     |     |
 '-- --+     +-   -'     +-----'
-
+                         [c]
 [a]: stroke="blue" stroke-width="20"
 [b]: stroke="red" stroke-width="4" stroke-dasharray="10,1,10,5"
 [c]: fill="yellow"
