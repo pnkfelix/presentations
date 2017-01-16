@@ -210,7 +210,7 @@ Solution: Allow attribute injection via markup.
 
 ```
 .-----+     .-----+     .-----+
-|     |[a]  |     |[b]  |     | [c]
+|     |[a]  |     |[b]  |     |[c]
 '-- --+     '-   -+     '-----+
 
 [a]: stroke="blue" stroke-width="20"
