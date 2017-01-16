@@ -580,6 +580,10 @@ But for practical use, it needs extensions beyond that shown so far.
   paper describes `maybe`, a way to collapse a `step` and an `end`
   into one rule.
 
+* A $⟨rendering⟩$ can also inject other attributes onto the path;
+  a local character can cause a global effect.
+  Allows e.g. `-=---=---=-` to show up as a dashed line.
+
 * Many rules often need to refer to the same set of characters.
   The DRY principle means that we should be able to identify such
   sets via a name: Variable Binding!
