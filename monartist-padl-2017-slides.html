@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Felix Klock (@pnkfelix), Mozilla">
+  <title>mon-artist: A Declarative DSL for Custom Rendering of ASCII Art</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="reveal.js/css/theme/mozilla-sandstone.css" id="theme">
+  <link rel="stylesheet" href="stripes.css"/>
+  <link rel="stylesheet" href="slide-style.css"/>
+  <link rel="stylesheet" href="code-style.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+  <h1 class="title">mon-artist: A Declarative DSL for Custom Rendering of ASCII Art</h1>
+  <h2 class="author">Felix Klock (<code>@pnkfelix</code>), Mozilla</h2>
+  <h3 class="date">PADL 2017, Paris, 16 January 2017</h3>
+</section>
+
+<section><section id="rendering-of-ascii-art" class="titleslide slide level1 center"><h1>&quot;Rendering of ASCII Art&quot; ?</h1></section></section>
+<section><section id="what" class="titleslide slide level1 center"><h1>What?</h1></section><section id="demo-early-demo-often" class="slide level2">
+<h1>Demo Early, Demo Often</h1>
+<div class="fragment">
+<pre><code>.---.
+|   |  Holy
+&#39;-+-&#39; Rounded Rectangle
+  |                       Batman
+  |   .----.  +-------+  .------.
+  |   |    |  |       |  |      |
+  &#39;--&gt;|    +-&gt;+       |-&gt;+      |
+      |    |  |       |  |      |
+      &#39;----&#39;  +-------+  &#39;------&#39;
+ (Note also when lines do and do not meet edges)</code></pre>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" viewBox="0 0 480 160" width="480" height="160">
+  <path stroke-width="2" d="M 5,16 Q 5,8 10,8Q 10,8 20,8L 30,8L 40,8Q 45,8 45,16L 45,32Q 45,40 40,40Q 40,40 30,40L 25,40L 10,40Q 5,40 5,32L 5,16 Z" fill="none" stroke="green" />
+  <path stroke-width="2" d="M 65,80 Q 65,72 70,72Q 70,72 80,72L 90,72L 100,72L 110,72Q 115,72 115,80L 115,96L 115,104L 115,128Q 115,136 110,136Q 110,136 100,136L 90,136L 80,136L 70,136Q 65,136 65,128L 65,112L 65,96L 65,80 Z" stroke="green" fill="none" />
+  <path fill="none" d="M 145,72L 160,72L 170,72L 180,72L 190,72L 200,72L 210,72L 220,72L 225,72L 225,96L 225,112L 225,128L 225,136L 210,136L 200,136L 190,136L 180,136L 170,136L 160,136L 150,136L 145,136L 145,112L 145,104L 145,80 Z" stroke-width="2" stroke="green" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 255,80 Q 255,72 260,72Q 260,72 270,72L 280,72L 290,72L 300,72L 310,72L 320,72Q 325,72 325,80L 325,96L 325,112L 325,128Q 325,136 320,136Q 320,136 310,136L 300,136L 290,136L 280,136L 270,136L 260,136Q 255,136 255,128L 255,112L 255,104L 255,80 Z" />
+  <path stroke="green" d="M 25,40L 25,64L 25,80L 25,96Q 25,104 30,104Q 30,104 40,104L 50,104L 55,104 l 3,0 m -3,-3 l 3,3 l -3,3 m 0,-3" stroke-width="2" fill="none" />
+  <path fill="none" d="M 115,104L 130,104L 140,104 m -2,0 l 4,0 m -4,-3 l 4,3 l -4,3 m 0,-3 m  4,0L 145,104" stroke-width="2" stroke="green" />
+  <path stroke-width="2" fill="none" stroke="green" d="M 230,104 L 240,104L 250,104 m -2,0 l 4,0 m -4,-3 l 4,3 l -4,3 m 0,-3 m  4,0L 255,104" />
+  <text text-anchor="start" font-family="Menlo" xml:space="preserve" fill="black" x="70" y="24" font-size="16" dominant-baseline="middle">Holy</text>
+  <text x="60" font-size="16" dominant-baseline="middle" font-family="Menlo" y="40" text-anchor="start" fill="black" xml:space="preserve">Rounded Rectangle</text>
+  <text x="260" y="56" font-size="16" dominant-baseline="middle" text-anchor="start" xml:space="preserve" fill="black" font-family="Menlo">Batman</text>
+  <text x="10" y="152" font-family="Menlo" xml:space="preserve" dominant-baseline="middle" fill="black" font-size="16" text-anchor="start">(Note also when lines do and do not meet edges)</text>
+</svg>
+</div>
+</section><section id="why" class="slide level2 center">
+<h1>Why?</h1>
+<div class="fragment">
+<p>I want to see more diagrams in program documentation</p>
+</div>
+<div class="fragment">
+<p>(also want Literate Programming to succeed; that's a different talk.)</p>
+<p>Goal: make it easy for documentation to include nice diagrams</p>
+</div>
+</section><section id="programmers-like-markdown" class="slide level2">
+<h1>Programmers like Markdown</h1>
+<div class="fragment">
+<p>(Not sure why, but here are some ideas)</p>
+<ul>
+<li><p>Lightweight Markup</p></li>
+<li><p>Text-based; therefore integrates with dev tools (<code>diff</code>, <code>git blame</code>)</p></li>
+<li><p>Source matches pre-existing conventions from text-based tools</p></li>
+<li><p>What You See Roughly Approximates What You Get (WYSRAWYG)</p></li>
+</ul>
+</div>
+</section><section id="section" class="slide level2 center">
+<h1></h1>
+<p>Some diagramming tools seek a WYSIWYG interface</p>
+<ul>
+<li><p>But its often onerous to use a separate tool</p></li>
+<li><p>(Caveat: Maybe modern IDE's make this easy...)</p></li>
+</ul>
+<div class="fragment">
+<p>ASCII Art provides a <em>WYSRAWYG</em> interface</p>
+</div>
+<div class="fragment">
+<p>Just need to compile it into a suitable output (I chose SVG as target)</p>
+</div>
+</section></section>
+<section><section id="sold-on-ascii-art-rendering" class="titleslide slide level1 center"><h1>Sold on ASCII Art Rendering?</h1></section></section>
+<section><section id="quick-review-of-svg" class="titleslide slide level1 center"><h1>Quick Review of SVG</h1></section><section id="svg-subset" class="slide level2">
+<h1>SVG (subset)</h1>
+<p>SVG: large feature set; tiny subset suffices for our tool.</p>
+<div class="fragment">
+<p><code>&lt;svg&gt;</code> XML with <code>&lt;path&gt;</code> or <code>&lt;text&gt;</code> elements; <code>&lt;path&gt;</code> may have <code>stroke</code>, <code>fill</code>, <code>d</code> attributes</p>
+</div>
+<div class="fragment">
+<p><code>d</code> attribute: string describes path's shape via a compact &quot;turtle language&quot; (hands up if you ever used LOGO?)</p>
+</div>
+<div class="fragment">
+<table>
+<tbody>
+<tr class="odd">
+<td><code>M</code></td>
+<td style="text-align: left;">Move</td>
+<td style="text-align: left;"><code>M x,y</code> starts a subpath at (x,y)</td>
+</tr>
+<tr class="even">
+<td><code>L</code></td>
+<td style="text-align: left;">Line to</td>
+<td style="text-align: left;"><code>L x,y</code> draws straight line to (x,y)</td>
+</tr>
+<tr class="odd">
+<td><code>Q</code></td>
+<td style="text-align: left;">Quadratic bezier</td>
+<td style="text-align: left;"><code>Q x1,y1 x2,y2</code> goes towards (x1,y1), but curves then ends at x2,y2</td>
+</tr>
+<tr class="even">
+<td><code>C</code></td>
+<td style="text-align: left;">Cubic bezier</td>
+<td style="text-align: left;"><code>C x1,y1 x2,y2 x3,y3</code> like above, with separate control points for start and end</td>
+</tr>
+<tr class="odd">
+<td><code>Z</code></td>
+<td style="text-align: left;">close current path</td>
+<td style="text-align: left;"><code>Z</code> draws line to first coordinate in subpath (established by Move)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section><section id="svg-subset-example" class="slide level2">
+<h1>SVG subset example</h1>
+<p><code>&lt;path d=&quot;M 0,8 L 10,8 Q 15,8 20,16 L 0,32&quot;&gt;&lt;/path&gt;</code></p>
+<div class="fragment">
+<table>
+<tr>
+<td>
+<code>M 0,8 L 10,8</code>
+</td>
+<td style="width:400px;overflow:visible;position:relative;">
+<svg style="position:absolute;top:0px">
+<path fill="none" d="M 0,8 L 10,8" stroke-width="2" stroke="green"></path>
+</svg>
+</td>
+</tr>
+<tr>
+<td>
+<code>      M 10,8 L 15,8 M 10,8 L 10,16</code>
+</td>
+<td style="width:400px;overflow:visible;position:relative;">
+<svg style="position:absolute;top:0px">
+<path fill="none" d="M 10,8 L 15,8 M 10,8 L 10,16" stroke-width="2" stroke="blue"></path>
+</svg>
+</td>
+</tr>
+<tr>
+<td>
+<code>      M 10,8 Q 15,8 10,16</code>
+</td>
+<td style="width:400px;overflow:visible;position:relative;">
+<svg style="position:absolute;top:0px">
+<path fill="none" d="M 10,8 Q 15,8 10,16" stroke-width="2" stroke="green"></path>
+</svg>
+</td>
+</tr>
+<tr>
+<td>
+<code>                  M 10,16 L 10,32</code>
+</td>
+<td style="width:400px;overflow:visible;position:relative;">
+<svg style="position:absolute;top:0px">
+<path fill="none" d="M 10,16 L 10,32" stroke-width="2" stroke="blue"></path>
+</svg>
+</td>
+</tr>
+<tr>
+<td>
+<code>                  M 10,16 L  0,32</code>
+</td>
+<td style="width:400px;overflow:visible;position:relative;">
+<svg style="position:absolute;top:0px">
+<path fill="none" d="M 10,16 L  0,32" stroke-width="2" stroke="green"></path>
+</svg>
+</td>
+</tr>
+<tr>
+<td>
+<code>M 0,8 L 10,8 Q 15,8 10,16 L  0,32</code>
+</td>
+<td style="width:400px;overflow:visible;position:relative;">
+<svg style="position:absolute;top:0px">
+<path fill="none" d="M 0,8 L 10,8 Q 15,8 10,16 L 0,32" stroke-width="2" stroke="green"></path>
+</svg>
+</td>
+</tr>
+</table>
+</div>
+<div class="fragment">
+<p>There won't be a quiz at the end, but just ... keep above data string and its rendering in mind for a bit.</p>
+</div>
+</section><section id="thats-enough-svg-for-us-to-be-dangerous" class="slide level2 center">
+<h1>That's enough SVG for us to be dangerous</h1>
+</section></section>
+<section><section id="rendering-tool-goals-and-approach" class="titleslide slide level1 center"><h1>Rendering Tool: Goals and Approach</h1></section><section id="goal-correspondence" class="slide level2">
+<h1>Goal: Correspondence</h1>
+<p>Output should not wildly deviate from input.</p>
+<pre><code>.------.     +----+   +----
+|      |     |    |   |
+|      |     |    +-+ |
+|      |     |    | | |
+|      |     |    | + +
+|      |     +----+  \ \
+|      |              \ \ .
+|      |     +----+    \ / \
+|      |     |    |     /   \
+&#39;------&#39;     +----+    &#39;-----+</code></pre>
+<svg baseProfile="full" viewBox="0 0 300 160" height="160" xmlns="http://www.w3.org/2000/svg" version="1.1" width="300">
+  <path fill="none" stroke-width="2" d="M 5,16 Q 5,8 10,8Q 10,8 20,8L 30,8L 40,8L 50,8L 60,8L 70,8Q 75,8 75,16L 75,32L 75,48L 75,64L 75,80L 75,96L 75,112L 75,128L 75,144Q 75,152 70,152Q 70,152 60,152L 50,152L 40,152L 30,152L 20,152L 10,152Q 5,152 5,144L 5,128L 5,112L 5,96L 5,80L 5,64L 5,48L 5,32L 5,16 Z" stroke="green" />
+  <path stroke-width="2" stroke="green" d="M 135,8L 150,8L 160,8L 170,8L 180,8L 185,8L 185,32L 185,40L 185,64L 185,80L 185,88L 170,88L 160,88L 150,88L 140,88L 135,88L 135,64L 135,48L 135,32L 135,16 Z" fill="none" />
+  <path fill="none" stroke="green" stroke-width="2" d="M 260,112 Q 265,104 270,112L 280,128L 290,144L 295,152L 280,152L 270,152L 260,152L 250,152L 240,152Q 235,152 240,144L 250,128L 260,112 Z" />
+  <path stroke="green" fill="none" d="M 135,120L 150,120L 160,120L 170,120L 180,120L 185,120L 185,144L 185,152L 170,152L 160,152L 150,152L 140,152L 135,152L 135,128 Z" stroke-width="2" />
+  <path stroke-width="2" fill="none" stroke="green" d="M 250,112 L 240,96L 230,80L 225,72L 225,48L 225,32L 225,16L 225,8L 240,8L 250,8L 260,8L 270,8" />
+  <path d="M 185,40L 200,40L 205,40L 205,64L 205,72L 220,96L 230,112L 240,128" stroke="green" fill="none" stroke-width="2" />
+</svg>
+<p>Input text forms a grid of characters; output SVG renders a grid of rectangular cells at corresponding coordinates.</p>
+</section><section id="goal-expose-underlying-svg" class="slide level2">
+<h1>Goal: Expose underlying SVG</h1>
+<p>Some SVG attributes can be inferred from input, but many have no natural ASCII art representation.</p>
+<p>Solution: Allow attribute injection via markup.</p>
+<div class="fragment">
+<pre><code>.-----+     .-----+     .-----+
+|     |[a]  |     |[b]  |     | [c]
+&#39;-- --+     &#39;-   -+     &#39;-----+
+
+[a]: stroke=&quot;blue&quot; stroke-width=&quot;20&quot;
+[b]: stroke=&quot;red&quot; stroke-width=&quot;4&quot; stroke-dasharray=&quot;10,1,10,5&quot;
+[c]: fill=&quot;yellow&quot;</code></pre>
+<svg viewBox="0 0 340 64" height="64" xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full" width="340">
+  <path d="M 245,8L 260,8L 270,8L 280,8L 290,8L 300,8Q 305,8 305,16L 305,32Q 305,40 300,40Q 300,40 290,40L 280,40L 270,40L 260,40L 250,40L 245,40L 245,16 Z" stroke="green" stroke-width="2" id="c" fill="yellow" />
+  <path stroke-width="20" d="M 30,40 L 20,40L 10,40Q 5,40 5,32L 5,16Q 5,8 10,8Q 10,8 20,8L 30,8L 40,8L 50,8L 60,8L 65,8L 65,32L 65,40L 50,40L 40,40" id="a" fill="none" stroke="blue" />
+  <path d="M 140,40 L 130,40L 125,40L 125,16L 125,8L 140,8L 150,8L 160,8L 170,8L 180,8Q 185,8 185,16L 185,32Q 185,40 180,40Q 180,40 170,40" fill="none" stroke="red" stroke-width="4" stroke-dasharray="10,1,10,5" id="b" />
+</svg>
+</div>
+</section><section id="goal-go-beyond-ascii" class="slide level2">
+<h1>Goal: Go Beyond ASCII</h1>
+<h3 id="its-2017">Its 2017</h3>
+<div class="fragment">
+<p>We should be able to support Unicode codepoints in our pictures.</p>
+</div>
+<div class="fragment">
+<p>but...</p>
+<p>... I am not going to write the rendering rules for over a million codepoints...</p>
+</div>
+</section><section id="goal-customizable-rules" class="slide level2">
+<h1>Goal: Customizable Rules</h1>
+<p>Do not hard code rendering logic; allow user to add or override rules.</p>
+<ul>
+<li>(This is where the &quot;domain specific language&quot; comes in.)</li>
+</ul>
+<div class="fragment">
+<p>E.g. different communities have different conventions for rounded corners:</p>
+<pre><code>                              .---.               /---\
+                        (a2s) |   |               |   | (ditaa)
+                              &#39;---&#39;               \---/</code></pre>
+<p>With appropriate rules, each of above render to:</p>
+<svg baseProfile="full" width="50" version="1.1" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 0 50 48">
+  <path d="M 5,16 Q 5,8 10,8Q 10,8 20,8L 30,8L 40,8Q 45,8 45,16L 45,32Q 45,40 40,40Q 40,40 30,40L 20,40L 10,40Q 5,40 5,32L 5,16 Z" stroke-width="2" fill="none" stroke="green" />
+</svg>
+</div>
+<div class="fragment">
+<p>(<em>Ta-dah</em>: This also <del>solves</del> delegates &quot;millions of codepoints&quot; problem)</p>
+</div>
+</section><section id="rules-drive-both-path-search-and-rendering" class="slide level2">
+<h1>Rules drive both path search and rendering</h1>
+<p>Our tool will only find paths (aka sequences of adjacent characters) that are described via the rules.</p>
+<p>(Hard-coding path search into tool and only exposing rendering in rules would be another route.)</p>
+<div class="fragment">
+<p>Confession: It was my experience <em>writing</em> a hard-coded path search (and struggling to debug its special case logic) that led to revelation.</p>
+<p>Driving the search via the DSL-encoded rules removes ability to add special cases. Core code becomes simpler!</p>
+</div>
+</section><section id="goal-compositional-rules" class="slide level2">
+<h1>Goal: Compositional Rules</h1>
+<p>Want to ease anticipation of:</p>
+<ul>
+<li><p>how rules effect rendering, and</p></li>
+<li><p>how new text changes diagram</p></li>
+</ul>
+</section></section>
+<section><section id="mental-model" class="titleslide slide level1 center"><h1>Mental model</h1></section><section id="naive-model" class="slide level2 center">
+<h1>Naive model</h1>
+<p>Each rule dictates how to render an individual character</p>
+<p>Tool searches for path as series of adjacent characters</p>
+<p>Each character contributes to the <code>d</code> attribute of the constructed path</p>
+</section><section id="dive-in-rendering-template" class="slide level2">
+<h1>Dive in: Rendering Template</h1>
+<p>Each rule specifies how to render a character in the context of its position (&quot;cell&quot;) in the grid.</p>
+<p>Each defines a rendering string, with placeholders where coordinates need to be substituted in.</p>
+<p>Here is a cell, with eight compass positions and a center point.</p>
+<svg xmlns="http://www.w3.org/2000/svg" width="150" version="1.1" height="208" viewBox="0 0 150 208" baseProfile="full">
+  <path fill="none" stroke="green" d="M 5,8L 20,8L 30,8L 40,8L 50,8L 60,8L 70,8L 80,8L 90,8L 100,8L 110,8L 120,8L 130,8L 140,8L 145,8L 145,32L 145,48L 145,64L 145,80L 145,96L 145,112L 145,128L 145,144L 145,160L 145,176L 145,192L 145,200L 130,200L 120,200L 110,200L 100,200L 90,200L 80,200L 70,200L 60,200L 50,200L 40,200L 30,200L 20,200L 10,200L 5,200L 5,176L 5,160L 5,144L 5,128L 5,112L 5,96L 5,80L 5,64L 5,48L 5,32L 5,16 Z" stroke-width="2" />
+  <text font-family="Menlo" dominant-baseline="middle" xml:space="preserve" x="10" font-size="16" text-anchor="start" fill="black" y="24">NW    N    NE</text>
+  <text fill="black" x="10" text-anchor="start" font-size="16" xml:space="preserve" dominant-baseline="middle" font-family="Menlo" y="104">W     C     E</text>
+  <text dominant-baseline="middle" x="10" text-anchor="start" fill="black" y="184" xml:space="preserve" font-size="16" font-family="Menlo">SW    S    SE</text>
+</svg>
+<p>So we have placeholders <code>{NW}</code>, <code>{N}</code>, <code>{C}</code>, et cetera.</p>
+</section><section id="example" class="slide level2">
+<h1>Example</h1>
+<p>To draw a <code>┐</code>, we could draw a line that goes from <code>W</code> to <code>C</code> and then to <code>S</code></p>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><code>┐</code></td>
+<td>:</td>
+<td style="text-align: left;"><code>&quot;M {W} L {C} L {S}&quot;</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><code>┴</code></td>
+<td>:</td>
+<td style="text-align: left;"><code>&quot;M {W} L {C} L {N} L {C} L {E}&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<pre><code>┐
+┴</code></pre>
+<svg width="10" baseProfile="full" viewBox="0 0 10 32" xmlns="http://www.w3.org/2000/svg" height="32" version="1.1">
+  <path stroke-width="2" d="M 0,8 L 5,8 L 5,16M 0,24 L 5,24 L 5,16 L 5,24 L 10,24" stroke="green" fill="none" />
+</svg>
+<div class="fragment">
+<pre><code>d=&quot;M 0,8 L 5,8 L 5,16 M 0,24 L 5,24 L 5,16 L 5,24 L 10,24&quot;
+      |     |     |      |      |      |      |       |
+     W(┐)  C(┐)  S(┐)   W(┴)   C(┴)   N(┴)   C(┴)   E(┴)</code></pre>
+<p>The main interesting thing here is that <code>S(┐)</code> = <code>N(┴)</code>, because of their relative positions on this path.</p>
+</div>
+</section></section>
+<section><section id="lets-not-be-naive" class="titleslide slide level1 center"><h1>Lets not be naive</h1></section><section id="problem" class="slide level2">
+<h1>Problem</h1>
+<p>Example of box drawing rules like <code>┐</code> : <code>&quot;M {W} L {C} L {S}&quot;</code> is naive</p>
+<p>(Which is okay, because this model is naive)</p>
+<div class="fragment">
+<p>If all we do is render each character as its own subpath, we are just recreating a text font (poorly).</p>
+</div>
+<div class="fragment">
+<p>In practice we want combinations of characters to work together.</p>
+</div>
+</section><section id="dive-in-how-to-render-a-." class="slide level2" data-transition="fade-out">
+<h1>Dive in: How to render a <code>.</code>?</h1>
+<pre><code>-.
+/</code></pre>
+<svg height="32" viewBox="0 0 20 32" width="20" xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full">
+  <path stroke="green" d="M 0,8 L 10,8Q 15,8 10,16L 0,32" stroke-width="2" fill="none" />
+</svg>
+<table>
+<tbody>
+<tr class="odd">
+<td></td>
+<td style="text-align: center;">hyphen</td>
+<td style="text-align: center;">period</td>
+<td>fwd slash</td>
+</tr>
+<tr class="even">
+<td><code>d =</code></td>
+<td style="text-align: center;"><code>&quot;M 0,8 L 10,8</code></td>
+<td style="text-align: center;"><code>Q 15,8 10,16</code></td>
+<td><code>L 0,32&quot;</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td style="text-align: center;"><code>M {W} L {E}</code></td>
+<td style="text-align: center;"><code>Q {C}  {SW}</code></td>
+<td><code>L {SW}</code></td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<p>(does that <code>d</code> string look familiar? Or the shape above it?)</p>
+</div>
+</section><section id="dive-in-how-to-render-a-.-1" class="slide level2" data-transition="fade">
+<h1>Dive in: How to render a <code>.</code>?</h1>
+<pre><code>-.
+/</code></pre>
+<svg xmlns="http://www.w3.org/2000/svg" height="32" baseProfile="full" width="20" version="1.1" viewBox="0 0 20 32">
+  <path stroke-width="2" stroke="green" fill="none" d="M 0,8 L 10,8Q 15,8 10,16L 0,32" />
+</svg>
+<table>
+<tbody>
+<tr class="odd">
+<td></td>
+<td style="text-align: center;">hyphen</td>
+<td style="text-align: center;">period</td>
+<td>fwd slash</td>
+</tr>
+<tr class="even">
+<td><code>d =</code></td>
+<td style="text-align: center;"><code>&quot;M 0,8 L 10,8</code></td>
+<td style="text-align: center;"><code>Q 15,8 10,16</code></td>
+<td><code>L 0,32&quot;</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td style="text-align: center;"><code>M {W} L {E}</code></td>
+<td style="text-align: center;"><code>Q {C}  {SW}</code></td>
+<td><code>L {SW}</code></td>
+</tr>
+</tbody>
+</table>
+<p><em>Continues</em> path from <code>-</code> through <code>.</code> (via a <code>Q</code>) and then slash back via <code>/</code>.</p>
+</section><section id="dive-in-how-to-render-a-.-2" class="slide level2" data-transition="fade-in">
+<h1>Dive in: How to render a <code>.</code>?</h1>
+<pre><code>-.
+/</code></pre>
+<svg xmlns="http://www.w3.org/2000/svg" height="32" version="1.1" width="20" baseProfile="full" viewBox="0 0 20 32">
+  <path stroke-width="2" stroke="green" fill="none" d="M 0,8 L 10,8Q 15,8 10,16L 0,32" />
+</svg>
+<table>
+<tbody>
+<tr class="odd">
+<td></td>
+<td style="text-align: center;">hyphen</td>
+<td style="text-align: center;">period</td>
+<td>fwd slash</td>
+</tr>
+<tr class="even">
+<td><code>d =</code></td>
+<td style="text-align: center;"><code>&quot;M 0,8 L 10,8</code></td>
+<td style="text-align: center;"><code>Q 15,8 10,16</code></td>
+<td><code>L 0,32&quot;</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td style="text-align: center;"><code>M {W} L {E}</code></td>
+<td style="text-align: center;"><code>Q {C}  {SW}</code></td>
+<td><code>L {SW}</code></td>
+</tr>
+</tbody>
+</table>
+<pre><code>-.
+  \</code></pre>
+<svg baseProfile="full" version="1.1" width="30" viewBox="0 0 30 32" height="32" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 0,8 L 10,8Q 15,8 20,16L 30,32" fill="none" stroke="green" stroke-width="2" />
+</svg>
+<table>
+<tbody>
+<tr class="odd">
+<td></td>
+<td style="text-align: center;">hyphen</td>
+<td style="text-align: center;">period</td>
+<td>back slash</td>
+</tr>
+<tr class="even">
+<td><code>d =</code></td>
+<td style="text-align: center;"><code>&quot;M 0,8 L 10,8</code></td>
+<td style="text-align: center;"><code>Q 15,8 20,16</code></td>
+<td><code>L 30,32&quot;</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td style="text-align: center;"><code>M {W} L {E}</code></td>
+<td style="text-align: center;"><code>Q {C}  {SE}</code></td>
+<td><code>L {SE}</code></td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<p>Template for <code>.</code> depends on neighboring characters on path!</p>
+</div>
+</section><section id="mental-model-1" class="slide level2">
+<h1>Mental model</h1>
+<p><del>Naive mental model: each rule dictates how a single character is rendered</del></p>
+<p>Mental model: each rule dictates how a single character is rendered in the <em>context of immediate neighbors</em> on a path</p>
+</section></section>
+<section><section id="the-language" class="titleslide slide level1 center"><h1>The Language</h1></section><section id="rules-encoded-via-oriented-tuples" class="slide level2">
+<h1>Rules Encoded via Oriented Tuples</h1>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">⟨<em>r</em><em>u</em><em>l</em><em>e</em>⟩</span></td>
+<td>::=</td>
+<td><span class="math inline">⟨<em>m</em><em>a</em><em>t</em><em>c</em><em>h</em>⟩</span></td>
+<td style="text-align: left;"><code>draw</code></td>
+<td></td>
+<td style="text-align: left;"><span class="math inline">⟨<em>r</em><em>e</em><em>n</em><em>d</em><em>e</em><em>r</em><em>i</em><em>n</em><em>g</em>⟩</span></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">⟨<em>m</em><em>a</em><em>t</em><em>c</em><em>h</em>⟩</span></td>
+<td>::=</td>
+<td><code>loop</code></td>
+<td style="text-align: left;"><span class="math inline">⟨<em>p</em><em>r</em><em>e</em><em>v</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span></td>
+<td><span class="math inline">⟨<em>d</em><em>i</em><em>r</em>⟩</span></td>
+<td style="text-align: left;"><span class="math inline">⟨<em>c</em><em>u</em><em>r</em><em>r</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span></td>
+<td><span class="math inline">⟨<em>d</em><em>i</em><em>r</em>⟩</span></td>
+<td><span class="math inline">⟨<em>n</em><em>e</em><em>x</em><em>t</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td>|</td>
+<td><code>step</code></td>
+<td style="text-align: left;"><span class="math inline">⟨<em>p</em><em>r</em><em>e</em><em>v</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span></td>
+<td><span class="math inline">⟨<em>d</em><em>i</em><em>r</em>⟩</span></td>
+<td style="text-align: left;"><span class="math inline">⟨<em>c</em><em>u</em><em>r</em><em>r</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span></td>
+<td><span class="math inline">⟨<em>d</em><em>i</em><em>r</em>⟩</span></td>
+<td><span class="math inline">⟨<em>n</em><em>e</em><em>x</em><em>t</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td>|</td>
+<td><code>start</code></td>
+<td style="text-align: left;"></td>
+<td></td>
+<td style="text-align: left;"><span class="math inline">⟨<em>c</em><em>u</em><em>r</em><em>r</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span></td>
+<td><span class="math inline">⟨<em>d</em><em>i</em><em>r</em>⟩</span></td>
+<td><span class="math inline">⟨<em>n</em><em>e</em><em>x</em><em>t</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td>|</td>
+<td><code>end</code></td>
+<td style="text-align: left;"><span class="math inline">⟨<em>p</em><em>r</em><em>e</em><em>v</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span></td>
+<td><span class="math inline">⟨<em>d</em><em>i</em><em>r</em>⟩</span></td>
+<td style="text-align: left;"><span class="math inline">⟨<em>c</em><em>u</em><em>r</em><em>r</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">⟨<em>d</em><em>i</em><em>r</em>⟩</span> is a set of compass directions.</p>
+<p><span class="math inline">⟨<em>r</em><em>e</em><em>n</em><em>d</em><em>e</em><em>r</em><em>i</em><em>n</em><em>g</em>⟩</span> is string with placeholders, where a placeholder is either:</p>
+<ul>
+<li>compass coordinates <code>{N}</code>, <code>{NE}</code>, et cetera (as previously described), denoting points on the edge of the cell,</li>
+<li>the center of the cell <code>{C}</code></li>
+<li>the point nearest the incoming neighbor <code>{I}</code> or outgoing <code>{O}</code></li>
+<li>the reflection of the the previous points <code>{RI}</code> and <code>{RO}</code></li>
+</ul>
+</section><section id="why-four-cases-for-match" class="slide level2 center">
+<h1>Why four cases for <span class="math inline">⟨<em>m</em><em>a</em><em>t</em><em>c</em><em>h</em>⟩</span>?</h1>
+<p><span class="math inline">⟨<em>m</em><em>a</em><em>t</em><em>c</em><em>h</em>⟩</span> has both <code>loop</code> and <code>start</code> forms that can initiate a path.</p>
+<p>Purpose: The tool actually distinguishes closed and unclosed paths.</p>
+</section><section id="unclosed-paths" class="slide level2">
+<h1>Unclosed paths</h1>
+<p>Unclosed paths <code>start</code> with a character <span class="math inline">⟨<em>c</em><em>u</em><em>r</em><em>r</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span> and a neighbor <span class="math inline">⟨<em>n</em><em>e</em><em>x</em><em>t</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span>, follow a sequence of <code>step</code>s (each of which carries a prev/curr/next triple), and terminate at an <code>end</code> with a <span class="math inline">⟨<em>p</em><em>r</em><em>e</em><em>v</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span> and <span class="math inline">⟨<em>c</em><em>u</em><em>r</em><em>r</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span>.</p>
+<pre><code>--+
+   \</code></pre>
+<svg version="1.1" baseProfile="full" height="32" viewBox="0 0 40 32" xmlns="http://www.w3.org/2000/svg" width="40">
+  <path stroke="green" stroke-width="2" d="M 0,8 L 10,8L 20,8L 25,8L 40,32" fill="none" />
+</svg>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">start <code>-</code></td>
+<td>step <code>-</code></td>
+<td style="text-align: left;">step <code>+</code></td>
+<td style="text-align: center;">end <code>\</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>M 0,8 L 10,8</code></td>
+<td><code>L 20,8</code></td>
+<td style="text-align: left;"><code>L 25,8</code></td>
+<td style="text-align: center;"><code>L 40,32</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>M {RO} L {O}</code></td>
+<td><code>L {O}</code></td>
+<td style="text-align: left;"><code>L {C}</code></td>
+<td style="text-align: center;"><code>L {SE}</code></td>
+</tr>
+</tbody>
+</table>
+<p>Relevant Rules:</p>
+<pre><code>start              &quot;-&quot; (E,W) &quot;-+&quot; draw &quot;M {RO} L {O}&quot;
+step  &quot;-&quot;   (E,W)  &quot;-&quot; (E,W) ANY  draw &quot;L {O}&quot;
+step  &quot;-&quot;   (E,W)  &quot;+&quot; ANY   ANY  draw &quot;L {C}&quot;
+ end  ANY    SE    &quot;\&quot;            draw &quot;L {SE}&quot;</code></pre>
+</section><section id="closed-paths" class="slide level2">
+<h1>Closed paths</h1>
+<p>Closed paths start with a <code>loop</code>, followed by a sequence of <code>step</code>s required to end with a step that includes the opening <span class="math inline">⟨<em>p</em><em>r</em><em>e</em><em>v</em><em>c</em><em>h</em><em>a</em><em>r</em>⟩</span> for the <code>loop</code>; a <code>Z</code> is automatically inserted afterward to close the path.</p>
+<pre><code>+---+
+ \ /
+  +</code></pre>
+<svg width="50" viewBox="0 0 50 48" xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full" height="48">
+  <path stroke-width="2" d="M 5,8L 20,8L 30,8L 40,8L 45,8L 30,32L 25,40L 10,16 Z" fill="none" stroke="green" />
+</svg>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><code>M 5,8</code></td>
+<td><code>L 20,8</code></td>
+<td><code>L 30,8</code></td>
+<td><code>L 40,8</code></td>
+<td style="text-align: left;"><code>L 45,8</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><code>M {C}</code></td>
+<td><code>L {O}</code></td>
+<td><code>L {O}</code></td>
+<td><code>L {O}</code></td>
+<td style="text-align: left;"><code>L {C}</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">loop <code>+</code></td>
+<td>step <code>-</code></td>
+<td>step <code>-</code></td>
+<td>step <code>-</code></td>
+<td style="text-align: left;">step <code>+</code></td>
+</tr>
+</tbody>
+</table>
+<table>
+<tbody>
+<tr class="odd">
+<td>...</td>
+<td><code>L 30,32</code></td>
+<td><code>L 25,40</code></td>
+<td><code>L 10,16</code></td>
+<td style="text-align: left;"><code>Z</code></td>
+</tr>
+<tr class="even">
+<td>...</td>
+<td><code>L {SW}</code></td>
+<td><code>L {C}</code></td>
+<td><code>L {NW}</code></td>
+<td style="text-align: left;"><code>Z</code></td>
+</tr>
+<tr class="odd">
+<td>...</td>
+<td>step <code>/</code></td>
+<td>step <code>+</code></td>
+<td>step <code>\</code></td>
+<td style="text-align: left;">(implied)</td>
+</tr>
+</tbody>
+</table>
+</section><section id="section-1" class="slide level2 center">
+<h1></h1>
+<p>(Paper has more detail on the path search process itself.)</p>
+</section></section>
+<section><section id="is-that-all" class="titleslide slide level1 center"><h1>Is that all?</h1></section><section id="is-this-really-a-language" class="slide level2">
+<h1>Is this really a language?</h1>
+<p>The core rule format described here is essentially a table of data.</p>
+<p>But for practical use, it needs extensions beyond that shown so far.</p>
+<ul>
+<li><p>The same <span class="math inline">⟨<em>r</em><em>e</em><em>n</em><em>d</em><em>e</em><em>r</em><em>i</em><em>n</em><em>g</em>⟩</span> can often be reused for different rules. The paper describes <code>maybe</code>, a way to collapse a <code>step</code> and an <code>end</code> into one rule.</p></li>
+<li><p>Many rules often need to refer to the same set of characters. The DRY principle means that we should be able to identify such sets via a name: Variable Binding!</p></li>
+</ul>
+</section></section>
+<section><section id="related-work" class="titleslide slide level1 center"><h1>Related work</h1></section><section id="ascii-art-renderers" class="slide level2">
+<h1>ASCII Art Renderers</h1>
+<p>Examples include <code>ditaa</code> and <code>a2s</code>. The latter heavily influenced this work.</p>
+<p>To my knowledge no other ASCII Art renderers allow the user to customize the path-search and rendering process.</p>
+</section><section id="picture-description-languages" class="slide level2">
+<h1>Picture Description Languages</h1>
+<p>Metapost, Tikz/PGF, Graphviz, mermaid.</p>
+<p>None of these are WYSRAWYG</p>
+</section><section id="object-modelling-languages" class="slide level2">
+<h1>Object Modelling Languages</h1>
+<p>Message Sequence Charts, UML, Alloy</p>
+<p>These often carry semantics, which is useful for their target domains, but inherently limits their flexibility. My goal is to enable drawing of semi-arbitrary figures.</p>
+</section></section>
+<section><section id="conclusion" class="titleslide slide level1 center"><h1>Conclusion</h1></section><section id="what-was-this" class="slide level2">
+<h1>What was this</h1>
+<p>User-customizable ASCII Art Rendering</p>
+<pre><code>            .---------.
+\   /       | Hooray! |
+ \o/        &#39;-+-------&#39;
+  +          /
+ / \    \o/
+/   \    +
+        / \</code></pre>
+<div class="fragment">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 112" height="112" width="230" version="1.1" baseProfile="full">
+  <path d="M 125,16 Q 125,8 130,8Q 130,8 140,8L 150,8L 160,8L 170,8L 180,8L 190,8L 200,8L 210,8L 220,8Q 225,8 225,16L 225,32Q 225,40 220,40Q 220,40 210,40L 200,40L 190,40L 180,40L 170,40L 160,40L 150,40L 145,40L 130,40Q 125,40 125,32L 125,16 Z" stroke-width="2" fill="none" stroke="green" />
+  <path d="M 0,16 L 10,32L 20,48L 25,56L 40,80L 50,96" stroke="green" stroke-width="2" fill="none" />
+  <path fill="none" d="M 50,16 L 40,32L 30,48L 25,56L 10,80L 0,96" stroke-width="2" stroke="green" />
+  <path d="M 130,64 L 140,48L 145,40L 151.46446609406726,27.535533905932738 A 2,2 0 1 0 158.53553390593274,20.464466094067262  A 2,2 0 0 0 151.46446609406726,27.535533905932738 A 2,2 0 1 0 158.53553390593274,20.464466094067262" stroke="green" fill="none" stroke-width="2" />
+  <path stroke="green" stroke-width="2" fill="none" d="M 25,56L 25,45 A 2,2 0 1 0 25,35  A 2,2 0 0 0 25,45 A 2,2 0 1 0 25,35" />
+  <path d="M 80,64 L 90,80L 90,72 A 2,2  0 1 0  95,77  A 2,2  0 0 0 90,72 A 2,2 0 1 0 95,77L 95,88" fill="none" stroke-width="2" stroke="green" />
+  <path fill="none" d="M 110,64 L 100,80L 95,88L 80,112" stroke="green" stroke-width="2" />
+  <path d="M 95,88L 110,112" stroke-width="2" fill="none" stroke="green" />
+  <text font-family="Menlo" font-size="16" fill="black" x="140" xml:space="preserve" y="24" text-anchor="start" dominant-baseline="middle">H</text>
+  <text font-family="Menlo" x="160" text-anchor="start" y="24" font-size="16" dominant-baseline="middle" fill="black" xml:space="preserve">oray! </text>
+</svg>
+<p>(hmm there's ... some glitches in this rule set)</p>
+</div>
+<div class="fragment">
+<p>Good idea: Separate content from rendering rules (&amp; from core interpreter).</p>
+<p>Analogy: Its like HTML vs CSS (&amp; vs the browser)</p>
+</div>
+<div class="fragment">
+<p>A fun project I did while I was on paternity leave.</p>
+</div>
+</section><section id="where-is-it" class="slide level2">
+<h1>Where is it?</h1>
+<p>Where can you get it?</p>
+<p>Once frontend is done, will put out a 1.0 release (fatherhood: distracting)</p>
+<p>For now you can find it at:</p>
+<p><a href="https://github.com/pnkfelix/mon-artist/" class="uri">https://github.com/pnkfelix/mon-artist/</a></p>
+<div class="fragment">
+<p>Thanks for listening!</p>
+</div>
+</section></section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display the page number of the current slide
+        slideNumber: 'c / t',
+        // Vertical centering of slides
+        center: false,
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
