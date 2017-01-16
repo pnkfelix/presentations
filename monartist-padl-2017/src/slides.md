@@ -1,6 +1,6 @@
 % mon-artist: A Declarative DSL for Custom Rendering of ASCII Art 
 % Felix Klock (`@pnkfelix`), Mozilla
-% PADL 2017, Paris, 16 January 2017
+% [http://bit.ly/2jmMJ6o](http://bit.ly/2jmMJ6o) PADL 2017, January 16, Paris
 
 # "Rendering of ASCII Art" ?  {.center}
 
