@@ -1,0 +1,26 @@
+[package]
+name = "monartist-padl-2017"
+version = "0.1.0"
+authors = ["Felix S. Klock II <pnkfelix@pnkfx.org>"]
+
+# build script first runs `tango` to sync `.rs` and `.md` files, and
+# then `pandoc` to convert `.md` files to `reveal.js` slideshows.
+
+build = "tango-build.rs"
+
+[build-dependencies]
+tango = "0.5.*"
+pandoc = "0.4.*"
+pandoc_ast = "0.3.*"
+#
+# In addition to tango and pandoc, I am also going to use my new mon-artiste crate
+# for drawing pictures. (No more last minute hand scrawls!)
+#
+pandoc-filter = { path = "/Users/fklock/Dev/Rust/pandoc-filter" }
+mon-artiste = { git = "https://github.com/pnkfelix/mon-artiste" }
+
+[lib]
+name = "monartist_padl_2017"
+path = "src/lib.rs"
+
+[dependencies]
