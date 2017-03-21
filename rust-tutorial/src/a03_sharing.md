@@ -62,7 +62,30 @@ let christine = Car::new();
 
 This is "Christine"
 
-![pristine unborrowed car](christine_car_pristine.png)
+```art
+
+                                      .---------------.
+                                     /  .--------. .-. \
+                                    /  /         | |  \ \
+                                   /  /          | |   \ \
+                                  /  /           | |    \ \
+                                 /  /            | |     \ \
+          .---------------------'  '-------------' '------' '-----.
+         /                                                         \[car]
+        /  ---                                                      \
+       /  ----                                                       \
+      /  -----                                                        \
+     /                                                                 \
+    '-------------------------------------------------------------------'
+             \      /                                      \      /
+              '----'                                        '----'
+
+[car]: stroke="red"
+```
+
+pristine unborrowed car
+
+<!-- ![pristine unborrowed car](christine_car_pristine.png) -->
 
 (apologies to Stephen King)
 
@@ -72,9 +95,33 @@ This is "Christine"
 let read_only_borrow = &christine;
 ```
 
-![single inspector (immutable borrow)](christine_car_single_inspector.png)
+```art
+              .----.   -.             .---------------.
+              | @ @|     \           /  .--------. .-. \
+              |    |      \         /  /         | |  \ \
+              '-+--'       \       /  /          | |   \ \
+                |           \     /  /           | |    \ \
+             +--+--+         \   /  /            | |     \ \
+          .-- \ |   \         +-'  '-------------' '------' '-----.
+         /   ------- \ -------                                     \[car]
+        /  ---  [h]    [h2]                                         \
+       /  ----                                                       \
+      /  -----                                                        \
+     /                                                                 \
+    '-------------------------------------------------------------------'
+             \      /                                      \      /
+              '----'                                        '----'
+
+[car]: stroke="red"
+[h]: stroke="red"
+[h2]: stroke="red"
+```
+
+single inspector (immutable borrow)
 
 (apologies to Randall Munroe)
+
+<!-- ![single inspector (immutable borrow)](christine_car_single_inspector.png) -->
 
 ----
 
@@ -84,13 +131,61 @@ read_only_borrows[3] = &christine;
 read_only_borrows[4] = &christine;
 ```
 
-![many inspectors (immutable borrows)](christine_car_many_inspectors.png)
+```art
+              .----.   -.             .---------------.
+              | @ @|     \           /  .--------. .-. \
+              |    |      \         /  /         | |  \ \
+    .---      '-+--'.----. \       /  /          | |   \ \
+    | @@        |   |    |  \     /  /           | |    \ \
+    |   |    +--+--+|    |   \   /  /            | |     \ \
+     +--' .-- \ | \ '--+-' \  +-'  '-------------' '------' '-----.
+    /    /   ------\    \   \                                      \[car]
+ +-+--+ /  --- [h]  +----+---+                                      \
+ |    |/  ----      |        |                                       \
+ |    /  -----      |        |                                        \
+ |   /              |        |                                         \
+ +- '---------------|        |------------------------------------------'
+  |   [car2] \      +--------+                             \      /
+  |           '----'  |    |                                '----'
+                      |    |
+[car]: stroke="red"
+[car2]: stroke="red"
+[h]: stroke="red"
+[h2]: stroke="red"
+```
+
+many inspectors (immutable borrows)
+
+<!-- ![many inspectors (immutable borrows)](christine_car_many_inspectors.png) -->
 
 ----
 
 When inspectors are finished, we are left again with:
 
-![pristine unborrowed car](christine_car_pristine.png)
+```art
+
+                                      .---------------.
+                                     /  .--------. .-. \
+                                    /  /         | |  \ \
+                                   /  /          | |   \ \
+                                  /  /           | |    \ \
+                                 /  /            | |     \ \
+          .---------------------'  '-------------' '------' '-----.
+         /                                                         \[car]
+        /  ---                                                      \
+       /  ----                                                       \
+      /  -----                                                        \
+     /                                                                 \
+    '-------------------------------------------------------------------'
+             \      /                                      \      /
+              '----'                                        '----'
+
+[car]: stroke="red"
+```
+
+pristine unborrowed car
+
+<!-- ![pristine unborrowed car](christine_car_pristine.png) -->
 
 ----
 
@@ -99,14 +194,38 @@ let mutable_borrow = &mut christine; // like taking keys ...
 give_arnie(mutable_borrow); // ... and giving them to someone
 ```
 
-![driven car (mutably borrowed)](christine_car_driven.png)
+```art
+
+                                      .---------------.
+                                     /  .--------. .-. \
+                                    /  / ---.    | |  \ \
+                                   /  / |@@ |    | |   \ \
+                                  /  /  |~~ |[d] | |    \ \
+                                 /  /  /+-|-'    | |     \ \
+          .---------------------'  '--+---+------' '------' '-----.
+         /                                                         \[car]
+        /  ---                                                      \
+       /  ----                                                       \
+      /  -----                                                        \
+     /                                                                 \
+    '-------------------------------------------------------------------'
+             \      /  / / /                               \      / / / /
+              '----'                                        '----'
+
+[car]: stroke="red"
+```
+
+driven car (mutably borrowed)
+
+<!-- ![driven car (mutably borrowed)](christine_car_driven.png) -->
 
 ## Can't mix the two in safe code! {.center}
 
+<!--
 ------------------------------------------------------------------------- ----------------------------------------------------------
 ![many inspectors (immutable borrows)](christine_car_many_inspectors.png) ![driven car (mutably borrowed)](christine_car_driven.png)
-------------------------------------------------------------------------- ----------------------------------------------------------
-
+------------------------------------------------------------------------- ---------------9-------------------------------------------
+-->
 
 ### Otherwise: (data) races!
 
@@ -119,7 +238,31 @@ read_only_borrows[3] = &christine;
 // ⇒ CHAOS!
 ```
 
-![mixing mutable and immutable is illegal](christine_car_driving_over_inspectors.png)
+```art
+
+                                      .---------------.
+                                     /  .--------. .-. \
+                                    /  / ---.    | |  \ \
+                                   /  / |@@ |    | |   \ \
+                                  /  /  |~~ |[d] | |    \ \
+                                 /  /  /+-|-'    | |     \ \
+          .---------------------'  '--+---+------' '------' '-----.
+         /                                                         \[car]
+        /  ---                                                      \
+       /  ----                                                       \
+      /  -----                                                        \
+ .---.                                .----.                           \
+ |   |------------------------------- |    |----------------------------'
+||x x|---+   \      /  [car2]     +---| x x|-+             \      / / / /
+|'---'    \   '----'           +--|   '----'  \--+          '----'
++----------+                  /   +------------+  \
+[car]: stroke="red"
+[car2]: stroke="red"
+```
+
+mixing mutable and immutable is illegal
+
+<!-- ![mixing mutable and immutable is illegal](christine_car_driving_over_inspectors.png) -->
 
 ## {.center}
 
