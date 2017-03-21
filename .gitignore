@@ -1,5 +1,10 @@
 *~
 
+rust-tutorial/src/*.rs
+rust-tutorial/src/demos/*.rs
+rust-tutorial/target/
+rust-tutorial/Cargo.lock
+
 curry-on2015/src/lib.rs
 curry-on2015/tango.stamp
 curry-on2015/target
