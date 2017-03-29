@@ -91,7 +91,17 @@ fn run_mon_artist(id: &str, content: &str) -> String {
     use mon_artist::svg::{IntoElement};
     use mon_artist::render::svg::{SvgRender};
     use mon_artist::render::{RenderS};
-    let format_table = Default::default();
+    let new_rules = r#"
+# Handle box characters in sensible way.
+start          '┬' (S) '|' draw "M {W} L {E} L {C}";
+start          '┴' (N) '|' draw "M {W} L {E} L {C}";
+step   ANY ANY '|' (S) '┴' draw "";
+step   ANY ANY '|' (N) '┬' draw "";
+  end  '|' (N) '┬'         draw "L {C} L {W} L {E}";
+  end  '|' (S) '┴'         draw "L {C} L {W} L {E}";
+"#;
+    let format_table = format!("{}\n{}", new_rules, mon_artist::DEFAULT_RULES);
+    let format_table = mon_artist::format::Table::from_lines(format_table.lines().map(|r|Ok(r.to_owned())));
     let s = content.parse::<Grid>().unwrap().into_scene(&format_table, Default::default());
     let r = SvgRender {
         x_scale: 10, y_scale: 16,
