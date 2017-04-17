@@ -1,0 +1,53 @@
+[package]
+name = "craftconf-2017"
+version = "0.1.0"
+authors = ["Felix S. Klock II <pnkfelix@pnkfx.org>"]
+
+build = "build.rs"
+
+[dependencies]
+piston_window = "0.64"
+# image = "0.6.0"
+vecmath = "0.2.0"
+ramp = "0.2.3"
+num = "0.1.30"
+stopwatch = "0.0.6"
+rayon = "0.6"
+itertools = "0.4.10"
+hyper = "0.10"
+# simple_parallel
+crossbeam = "0.2.8"
+dispatch = "0.1"
+
+# The preprocessor is the `tango` crate, so we need to add that
+# to the build-dependencies.
+
+[build-dependencies]
+tango = "^0.4.*"
+cmd-pandoc = "^0.2.*"
+mon-artist = "0.1"
+pandoc = "0.6.*"
+pandoc_ast = "0.6.*"
+walkdir = "1.0"
+
+# Since the lib may be a tango file stored in `src/lib.md`, we need to
+# explicitly specify that this is a library project with a `[lib]`
+# section, which then requires an explicit name.
+
+[lib]
+name = "lib"
+
+# [features]
+# gmp = ["rust-gmp"]
+# 
+# [dependencies.rust-gmp]
+# version = "0.2.10"
+# optional = true
+# 
+# [[bin]]
+# name = "paint"
+# path = "src/demos/paint.rs"
+# 
+# [[bin]]
+# name = "mandelbrot"
+# path = "src/demos/mandelbrot.rs"
