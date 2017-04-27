@@ -8,7 +8,12 @@
 
 /* .sourceCode pre code { font-family: Menlo,monospace; font-size: 100%; line-height: initial; background-color: #f3fff3; } */
 /* .sourceCode pre { font-family: Menlo,monospace; font-size: 100%; line-height: initial; background-color: #f3fff3 } */
-.sourceCode pre { background-color: #f3fff3 }
+.sourceCode.cpp code  { background-color: #e2f2f2; }
+.sourceCode.java code { background-color: #ffcb73; }
+.sourceCode.rust code { background-color: #e3efd3; }
+.sourceCode.bash { background-color: #F0F0F0; }
+.sourceCode.javascript { background-color: #FFFFFF; }
+
 .sourceCode code {
     /* font-family: FiraCode,Menlo,monospace; */
     font-family: Menlo,monospace;
@@ -17,7 +22,7 @@
     /* -webkit-font-variant-ligatures: discretionary-ligatures; */
     /* font-size: 100%; */
     line-height: initial;
-    background-color: #f3fff3;
+    // background-color: #f3fff3;
 }
 pre { text-align: left; }
 
@@ -34,9 +39,7 @@ pre { text-align: left; }
 /* .sourceCode .rust code { color: black; background-color: #f3fff3; display: block } */
 .sourceCode pre.compile_error { color: black; background-color: #f7e8e8; }
 .sourceCode .compile_error code { color: black; background-color: #f7e8e8; }
-.sourceCode .compile_error code { background-color: brightwhite; }
-.sourceCode .bash { background-color: #F0F0F0; }
-.sourceCode .javascript { background-color: #FFFFFF; }
+// .sourceCode .compile_error code { background-color: brightwhite; }
 
 .error_message code, .error_message pre {
     font-family: Menlo,monospace;
