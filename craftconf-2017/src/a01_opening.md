@@ -1095,7 +1095,8 @@ error: aborting due to previous error
 * In both C++ and in Rust, you can easily eliminate the data race
 
  >- common approach: can wrap a mutex around `result`
- >- better: use separate result receiver for each thread, then add
+ >- better: use atomic operation (e.g. compare-and-swap, fetch-and-add)
+ >- better still: use separate result receiver for each thread, then add
     those up at end.
 
 * Point is: Rust *forces* you to resolve this bug

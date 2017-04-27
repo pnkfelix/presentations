@@ -216,6 +216,10 @@ fn demo_sharing_cross_threads() {
 >- `T: Sync` implies a reference to `T` (e.g. `&T`, `Arc<T>`)
    can be shared across threads
 
+>- `Send` enables Message Passing style concurrency, via channels
+
+>- `Sync` enables Shared State style concurrency; only `T` with synchronized access is allowed
+
 ## Any other solutions to this besides shared ownership? {.center}
 
 . . .
