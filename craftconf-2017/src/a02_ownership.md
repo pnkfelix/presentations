@@ -8,37 +8,87 @@ Let's buy a car
 
 ``` {.rust}
 let money: Money = bank.withdraw_cash();
-let my_new_car: Car = dealership.buy_car(money);
 ```
 
-``` {.rust .compile_error}
-let second_car = dealership.buy_car(money); // <-- cannot reuse
+```art
+  US   BANK    DEALERSHIP
+   .----
+   |
+   v money
+
+
+💰
+ [money]
+[money]: font-size="64"
 ```
 
-money transferred into `dealership`,
-and car transferred to us.
-
-## "Ownership is intuitive"  { data-transition="fade" }
+## "Ownership is intuitive"  { data-transition="fade-out" }
 
 Let's buy a car
 
 ``` {.rust}
 let money: Money = bank.withdraw_cash();
 let my_new_car: Car = dealership.buy_car(money);
-// let second_car = dealership.buy_car(money); // <-- cannot reuse
+```
+
+```art
+ US   BANK    DEALERSHIP
+  .------
+  |
+  v money
+
+  |
+  '----------------> 💰"thank you"
+  .--------------
+  |
+  v     my_new_car
+
+🚗
+[car]
+[car]: font-size="64"
 ```
 
 money transferred into `dealership`,
 and car transferred to us.
 
+. . .
+
+``` {.rust .compile_error}
+let second_car = dealership.buy_car(money); // <-- cannot reuse
+```
+
+## "Ownership is intuitive"  { data-transition="fade" }
 
 ``` {.rust}
+let money: Money = bank.withdraw_cash();
+let my_new_car: Car = dealership.buy_car(money);
+// let second_car = dealership.buy_car(money); // <-- cannot reuse
 my_new_car.drive_to(home);
 garage.park(my_new_car);
 ```
 
+```art
+US    BANK    DEALERSHIP    GARAGE
+.-------
+|
+v money
+
+|
+'----------------> 💰
+.--------------
+|
+v my_new_car
+🚗
+|
+'------------------------> 🚗
+                           [car]
+[car]: font-size="64"
+```
+
+. . .
+
 ``` {.rust .compile_error}
-my_new_car.drive_to(...) // now doesn't work
+my_new_car.drive_to(...) // doesn't work either (reuse again)
 ```
 
 (can't drive car without access to it, e.g. taking it
@@ -46,36 +96,45 @@ out of the garage)
 
 ## "Ownership is intuitive"  { data-transition="fade-in" }
 
-Let's buy a car
-
 ``` {.rust}
 let money: Money = bank.withdraw_cash();
 let my_new_car: Car = dealership.buy_car(money);
 // let second_car = dealership.buy_car(money); // <-- cannot reuse
-```
-
-money transferred into `dealership`,
-and car transferred to us.
-
-
-``` {.rust}
 my_new_car.drive_to(home);
 garage.park(my_new_car);
-// my_new_car.drive_to(...) // now doesn't work
-```
-
-(can't drive car without access to it, e.g. taking it
-out of the garage)
-
-``` {.rust}
+// my_new_car.drive_to(...) // doesn't work either (reuse again)
 let my_car = garage.unpark();
 my_car.drive_to(work);
 ```
+
+```art
+US    BANK    DEALERSHIP    GARAGE
+.-------
+|
+v money
+
+|
+'----------------> 💰
+.--------------
+|
+v my_new_car
+🚗
+|
+'---------------------------->
+.--------------------------
+|
+v        my_car
+🚗
+[car]
+[car]: font-size="64"
+```
+
 
 . . .
 
 ...reflection time...
 
+## Ownership is intuitive?
 
 ## Correction: Ownership is intuitive, except for programmers ...  { .center }
 

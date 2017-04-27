@@ -6,9 +6,7 @@
 
 . . .
 
-But `dispatch`, `crossbeam`, and `rayon` are 3rd party
-
-(not to mention `hyper` and a host of other crates used in this talk's construction)
+But `crossbeam` and `rayon` are 3rd party
 
 . . .
 
@@ -38,7 +36,7 @@ Edit the associated `Cargo.toml` file to:
 
 . . .
 
-"What's this about `crates.io`?"
+"What's this about publishing to `crates.io`?"
 
 ## crates.io
 
@@ -46,7 +44,7 @@ Open-source crate distribution site
 
 Has every version of every crate
 
-Cargo adheres to *semver*
+Cargo adheres to *semantic versioning* ("semver")
 
 ## Semver
 
@@ -62,6 +60,8 @@ From the cargo docs
 -->
 
 The use of [Semantic Versioning][] in `cargo` basically amounts to this:
+
+[Semantic Versioning]: http://semver.org/
 
 Major versions (MAJOR.minor.patch) are free to break whatever they want.
 
@@ -86,6 +86,7 @@ used *simultaneously* in the same program.
 
 This is important when pulling in third party libraries.
 
+<!--
 ## Fixing versions
 
 `cargo` generates a `Cargo.lock` file that tracks the versions you built the project with
@@ -99,47 +100,12 @@ However: library (i.e. intermediate) crates should *not* check their `Cargo.lock
  * Instead, everyone should follow sem.ver.; then individual applications can mix different libraries
    into their final product, upgrading intermediate libraries as necessary
 
-## Crate dependency graph
-
-Compiler ensures one cannot pass struct defined
-via `X` version 2.x.y into function expecting
-`X` version 1.m.n, or vice versa.
-
-[Semantic Versioning]: http://semver.org/
-
-```art
-+-------+                   +-------+
-| A 1.0 |=----------------->| A 2.0 |
-+-------+                   +-------+
-     ^        +-=--=--+       ^
-     |        : B 1.0 :       |
-     |        +--=--=-+       |
-     |            :           |
-     |            v           |
-     |        +-------+       |
-     |     .->| B 1.1 |<-.    |
-     |    /   +-------+   \   |
-     |   /                 \  |
-    +-------+             +-------+
-    |   C   |             |   D   |
-    +-------+             +-------+
-         ^                  ^
-         |                  |
-         |     +-------+    |
-         '-----|   P   |----'
-               +-------+
-```
-
-![](crate_dep_graph.png)
-
------------------------- --------------------- -------------------
-`A`: Graph Structure       `B`: Token API
-`C`: Lexical Scanner       `D`: GLL Parser     `P`: Linked Program
------------------------- --------------------- -------------------
+-->
 
 ## In Practice
 
-* If you (*) follow the sem.ver. rules, then you do not usually have to think hard about those sorts of pictures.
+* If you (*) follow the sem.ver. rules, then you do not usually have
+  to think hard about the crates you (recursively) import.
 
    * "you" is really "you and all the crates you use"
 

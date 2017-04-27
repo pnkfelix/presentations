@@ -10,8 +10,6 @@
 
 > - (... *especially* when it comes to concurrency)
 
-. . .
-
 ### Low-level hacking without fear of segfaults nor data races
 
 > - or more simply: "Hack without Fear"
@@ -28,8 +26,12 @@
 
 <div class="notes">
  * So far, sounds like C++
- * "the UB stops here"
+ * "but, the UB stops here"
 </div>
+
+----
+
+![Safety: No More Undefined Behavior](the_ub_stops_here.png)
 
 ## Safety and Parallelism {.center}
 
@@ -45,23 +47,1065 @@
 
   * msg passing via channels
 
-  * shared state via `Arc` and atomics, `Mutex`, etc
+  * shared state (R/W-capabilities controlled via types)
 
   * use native threads... or scoped threads... or work-stealing...
 
-## Why would you (Felix) work on Rust?  { .big_text data-transition="fade" }
+# Let's Jump In: Safety
+
+##
+
+##### C++
+
+```c++
+int gather_negs(std::vector<int> &input, std::vector<int> &out) {
+    int count = 0;
+    for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+        if (val < 0) { out.push_back(-val); count++; }
+    }
+    return count;
+}
+```
+
+##### Java
+
+```java
+static int gather_negs(ArrayList<Integer> input, ArrayList<Integer> out) {
+    int count = 0;
+    for (int val: input) {
+        if (val < 0) { out.add(-val); count++; }
+    }
+    return count;
+}
+```
+
+##### Rust
+
+```rust
+fn gather_negs(input: &Vec<i32>, out: &mut Vec<i32>) -> isize {
+    let mut count = 0;
+    for val_ref in input {
+        let val = *val_ref;
+        if val < 0 { out.push(-val); count += 1; }
+    }
+    return count;
+}
+```
 
 . . .
 
-It's awesome!
+(silly? well ... slides are ~~strawmen~~ succinct)
 
-(Were prior slides really not a sufficient answer?)
+## Sample usage of `gather_negs`
+
+<!--
+```rust
+fn test() {
+```
+-->
+
+```rust
+let values = [-1, 2, 3, -4, -5, -6, -7, -8, -9, 10];
+let mut input = Vec::new();
+input.extend_from_slice(&values); // put `values` into `input` vector
+let mut myvector = Vec::new();
+gather_negs(&input, &mut myvector); // gather neg vals of `input` into `myvector`
+```
+
+<!--
+```rust
+}
+```
+-->
+
+#### can make similar code for C++ and Java, e.g.: {newmargin=0}
+
+```c++
+int values[] = { -1, 2, 3, -4, -5, -6, -7, -8, -9, 10};
+std::vector<int> input(values, values + sizeof(values) / sizeof(int));
+std::vector<int> myvector;
+gather_negs(input, myvector); // gather neg vals of `input` into `myvector`
+```
+
+```art
+                      +-------------------------------+
+        input ------->| -1  2  3 -4 -5 -6 -7 -8 -9 10 |
+                      +-------------------------------+
+(BEFORE)
+                      +--+
+        myvector ---->|  |
+                      +--+
+```
 
 . . .
 
-oh, maybe you meant ...
+```art
+                      +-------------------------------+
+        input ------->| -1  2  3 -4 -5 -6 -7 -8 -9 10 |
+                      +-------------------------------+
+(AFTER)
+                      +----------------------+
+        myvector ---->|  1  4  5  6  7  8  9 |
+                      +----------------------+
+```
 
-## Why would Mozilla sponsor Rust?   { data-transition="fade" }
+. . .
+
+##### (Same for Rust, C++ and Java). So why is Rust special?
+
+## More C++ `gather_negs`
+
+<div class="notes">Strawman Example Alert!</div>
+
+```c++
+int values[] = { -1, 2, 3, -4, -5, -6, -7, -8, -9, 10};
+std::vector<int> input(values, values + sizeof(values) / sizeof(int));
+std::vector<int> myvector = input;
+
+gather_negs(myvector, myvector); // gather neg vals of `myvector` into `myvector`
+```
+
+How does *this* behave?
+
+. . .
+
+Might expect:
+
+```art
+                      +-----------------------------+
+(BEFORE)              | -1 2 3 -4 -5 -6 -7 -8 -9 10 |
+                      +-----------------------------+
+
+                      +-------------------------------------------+
+(AFTER)               | -1 2 3 -4 -5 -6 -7 -8 -9 10 1 4 5 6 7 8 9 |
+                      +-------------------------------------------+
+```
+. . .
+
+##### Reality (for C++) is:
+
+```art
+
++-----------------------------------------------------------------------+
+| -1 2 3 -4 -5 -6 -7 -8 -9 10 1 4 5 6 7 8 9 1 4 5 6 7 8 9 1 4 5 6 7 8 9 |
++-----------------------------------------------------------------------+
+```
+
+. . .
+
+##### or:
+
+```art
++-------------------------------------------------------------------------------------------+
+| -1 2 3 -4 -5 -6 -7 -8 -9 10 1 4 5 6 7 8 9 1 4 5 6 7 8 9 536870912 536870912 1 4 5 6 7 8 9 |
++-------------------------------------------------------------------------------------------+
+```
+
+. . .
+
+##### or:
+
+```
+Segmentation fault: 11
+```
+
+# C++ and Undefined Behavior
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+>   for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+        if (val < 0) {
+            out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val                 .-------------------------------------------- iter
+                            |
+                            v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10    |
+            len = 10     +----------------------------------+
+            cap = 11                                     ^
+                                                         |
+                                                         |
+                                                         |
+                                                         |
+                                                         |
+        myvector.end() ----------------------------------'
+```
+
+<div class="notes">Spelling out underlying vector representation
+here: three words, a pointer to the data buffer, its current length,
+and the buffered capacity, . Note I have chosen capacity here to
+accommodate my slides, rather than adhere to any one actual
+implementation.</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+    for (auto it = input.begin(); it != input.end(); ++it) {
+>       auto val = *it;
+        if (val < 0) {
+            out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = -1            .-------------------------------------------- iter
+                            |
+                            v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10    |
+            len = 10     +----------------------------------+
+            cap = 11                                     ^
+                                                         |
+                                                         |
+                                                         |
+                                                         |
+                                                         |
+        myvector.end() ----------------------------------'
+```
+
+<div class="notes">
+First we load the `val` from the iterator
+</div>
+
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+    for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+>       if (val < 0) {
+            out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = -1            .-------------------------------------------- iter
+                            |
+                            v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10    |
+            len = 10     +----------------------------------+
+            cap = 11                                     ^
+                                                         |
+                                                         |
+                                                         |
+                                                         |
+                                                         |
+        myvector.end() ----------------------------------'
+```
+
+<div class="notes">
+We check if its negative
+</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+    for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+        if (val < 0) {
+>           out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = -1            .-------------------------------------------- iter
+                            |
+                            v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |
+            len = 11     +----------------------------------+
+            cap = 11                                         ^
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+        myvector.end() --------------------------------------'
+```
+
+<div class="notes">
+It is negative, so we negate it and push the result (1) on the end.
+</div>
+
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+>   for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+        if (val < 0) {
+            out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val                    .----------------------------------------- iter
+                               |
+                               v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |
+            len = 11     +----------------------------------+
+            cap = 11                                         ^
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+        myvector.end() --------------------------------------'
+```
+
+<div class="notes">
+And we loop. Is the iteration done? No we haven't hit the end.
+</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+    for (auto it = input.begin(); it != input.end(); ++it) {
+>       auto val = *it;
+        if (val < 0) {
+            out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = 2                .----------------------------------------- iter
+                               |
+                               v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |
+            len = 11     +----------------------------------+
+            cap = 11                                         ^
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+        myvector.end() --------------------------------------'
+```
+
+<div class="notes">
+So again we load the value.
+</div>
+
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+    for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+>       if (val < 0) {
+            out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = 2                .----------------------------------------- iter
+                               |
+                               v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |
+            len = 11     +----------------------------------+
+            cap = 11                                         ^
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+        myvector.end() --------------------------------------'
+```
+
+<div class="notes">
+2 is non-negative, so we do nothing with it.
+</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+>   for (auto it = input.begin(); it != input.end(); ++it) {
+>       auto val = *it;
+>       if (val < 0) {
+            out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = 3                   .-------------------------------------- iter
+                                  |
+                                  v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |
+            len = 11     +----------------------------------+
+            cap = 11                                         ^
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+        myvector.end() --------------------------------------'
+```
+
+<div class="notes">
+The case for 3rd elem is just like 2nd, so we'll zoom through it.
+</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+>   for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+        if (val < 0) {
+            out.push_back(-val);
+        }
+    }
+```
+
+```art
+                                     .----------------------------------- iter
+                                     |
+                                     v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |
+            len = 11     +----------------------------------+
+            cap = 11                                         ^
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+        myvector.end() --------------------------------------'
+```
+
+<div class="notes">
+And we loop. Is the iteration done? No we still haven't hit the end.
+</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+    for (auto it = input.begin(); it != input.end(); ++it) {
+>       auto val = *it;
+        if (val < 0) {
+            out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = -4                     .----------------------------------- iter
+                                     |
+                                     v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |
+            len = 11     +----------------------------------+
+            cap = 11                                         ^
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+        myvector.end() --------------------------------------'
+```
+
+<div class="notes">
+So we load the value -4.
+</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+    for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+>       if (val < 0) {
+            out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = -4                     .----------------------------------- iter
+                                     |
+                                     v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |
+            len = 11     +----------------------------------+
+            cap = 11                                         ^
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+        myvector.end() --------------------------------------'
+```
+
+<div class="notes">
+And that's negative.
+</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+    for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+        if (val < 0) {
+>           out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = -4                     .----------------------------------- iter
+                                     |
+                                     v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |
+            len = 11     +----------------------------------+
+            cap = 11                                         ^
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+                                                             |
+        myvector.end() --------------------------------------'
+```
+
+<div class="notes">
+So we push ... but the backing buffer is already full
+</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+    for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+        if (val < 0) {
+>           out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = -4                     .----------------------------------- iter
+                                     |
+                                     v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |[old]
+            len = 11     +----------------------------------+
+            cap = 11
+                         +--------------------------------------------------+
+                         |                                                  |
+                         +--------------------------------------------------+
+
+
+        myvector.end()
+[old]: stroke="blue"
+```
+
+<div class="notes">
+Lets tease apart what `push_back` will do here. It needs to allocate a
+larger buffer.
+</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+    for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+        if (val < 0) {
+>           out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = -4                     .----------------------------------- iter
+                                     |
+                                     v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |[old]
+            len = 11     +----------------------------------+
+            cap = 11
+                         +--------------------------------------------------+
+                         | -1  2  3 -4 -5 -6 -7 -8 -9 10  1                 |
+                         +--------------------------------------------------+
+
+
+        myvector.end()
+[old]: stroke="blue"
+```
+
+<div class="notes">
+Then it copies the current contents to the newly allocated buffer.
+</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+    for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+        if (val < 0) {
+>           out.push_back(-val);
+        }
+    }
+```
+
+```art
+        val = -4                     .----------------------------------- iter
+                                     |
+                                     v
+        myvector         +----------------------------------+
+            buf -------->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1 |[old]
+            len = 11     +----------------------------------+
+            cap = 11
+                         +--------------------------------------------------+
+                         | -1  2  3 -4 -5 -6 -7 -8 -9 10  1  4              |
+                         +--------------------------------------------------+
+
+
+        myvector.end()
+[old]: stroke="blue"
+```
+
+<div class="notes">
+We finally push the value `4` onto the end, and we will also need to
+adjust `buf`, `len`, and `cap` (to point at the newly allocated
+buffer, with its new length and larger capacity).
+</div>
+
+## C++: Bugs yield Undefined Behavior { data-transition="fade" }
+
+```c++
+>   for (auto it = input.begin(); it != input.end(); ++it) {
+        auto val = *it;
+        if (val < 0) {
+            out.push_back(-val);
+        }
+    }
+```
+
+```art
+                                        .-------------------------------- iter
+                                        | [iter]
+                                        v
+        myvector         +----------------------------------+
+            buf -----.   : -1  2  3 -4 -5 -6 -7 -8 -9 10  1 :[old]
+            len = 12 |   +----------------------------------+
+            cap = 16 |
+                     |   +--------------------------------------------------+
+                     '-->| -1  2  3 -4 -5 -6 -7 -8 -9 10  1  4              |
+                         +--------------------------------------------------+
+                                                                ^
+                                                                |
+        myvector.end() -----------------------------------------'
+[old]: stroke="blue"
+[iter]: stroke="red"
+```
+
+<div class="notes">
+But `push_back` didn't know about `iter`.  Things have gone terribly
+terribly wrong.  (This is called "Iterator Invalidation" in C++. It is
+considered programmer error.)
+
+Note typical results are largely dependent on memory allocator
+(e.g. how soon old buffer is overwritten or returned to OS, and what its
+memory address range is relative to the new buffer).
+</div>
+
+## C++ chose speed over safety
+
+Iterator invalidation yields undefined behavior
+
+## Java has Iterator Invalidation too
+
+Analogous code in Java
+
+```java
+ArrayList<Integer> myvector = new ArrayList<Integer>(input);
+myvector.addAll(Arrays.asList(values));
+gather_negs(myvector, myvector);
+```
+
+yields `ConcurrentModificationException` at runtime.
+
+. . .
+
+(So Java remains safe; its collection code dynamically checks to
+detect iterator invalidation. Programmer's bug is detected at
+runtime.)
+
+## Rust
+
+Analogous code in Rust
+
+``` {.rust .compile_error}
+let mut myvector = Vec::new();
+myvector.extend(values.iter());
+gather_negatives(&myvector,
+                 &mut myvector  );
+```
+
+. . .
+
+yields:
+
+``` {.rust .compile_error}
+error: cannot borrow `myvector` as mutable 
+  because it is also borrowed as immutable
+  --> examples/vex.rs:18:27
+   |
+17 |     gather_negatives(&myvector,
+   |                       -------- immutable borrow occurs here
+18 |                      &mut myvector  );
+   |                           ^^^^^^^^  - immutable borrow ends here
+   |                           |
+   |                           mutable borrow occurs here
+
+error: aborting due to previous error
+```
+
+at *compile-time*.
+
+## Safe code means no undefined behavior {.left_align}
+
+>- Compiler rejects code that does unsafe things, when feasible
+
+>- Developer must explicitly opt into use of `unsafe` constructs,
+   like raw pointer addresses
+
+>- Some things checked at runtime (e.g. array bounds checks); errors
+   here yield "panics"
+
+>- No undefined behavior; but unwinds/aborts are allowed
+
+# Let's Jump In: Parallelism
+
+## Example: Sum of (even) numbers in C++
+
+Core function to add the even values in an integer range.
+
+```c++
+uint64_t do_partial_sum(int start, int to_do) {
+    uint64_t result = 0;
+    for (int i = start; i < start + to_do; i++) {
+        if (i % 2 == 0) { // avoid compiler reduction to closed form solution
+            result += i;
+        }
+    }
+    return result;
+}
+```
+
+## Parallelize it: Divide and conquer!
+
+```c++
+void thread_work(uint64_t *result, int start, int to_do) {
+    *result += do_partial_sum(start, to_do);
+}
+
+int main(int argc, char *argv[]) {
+    uint64_t result;
+    /* ... */
+    std::vector<std::thread *> threads;
+    result = 0;
+    for (int start_val = 0, i = 0;
+         start_val < max;
+         start_val += sum_per_thread, i++) {
+        threads.push_back(new std::thread(thread_work,
+                                          &result,
+                                          start_val,
+                                          sum_per_thread));
+    }
+    for (int i = 0; i < thread_count; i++) {
+        threads[i]->join();
+    }
+    /* ... */
+}
+```
+
+## Lets try it!
+
+(I know you're aching to see more Rust; we'll get to it!)
+
+## Lets try our C++ code { data-transition="fade" }
+
+threads  average time notes
+-------- ------------ -----
+1        (TBD)
+4        (TBD)
+1000     (TBD)
+-------- ------------ -----
+
+Four runs, 1 thread
+
+```art
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.474006s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.429937s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.430296s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.425924s
+```
+
+## Lets try our C++ code { data-transition="fade" }
+
+threads  average time notes
+-------- ------------ -----
+1        0.44004075
+4        (TBD)
+1000     (TBD)
+-------- ------------ -----
+
+Four runs, 1 thread
+
+```art
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.474006s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.429937s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.430296s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.425924s
+```
+
+## Lets try our C++ code { data-transition="fade" }
+
+threads  average time notes
+-------- ------------ -----
+1        0.44004075
+4        (TBD)
+1000     (TBD)
+-------- ------------ -----
+
+
+Four runs, 4 threads
+
+```art
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.154396s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.156933s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.166546s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.153196s
+```
+
+## Lets try our C++ code { data-transition="fade" }
+
+threads  average time notes
+-------- ------------ -----
+1        0.44004075
+4        0.15776775
+1000     (TBD)
+-------- ------------ -----
+
+
+Four runs, 4 threads
+
+```art
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.154396s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.156933s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.166546s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.153196s
+```
+
+## Lets try our C++ code { data-transition="fade" }
+
+threads  average time notes
+-------- ------------ -------
+1        0.44004075
+4        0.15776775
+1000     (TBD)
+-------- ------------ -------
+
+Four runs, 1000 threads
+
+```art
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.134191s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.137994s
+sum of 0 to 1000000000 result: 249850749500500000
+time 0.135118s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.134177s
+```
+
+## Lets try our C++ code { data-transition="fade" }
+
+threads  average time   notes
+-------- -------------- -------
+1        ~~0.44004075~~ (but
+4        ~~0.15776775~~ its all
+1000     ~~0.13537~~    bogus!)
+-------- -------------- -------
+
+Four runs, 1000 threads
+
+```art
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.134191s
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.137994s
+sum of 0 to 1000000000 result: 249850749500500000
+time 0.135118s                      -------[uhoh]
+sum of 0 to 1000000000 result: 249999999500000000
+time 0.134177s
+[uhoh]: stroke="red"
+```
+
+## Data Race!
+
+## Data Race!
+
+```c++
+void thread_work(uint64_t *result, int start, int to_do) {
+    *result += do_partial_sum(start, to_do);
+ // ~~~~~~~
+}
+
+int main(int argc, char *argv[]) {
+    uint64_t result;
+    /* ... */
+    std::vector<std::thread *> threads;
+    result = 0;
+    for (int start_val = 0, i = 0;
+         start_val < max;
+         start_val += sum_per_thread, i++) {
+        auto result_ptr = &result;
+                       // ~~~~~~~
+        threads.push_back(new std::thread(thread_work,
+                                          result_ptr,
+                                          start_val,
+                                          sum_per_thread));
+    }
+    for (int i = 0; i < thread_count; i++) {
+        threads[i]->join();
+    }
+    /* ... */
+}
+```
+
+## Analogous code in Rust
+
+```rust
+fn do_partial_sum(start: isize, to_do: isize) -> u64 {
+    let mut result: u64 = 0;
+    for i in start..(start + to_do) {
+        if i % 2 == 0 {
+            result += i as u64;
+        }
+    }
+    return result;
+}
+```
+
+. . .
+
+or if you prefer
+
+```rust
+fn do_partial_sum_alt(start: isize, to_do: isize) -> u64 {
+    (start..(start + to_do)).filter(|i| i % 2 == 0).map(|i| i as u64).sum()
+}
+```
+
+## Parallelized
+
+(Attempt at analogous code, now in Rust.)
+
+<!--
+```rust
+fn main() {
+    let sum_per_thread = 250000000;
+    let max = 1000000000;
+    let mut result: u64;
+```
+-->
+```{.rust .compile_error}
+let mut threads = Vec::new();
+result = 0;
+::crossbeam::scope(|scope| {
+    let mut start_val = 0;
+    while start_val < max {
+        let result_ptr = &mut result;
+        threads.push(scope.spawn(move || {
+            *result_ptr += do_partial_sum(start_val, sum_per_thread);
+        }));
+        start_val += sum_per_thread;
+    }
+    for thread in threads {
+        thread.join();
+    }
+});
+```
+<!--
+```rust
+}
+```
+-->
+
+## No data races allowed!
+
+```
+error: cannot borrow `*result` as mutable more than once at a time
+   --> src/a01_opening.rs:963:31
+    |
+960 | ::crossbeam::scope(|scope| {
+...
+962 |     while start_val < max {
+    |
+963 |         let result_ptr = &mut result;
+    |                               ^^^^^^
+    |                               |
+    |                               second mutable borrow occurs here
+    |                               first mutable borrow occurs here
+...
+972 | });
+    | - first borrow ends here
+
+error: aborting due to previous error
+```
+
+## Eliminating the race {.left_align}
+
+* In both C++ and in Rust, you can easily eliminate the data race
+
+ >- common approach: can wrap a mutex around `result`
+ >- better: use separate result receiver for each thread, then add
+    those up at end.
+
+* Point is: Rust *forces* you to resolve this bug
+
+* C++ allows silent, scheduler dependent failure (which may arise only rarely)
+
+# Why ...? (continued) {.center}
+
+
+## Why would Mozilla sponsor Rust?
 
 >- Hard to prototype research-y browser changes atop C++ code base
 
@@ -71,479 +1115,15 @@ oh, maybe you meant ...
 
 >- > "Our mission is to ensure the Internet is a global public resource, open and accessible to all. An Internet that truly puts people first, where individuals can shape their own experience and are empowered, safe and independent."
 
->- "accessible to all"
+>- "accessible to all": IMO, Rust may "bring system programming to the masses"
 
-# Let's Jump In
-
-## A Java Program
-
-```java
-
-```
-
-## A Rust Program
-
-```art
-    +------+
-    | ♕ /  |
-    |  /   |
-    | /    |
-    |♕-----|
-    | \♕   |
-    |  \   |
-    +------+
-```
-
-
-```rust
-type Row = i32;
-type Col = usize;
-
-/// Represents a n x n chess board holding only queens, with at most one queen per column.
-#[derive(Clone, PartialEq, Eq, Debug)]
-struct Board { n: usize, q_row_idx: Vec<Row>, }
-
-impl Board {
-    fn empty(n: usize) -> Board { Board { n: n, q_row_idx: vec![] } }
-
-    fn is_complete(&self) -> bool { self.q_row_idx.len() == self.n }
-
-    fn is_legal(&self) -> bool {
-        self.q_row_idx.iter().all(|row| *row <= self.n as i32) &&
-            self.collision().is_none()
-    }
-
-    fn is_illegal(&self) -> bool { !self.is_legal() }
-
-    fn collision(&self) -> Option<((Col, Row), (Col, Row))> {
-        for (my_col, &my_row) in self.q_row_idx.iter().enumerate() {
-            let mut ne = my_row;
-            let mut se = my_row;
-            for (idx, &nb_row) in self.q_row_idx[(my_col+1)..].iter().enumerate() {
-                let nb_col = my_col + 1 + idx;
-                ne += 1;
-                se -= 1;
-                if my_row == nb_row || ne == nb_row || se == nb_row {
-                    return Some(((my_col, my_row), (nb_col, nb_row)));
-                }
-            }
-        }
-        return None;
-    }
-}
-
-#[test]
-fn collisions() {
-    assert_eq!((Board { n: 4, q_row_idx: vec![0, 0] }).collision(), Some(((0, 0), (1, 0))));
-    assert_eq!((Board { n: 4, q_row_idx: vec![0, 2, 0] }).collision(), Some(((0, 0), (2, 0))));
-    assert_eq!((Board { n: 4, q_row_idx: vec![1, 3, 1] }).collision(), Some(((0, 1), (2, 1))));
-    assert_eq!((Board { n: 4, q_row_idx: vec![0, 1] }).collision(), Some(((0, 0), (1, 1))));
-    assert_eq!((Board { n: 4, q_row_idx: vec![1, 3, 2] }).collision(), Some(((1, 3), (2, 2))));
-    assert_eq!((Board { n: 5, q_row_idx: vec![2, 3, 1] }).collision(), Some(((0, 2), (1, 3))));
-    assert_eq!((Board { n: 5, q_row_idx: vec![2, 4, 0] }).collision(), Some(((0, 2), (2, 0))));
-    assert_eq!((Board { n: 4, q_row_idx: vec![1, 3, 0, 2] }).collision(), None);
-}
-```
-
-Solving n-queens
-
-```rust
-struct AllQueenPlacements { b: Board }
-
-impl Iterator for AllQueenPlacements {
-    type Item = Board;
-    fn next(&mut self) -> Option<Board> {
-        if self.b.is_final() {
-            return None;
-        }
-        if self.b.place_new().is_ok() || self.b.adjust_last().is_ok() {
-            return Some(self.b.clone());
-        }
-        // if we got here, then we were not able to place a new
-        // piece nor adjust the last one. Pop until we can find
-        // something to adjust, and try again.
-        loop {
-            if self.b.remove_last().is_err() {
-                break;
-            }
-            if self.b.adjust_last().is_ok() {
-                break;
-            }
-        }
-        return Some(self.b.clone());
-    }
-}
-
-struct LegalQueenPlacements { b: Board }
-
-impl Iterator for LegalQueenPlacements {
-    type Item = Board;
-    fn next(&mut self) -> Option<Board> {
-        if self.b.is_final() {
-            return None;
-        }
-
-        if self.b.place_new().is_ok() {
-            if self.b.is_legal() {
-                return Some(self.b.clone());
-            }
-            'adjust_just_placed: loop {
-                if self.b.adjust_last().is_ok() {
-                    if self.b.is_legal() {
-                        return Some(self.b.clone());
-                    } else {
-                        continue;
-                    }
-                } else {
-                    self.b.remove_last().unwrap();
-                    break;
-                }
-            }
-        }
-        // If we got here, then there was no location to place a
-        // new piece in the neighboring column. Do an iterative
-        // `{Adjust* Pop}*` until we can find something legal (or
-        // run out of options).
-        'adjust_search: loop {
-            if self.b.adjust_last().is_ok() {
-                if self.b.is_legal() {
-                    return Some(self.b.clone());
-                } else {
-                    continue;
-                }
-            }
-            if self.b.remove_last().is_err() {
-                self.b = Board::final_board(self.b.n);
-                return None;
-            }
-        }
-    }
-}
-```
-
-These are the helper methods for the high-level (though
-inefficient) iteration.
-
-```rust
-impl Board {
-    fn final_board(n: usize) -> Board {
-        Board { n: n, q_row_idx: ::std::iter::repeat(n as i32 - 1).take(n).collect() }
-    }
-    fn is_final(&self) -> bool {
-        self.q_row_idx.len() == self.n &&
-            self.q_row_idx.iter().all(|row| *row == (self.n as i32 - 1))
-    }
-
-    fn place_new(&mut self) -> Result<i32, ()> {
-        if self.q_row_idx.len() < self.n {
-            self.q_row_idx.push(0);
-            Ok(0)
-        } else {
-            Err(())
-        }
-    }
-
-    fn remove_last(&mut self) -> Result<i32, ()> {
-        match self.q_row_idx.pop() {
-            Some(x) => Ok(x),
-            None => Err(()),
-        }
-    }
-
-    fn adjust_last(&mut self) -> Result<i32, ()> {
-        match self.q_row_idx.last_mut() {
-            Some(ref mut l) if **l + 1 < self.n as i32 => {
-                **l += 1;
-                Ok(**l)
-            }
-            _ => Err(()),
-        }
-    }
-}
-```
-
-Lets try out the iterators.
-
-```rust
-#[test]
-fn all_2x2() {
-    let mut boards = AllQueenPlacements { b: Board::empty(2) };
-    let queens: Vec<_> = boards.map(|b| b.q_row_idx).collect();
-    assert_eq!(queens, vec![vec![0], vec![0,0], vec![0,1],
-                            vec![1], vec![1,0], vec![1,1]]);
-}
-
-#[test]
-fn all_3x3() {
-    let mut boards = AllQueenPlacements { b: Board::empty(3) };
-    let queens: Vec<_> = boards.map(|b| b.q_row_idx).collect();
-    assert_eq!(queens, vec![vec![0],
-                            vec![0,0], vec![0,0,0], vec![0,0,1], vec![0,0,2],
-                            vec![0,1], vec![0,1,0], vec![0,1,1], vec![0,1,2],
-                            vec![0,2], vec![0,2,0], vec![0,2,1], vec![0,2,2],
-                            vec![1],
-                            vec![1,0], vec![1,0,0], vec![1,0,1], vec![1,0,2],
-                            vec![1,1], vec![1,1,0], vec![1,1,1], vec![1,1,2],
-                            vec![1,2], vec![1,2,0], vec![1,2,1], vec![1,2,2],
-                            vec![2],
-                            vec![2,0], vec![2,0,0], vec![2,0,1], vec![2,0,2],
-                            vec![2,1], vec![2,1,0], vec![2,1,1], vec![2,1,2],
-                            vec![2,2], vec![2,2,0], vec![2,2,1], vec![2,2,2]]);
-}
-
-#[test]
-fn all_solved_1x1() {
-    let mut boards = AllQueenPlacements { b: Board::empty(1) };
-    let queens: Vec<_> = boards
-        .filter(|b| b.is_complete() && b.is_legal())
-        .map(|b| b.q_row_idx)
-        .collect();
-    assert_eq!(queens, vec![vec![0]]);
-}
-
-#[test]
-fn all_solved_3x3() {
-    let mut boards = AllQueenPlacements { b: Board::empty(3) };
-    let queens: Vec<_> = boards
-        .filter(|b| b.is_complete() && b.is_legal())
-        .collect();
-    assert_eq!(queens, Vec::<Board>::new());
-}
-
-#[test]
-fn all_solved_4x4() {
-    let mut boards = AllQueenPlacements { b: Board::empty(4) };
-    let queens: Vec<_> = boards
-        .filter(|b| b.is_complete() && b.is_legal())
-        .map(|b| b.q_row_idx)
-        .collect();
-    assert_eq!(queens, vec![vec![1,3,0,2], vec![2,0,3,1]]);
-}
-
-#[bench]
-fn nqueens_4x4_slow(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = AllQueenPlacements { b: Board::empty(4) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 2);
-    });
-}
-
-#[bench]
-fn nqueens_5x5_slow(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = AllQueenPlacements { b: Board::empty(5) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 10);
-    });
-}
-
-#[bench]
-fn nqueens_6x6_slow(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = AllQueenPlacements { b: Board::empty(6) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 4);
-    });
-}
-
-#[bench]
-fn nqueens_7x7_slow(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = AllQueenPlacements { b: Board::empty(7) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 40);
-    });
-}
-
-#[test]
-fn legal_3x3() {
-    let mut boards = LegalQueenPlacements { b: Board::empty(3) };
-    let queens: Vec<_> = boards.map(|b| b.q_row_idx).collect();
-    assert_eq!(queens, vec![vec![0], vec![0,2],
-                            vec![1],
-                            vec![2], vec![2,0]]);
-}
-
-#[test]
-fn legal_4x4() {
-    let mut boards = LegalQueenPlacements { b: Board::empty(4) };
-    let queens: Vec<_> = boards.map(|b| b.q_row_idx).collect();
-    assert_eq!(queens, vec![vec![0], vec![0,2], vec![0,3],   vec![0,3,1],
-                            vec![1], vec![1,3], vec![1,3,0], vec![1,3,0,2],
-                            vec![2], vec![2,0], vec![2,0,3], vec![2,0,3,1],
-                            vec![3], vec![3,0], vec![3,0,2], vec![3,1]]);
-}
-
-#[bench]
-fn nqueens_4x4_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(4) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 2);
-    });
-}
-
-#[bench]
-fn nqueens_5x5_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(5) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 10);
-    });
-}
-
-#[bench]
-fn nqueens_6x6_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(6) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 4);
-    });
-}
-
-#[bench]
-fn nqueens_7x7_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(7) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 40);
-    });
-}
-
-#[bench]
-fn nqueens_8x8_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(8) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 92);
-    });
-}
-
-#[bench]
-fn nqueens_9x9_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(9) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 352);
-    });
-}
-
-#[bench]
-fn nqueens_10x10_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(10) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 724);
-    });
-}
-
-#[bench]
-fn nqueens_11x11_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(11) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 2680);
-    });
-}
-
-#[bench]
-fn nqueens_12x12_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(12) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 14200);
-    });
-}
-
-#[bench]
-fn nqueens_13x13_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(13) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 73_712);
-    });
-}
-
-#[bench]
-fn nqueens_14x14_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(14) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 365_596);
-    });
-}
-
-#[bench]
-fn nqueens_15x15_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(15) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 2_279_184);
-    });
-}
-
-#[bench]
-fn nqueens_16x16_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(16) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 14_772_512);
-    });
-}
-
-#[bench]
-fn nqueens_17x17_pruned(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut boards = LegalQueenPlacements { b: Board::empty(17) };
-        let num_solns = boards
-            .filter(|b| b.is_complete() && b.is_legal())
-            .count();
-        assert_eq!(num_solns, 95_815_104);
-    });
-}
-```
-
+# Where is Rust now?
 
 ## Where is Rust now?
 
  * 1.0 release was back in May 2015
 
- * Rolling release cycle (up to Rust 1.7 as of March 2nd 2016)
+ * Rolling release cycle (up to Rust 1.16 as of March 16nd 2017)
 
  * Open source from the begining
    `https://github.com/rust-lang/rust/`
@@ -552,15 +1132,13 @@ fn nqueens_17x17_pruned(b: &mut ::test::Bencher) {
    `https://github.com/rust-lang/rfcs/`
 
  * Awesome developer community
-   (~1,000 people in `#rust`, ~250 people in `#rust-internals`, ~1,300 unique commiters to rust.git)
+   (~1,400 people in `#rust`, ~300 people in `#rust-internals`, ~1,900 unique commiters to rust.git)
+
+# Talk plan
 
 ## Talk plan
 
->- "Why Rust" Demonstration
+>- Demonstration, "Why Rust"
 >- "Ownership is easy" (... or is it?)
->- ___Sharing                        Stuff
-   -----------------------------  --------------------------------
-   Sharing *capabilities*         (Language stuff)
-   Sharing *work*                 (Parallelism stuff)
-   Sharing *code*                 (Open source distribution stuff)
-   -----------------------------  --------------------------------
+>- Sharing (Data) between Threads
+>- Sharing (Libraries) between People

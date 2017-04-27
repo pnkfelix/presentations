@@ -1,9 +1,6 @@
 # Final Words
 
-## Final Words {.center}
-
-### (and no more pictures)
-
+<!--
 ## Interop
 
 * Rust to C
@@ -17,20 +14,42 @@
 * Ruby, Python, etc to Rust
 
   * <div class="fragment">see e.g. `https://github.com/wycats/rust-bridge`</div>
+-->
 
-## Customers {.big_text .center}
+## So much more!
 
-Mozilla (of course)
+Touched on things like `Send` and `Sync`, but there is more to Rust's
+secret sauce
 
-Skylight
+>- Lifetimes
 
-MaidSafe
+>- Object-orientation via trait-references
 
-... others
+>- Unboxed closures
+
+. . .
+
+Lots of technology (and still evolving!)
+
+## Customers {.big_text .left_align}
+
+See [https://www.rust-lang.org/en-US/friends.html][friends]
+
+[friends]: https://www.rust-lang.org/en-US/friends.html
+
+* Mozilla (of course)
+
+* Dropbox (see "Wired" article on exodus from Amazon cloud)
+
+* MaidSafe
 
 ## Pivot from C/C++ to Rust {.big_text .center}
 
-Maidsafe is one example of this
+MaidSafe is one example of this
+
+[https://blog.maidsafe.net/2015/07/01/the-ants-are-coming/][ants]
+
+[ants]: https://blog.maidsafe.net/2015/07/01/the-ants-are-coming/
 
 ## Rust as enabler of individuals {.big_text .center}
 
@@ -38,9 +57,14 @@ Maidsafe is one example of this
 
 ### to "lauded systems hacker"
 
+. . .
+
+> Programming in Rust has made me look at C++ code in a whole new light
+
+<div class="notes">I believe experience with Rust will make you a better C++ programmer</div>
+
+
 <!--
-## The Buck Stops Here
--->
 
 ## Or if you prefer: {.big_text .center}
 
@@ -48,16 +72,22 @@ Enabling *sharing* systems hacking knowledge with everyone
 
 . . .
 
+> After experiencing Rust, I dread looking at code from prior projects ... I will now see how riddled with races it was
+
+. . .
+
 > Programming in Rust has made me look at C++ code in a whole new light
 
-## Thanks {.center}
+-->
 
-`www.rust-lang.org`
+## Thanks
 
 <div class="no_border logo">
-![Rust Logo]
+![][Rust Logo]
 <div>
 
-*Hack Without Fear*
+------------------- -----------------
+`www.rust-lang.org` Hack Without Fear
+------------------- -----------------
 
 [Rust Logo]: Rust_programming_language_black_logo.svg
