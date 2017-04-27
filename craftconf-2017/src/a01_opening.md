@@ -1,6 +1,6 @@
 # What is Rust? {.center}
 
-## What is Rust?
+## What is Rust? {.center}
 
 ### New programming language
 
@@ -29,7 +29,7 @@
  * "but, the UB stops here"
 </div>
 
-----
+## {.center}
 
 ![Safety: No More Undefined Behavior](the_ub_stops_here.png)
 
@@ -51,7 +51,7 @@
 
   * use native threads... or scoped threads... or work-stealing...
 
-# Let's Jump In: Safety
+# Let's Jump In: Safety {.center}
 
 ##
 
@@ -210,7 +210,7 @@ Might expect:
 Segmentation fault: 11
 ```
 
-# C++ and Undefined Behavior
+# C++ and Undefined Behavior {.center}
 
 ## C++: Bugs yield Undefined Behavior { data-transition="fade" }
 
@@ -727,7 +727,7 @@ Note typical results are largely dependent on memory allocator
 memory address range is relative to the new buffer).
 </div>
 
-## C++ chose speed over safety
+## C++ chose speed over safety {.center}
 
 Iterator invalidation yields undefined behavior
 
@@ -793,7 +793,7 @@ at *compile-time*.
 
 >- No undefined behavior; but unwinds/aborts are allowed
 
-# Let's Jump In: Parallelism
+# Let's Jump In: Parallelism {.center}
 
 ## Example: Sum of (even) numbers in C++
 
@@ -977,7 +977,7 @@ time 0.134177s
 [uhoh]: stroke="red"
 ```
 
-## Data Race!
+## Data Race! {.center}
 
 ## Data Race!
 
@@ -1106,7 +1106,7 @@ error: aborting due to previous error
 # Why ...? (continued) {.center}
 
 
-## Why would Mozilla sponsor Rust?
+## Why would Mozilla sponsor Rust? {.center}
 
 >- Hard to prototype research-y browser changes atop C++ code base
 
@@ -1118,9 +1118,9 @@ error: aborting due to previous error
 
 >- "accessible to all": IMO, Rust may "bring system programming to the masses"
 
-# Where is Rust now?
+# Where is Rust now? {.center}
 
-## Where is Rust now?
+## Where is Rust now? {.center}
 
  * 1.0 release was back in May 2015
 
@@ -1135,9 +1135,9 @@ error: aborting due to previous error
  * Awesome developer community
    (~1,400 people in `#rust`, ~300 people in `#rust-internals`, ~1,900 unique commiters to rust.git)
 
-# Talk plan
+# Talk plan {.center}
 
-## Talk plan
+## Talk plan {.center}
 
 >- Demonstration, "Why Rust"
 >- "Ownership is easy" (... or is it?)

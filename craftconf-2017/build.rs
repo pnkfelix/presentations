@@ -35,7 +35,7 @@ fn run_pandoc() {
     for opt in vec![
         O::Standalone,
         O::Var("theme".to_owned(), Some("mozilla-sandstone".to_owned())),
-        // O::Var("center".to_owned(), Some("false".to_owned())),
+        O::Var("center".to_owned(), Some("false".to_owned())),
         // O::Var("slideNumber".to_owned(), Some("c / t".to_owned())),
 
         O::Css("slide-style.css".to_owned()),

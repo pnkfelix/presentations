@@ -134,7 +134,7 @@ v        my_car
 
 ...reflection time...
 
-## Ownership is intuitive?
+## Ownership is intuitive? {.center}
 
 ## Correction: Ownership is intuitive, except for programmers ...  { .center }
 
