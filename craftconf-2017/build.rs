@@ -19,7 +19,9 @@ fn run_pandoc() {
     let mut pandoc = pandoc::new();
 
     fn md_entry<E: ::std::fmt::Debug>(e: &Result<walkdir::DirEntry, E>) -> bool {
-        e.as_ref().unwrap().file_name().to_string_lossy().ends_with(".md")
+        let file_name = e.as_ref().unwrap().file_name().to_string_lossy();
+
+        file_name.ends_with(".md") && file_name != "lib.md"
     }
 
     for entry in walkdir::WalkDir::new("src").into_iter().filter(|e| md_entry(e))
@@ -93,6 +95,12 @@ fn run_mon_artist(id: &str, content: &str) -> String {
     use mon_artist::render::{RenderS};
     let new_rules = r#"
 # Handle box characters in sensible way.
+start          '├' (E) "─┬" draw "M {N} L {S} L {C}";
+start          '┤' (W) "─┬" draw "M {N} L {S} L {C}";
+step  "├─" (E) '┬' (E) "─┤" draw "L {C} L {S} L {C} L {E}";
+step  "─┤" (W) '┬' (W) "├─" draw "L {C} L {S} L {C} L {W}";
+end   "─┬" (E) '┤'          draw "L {C} L {S} L {N}";
+end   "─┬" (W) '├'          draw "L {C} L {S} L {N}";
 start          '┬' (S) '|' draw "M {W} L {E} L {C}";
 start          '┴' (N) '|' draw "M {W} L {E} L {C}";
 step   ANY ANY '|' (S) '┴' draw "";
