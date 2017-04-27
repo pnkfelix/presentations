@@ -20,8 +20,8 @@
 
 > - Fast code, low memory footprint
 > - Go from bare metal (assembly; C FFI) ...
-  <div class="fragment">... to high-level (collections, closures, generic containers) ...</div>
-  <div class="fragment">with *zero cost* (no GC, unboxed closures, monomorphization of generics)</div>
+  <div class="fragment">... to high-level (closures, generic containers) ...</div>
+  <div class="fragment">with *zero cost* (no GC, unboxed closures, monomorphization); no runtime, cross-lang interop</div>
 > - *Safety* and *Parallelism*
 
 <div class="notes">
@@ -32,6 +32,8 @@
 ## {.center}
 
 ![Safety: No More Undefined Behavior](the_ub_stops_here.png)
+
+(apologies to Harry S. Truman)
 
 ## Safety and Parallelism {.center}
 
