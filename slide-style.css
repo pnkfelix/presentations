@@ -6,9 +6,16 @@
 .reveal h1 { font-size: 3.77em; }
 .reveal h2 { font-size: 2.11em; }
 .reveal h3 { font-size: 1.55em; }
+
+.reveal h5 { float: left; }
+// .reveal h5 { text-align: left; margin:0; padding:0; /*float: left;*/ }
 .reveal .level2 h1 { font-size: 2.11em; }
 .reveal { line-height: initial; }
 .reveal .heads_up { position: absolute; right: 0; top: 20ex; z-index: 10; }
+
+del {
+    color: #880000;
+}
 
 .reveal pre code {
     color: #000000;
@@ -19,7 +26,7 @@
 
 .reveal pre code {
     font-family: Menlo,monospace;
-    font-size: 125%;
+    // font-size: 80%;
     line-height: initial;
 }
 
