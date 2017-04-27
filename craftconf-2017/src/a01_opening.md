@@ -838,11 +838,11 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-## Lets try it!
+## Let's try it! {.center}
 
 (I know you're aching to see more Rust; we'll get to it!)
 
-## Lets try our C++ code { data-transition="fade" }
+## Let's try our C++ code { data-transition="fade" }
 
 threads  average time notes
 -------- ------------ -----
@@ -864,7 +864,7 @@ sum of 0 to 1000000000 result: 249999999500000000
 time 0.425924s
 ```
 
-## Lets try our C++ code { data-transition="fade" }
+## Let's try our C++ code { data-transition="fade" }
 
 threads  average time notes
 -------- ------------ -----
@@ -886,7 +886,7 @@ sum of 0 to 1000000000 result: 249999999500000000
 time 0.425924s
 ```
 
-## Lets try our C++ code { data-transition="fade" }
+## Let's try our C++ code { data-transition="fade" }
 
 threads  average time notes
 -------- ------------ -----
@@ -909,7 +909,7 @@ sum of 0 to 1000000000 result: 249999999500000000
 time 0.153196s
 ```
 
-## Lets try our C++ code { data-transition="fade" }
+## Let's try our C++ code { data-transition="fade" }
 
 threads  average time notes
 -------- ------------ -----
@@ -932,7 +932,7 @@ sum of 0 to 1000000000 result: 249999999500000000
 time 0.153196s
 ```
 
-## Lets try our C++ code { data-transition="fade" }
+## Let's try our C++ code { data-transition="fade" }
 
 threads  average time notes
 -------- ------------ -------
@@ -954,7 +954,7 @@ sum of 0 to 1000000000 result: 249999999500000000
 time 0.134177s
 ```
 
-## Lets try our C++ code { data-transition="fade" }
+## Let's try our C++ code { data-transition="fade" }
 
 threads  average time   notes
 -------- -------------- -------
