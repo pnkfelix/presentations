@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Felix Klock (@pnkfelix), Mozilla">
+  <title>Two Years of Rust</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="reveal.js/css/theme/mozilla-sandstone.css" id="theme">
+  <link rel="stylesheet" href="slide-style.css"/>
+  <link rel="stylesheet" href="code-style.css"/>
+  <link rel="stylesheet" href="fonts.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+  <h1 class="title">Two Years of Rust</h1>
+  <p class="author">Felix Klock (<code>@pnkfelix</code>), Mozilla</p>
+  <p class="date">(adapted from <code>carols10cents</code> blog post to <code>blog.rust-lang.org</code>) <kbd class="key">space</kbd>: next slide; <kbd class="key">esc</kbd>: overview; arrows navigate</p>
+</section>
+
+<section id="data" class="slide level2 center no_bullets">
+<h2>Data</h2>
+<p>Since Rust's first birthday:</p>
+<ul>
+<li class="fragment">10,800 commits by 663 contributors</li>
+</ul>
+<ul>
+<li class="fragment">56 RFCs merged</li>
+</ul>
+<ul>
+<li class="fragment">4,405 new crates published</li>
+</ul>
+<ul>
+<li class="fragment">48 new companies running Rust in production</li>
+</ul>
+<ul>
+<li class="fragment">Four conferences so far this year (lots of online video) ...</li>
+</ul>
+<ul>
+<li class="fragment">... three more conferences still to come: RustConf 2017 (Portland OR, USA), RustFest Fall 2017 (Zurich, Switzerland), Rust Belt Rust 2017 (Columbus OH, USA)</li>
+</ul>
+<ul>
+<li>(for other stats see blog post)</li>
+</ul>
+</section>
+<section id="production-use" class="slide level2 no_bullets">
+<h2>Production Use</h2>
+<ul>
+<li class="fragment">Rust in production: <a href="https://www.rust-lang.org/en-US/friends.html">Friends of Rust</a>; <a href="http://rustjobs.rs"><code>rustjobs.rs</code></a></li>
+<li class="fragment">Dropbox: Magic Pocket (see Wired article); Rust in Windows desktop client (see also <code>@jamwt</code> air mozilla talk)</li>
+<li class="fragment">Mozilla: Servo nightlies; Oxidation initiated w/ Firefox 48; Project Quantum</li>
+<li class="fragment">GNOME: from experiments in October 2016 to hackfest in March 2017</li>
+<li class="fragment">npm: Using Rust to serve JS packages (see <code>@ag_dubs</code> talk at RustFest Spring 2017)</li>
+</ul>
+</section>
+<section id="roadmap" class="slide level2 center no_bullets">
+<h2>Roadmap</h2>
+<p>Goals for 2017:</p>
+<ul>
+<li><p><strong>Lower learning curve</strong></p></li>
+<li><p><strong>Pleasant edit-compile-debug cycle</strong></p></li>
+<li><p>Basic but solid IDE experience</p></li>
+<li><p>High quality crates and crate accessibility</p></li>
+<li><p>Support writing robust, high-scale servers</p></li>
+<li><p>Integrate into large build systems</p></li>
+<li><p><strong>Provide community-based mentoring at all levels</strong></p></li>
+</ul>
+</section>
+<section id="lower-learning-curve" class="slide level2 center no_bullets">
+<h2>Lower Learning Curve</h2>
+<ul>
+<li><p>Language Ergonomics Initiative</p></li>
+<li><p>2nd ed of &quot;The Book&quot;</p></li>
+</ul>
+<ul>
+<li class="fragment"><code>match</code> and ownership ergonomics</li>
+<li class="fragment">non-lexical lifetimes</li>
+<li class="fragment">lifetime elision improvements</li>
+<li class="fragment">and many more ideas in flight!</li>
+</ul>
+</section>
+<section id="edit-compile-debug-cycle" class="slide level2 center no_bullets">
+<h2>Edit-Compile-Debug Cycle</h2>
+<ul>
+<li class="fragment">Incremental compilation; try it out on Nightly with <code>CARGO_INCREMENTAL=1 cargo &lt;command&gt;</code></li>
+<li class="fragment">Improved full compilation times; better by 5-10% on average</li>
+<li class="fragment"><a href="https://perf.rust-lang.org/"><code>perf.rust-lang.org</code></a></li>
+</ul>
+</section>
+<section id="mentoring-at-all-levels" class="slide level2 center no_bullets">
+<h2>Mentoring at all levels</h2>
+<ul>
+<li class="fragment">RustBridge for getting started with Rust</li>
+<li class="fragment">Interns via Outreachy and GSoC</li>
+<li class="fragment">Identification of low-committment, high-impact tasks; e.g. improved error messages</li>
+<li class="fragment">Language Team Shepherds</li>
+<li class="fragment">Growth of number and size of subteams; more opportunities to step into leadership roles</li>
+</ul>
+</section>
+<section id="happy-2nd-birthday-rust" class="slide level2 center no_bullets">
+<h2>Happy 2nd Birthday Rust</h2>
+<p>Thank you to every member of our awesome community!</p>
+</section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Vertical centering of slides
+        center: false,
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+              { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
