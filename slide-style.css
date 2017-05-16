@@ -31,6 +31,10 @@
     display: initial; margin: initial;
 }
 
+.no_bullets li {
+    list-style: none;
+}
+
 /* div .center_align { text-align: center; } */
 
 div.no_border img {
