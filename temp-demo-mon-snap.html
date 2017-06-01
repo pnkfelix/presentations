@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title></title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/mozilla-sandstone.css" id="theme">
+  <link rel="stylesheet" href="slide-style.css"/>
+  <link rel="stylesheet" href="code-style.css"/>
+  <link rel="stylesheet" href="fonts.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script src="snap.svg-min.js"></script>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+
+<section id="hello-world" class="slide level2">
+<h2>Hello World</h2>
+<p>Hit the 'c' key many times.</p>
+<svg baseProfile="full" viewBox="0 0 340 368" height="368" version="1.1" xmlns="http://www.w3.org/2000/svg" width="340">
+  <path stroke="none" d="M 75,224 Q 75,216 80,216Q 80,216 90,216Q 95,216 95,224L 95,240Q 95,248 90,248Q 90,248 80,248Q 75,248 75,240L 75,224 Z" fill="blue" stroke-width="2" id="a" />
+  <path id="c" fill="none" stroke-width="2" stroke="#BB0000" d="M 115,216L 130,216L 140,216L 150,216L 160,216L 170,216L 180,216L 190,216L 200,216L 210,216L 220,216L 230,216L 240,216L 250,216L 260,216L 270,216L 280,216L 290,216L 295,216L 295,240L 295,248L 280,248L 270,248L 260,248L 250,248L 240,248L 230,248L 220,248L 210,248L 200,248L 190,248L 180,248L 170,248L 160,248L 150,248L 140,248L 130,248L 120,248L 115,248L 115,224 Z" />
+  <path d="M 315,224 Q 315,216 320,216Q 320,216 330,216Q 335,216 335,224L 335,240Q 335,248 330,248Q 330,248 320,248Q 315,248 315,240L 315,224 Z" fill="none" stroke-width="2" id="b" stroke="none" />
+  <path stroke="green" stroke-width="2" d="M 45,0 L 45,16L 45,32L 45,48L 45,64L 45,80L 45,96L 45,112L 45,128L 45,144L 45,160L 45,176L 45,192L 45,208L 45,224L 45,240L 45,256L 45,272L 45,288L 45,304L 45,320L 45,336L 45,352" fill="none" />
+  <path id="t1" stroke="#00D000" d="M 60,72 L 70,72L 80,72L 90,72L 100,72L 110,72L 120,72L 130,72L 140,72L 150,72L 160,72L 170,72L 180,72L 190,72L 200,72L 210,72L 220,72Q 225,72 230,80L 240,96L 250,112L 260,128L 270,144L 280,160L 285,168L 285,192L 285,208" stroke-width="2" fill="none" />
+  <path stroke="#00A000" stroke-width="2" id="t2" fill="none" d="M 60,120 L 70,120L 80,120L 90,120Q 95,120 100,128L 110,144L 120,160L 125,168L 125,192L 125,208" />
+  <path fill="none" d="M 125,256 L 125,272L 125,288L 125,304L 125,320L 125,336L 125,352" stroke-width="2" id="t2r" stroke="#00A000" stroke-dasharray="5,2" />
+  <path id="t1r" stroke-width="2" fill="none" d="M 285,256 L 285,272L 285,288L 285,304L 285,320L 285,336L 285,352" stroke-dasharray="5,2" stroke="#00D000" />
+</svg>
+<script>
+var slide = document.getElementById("hello-world");
+var svg = slide.getElementsByTagName("svg")[0];
+var s = Snap(svg);
+
+// s.text("50%", "50%", "Snap Tutorial").attr({
+//     font: "300 100px Source Sans Pro",
+//     textAnchor: "middle",
+//     fill: "#fff"
+// });
+
+var a_elem = s.select("#a");
+var b_elem = s.select("#b");
+var c_elem = s.select("#c");
+
+var t1 = s.g(s.select("#t1"), s.select("#t1r"));
+var t2 = s.g(s.select("#t2"), s.select("#t2r"));
+
+t1.attr("stroke", "#FFD000");
+t2.attr("stroke", "#FFDA00");
+
+var c_x_final = c_elem.getPointAtLength(0).x;
+var c_y_final = c_elem.getPointAtLength(0).y;
+
+t1.transform("translate(300)");
+t2.transform("translate(300)");
+c_elem.transform("translate("+ -c_x_final + "," + -c_y_final +")");
+
+var a_x = a_elem.getPointAtLength(0).x;
+var b_x = b_elem.getPointAtLength(0).x;
+var a_y = a_elem.getPointAtLength(0).y;
+var b_y = b_elem.getPointAtLength(0).y;
+var delta_x = b_x - a_x;
+var delta_y = b_y - a_y;
+
+var clicks = 0;
+var dx = 0;
+var dy = 0;
+
+var transition = function() {
+    clicks += 1;
+    switch (clicks) {
+        case 1: {
+            // reveal thread 1
+            t1.animate({transform: ""}, 1000);
+            break;
+        }
+        case 2: {
+            // reveal thread 2
+            t2.animate({transform: ""}, 1000);
+            break;
+        }
+        case 3: {
+            // install the channel
+            c_elem.animate({transform: ""}, 1000);
+            break;
+        }
+        default: {
+            dx = (delta_x * (clicks % 2));
+            dy = (delta_y * (clicks % 2));
+            a_elem.animate({transform: "translate("+dx+","+dy+")"}, 1000);
+            break;
+        }
+    }
+};
+
+window.addEventListener("keypress", function(evt) {
+    console.log("keyup key: " + evt.key);
+    if (evt.key == "c") {
+        transition();
+    }
+}, false);
+
+s.click(transition);
+</script>
+</section>
+<section id="demo" class="slide level2">
+<h2>Demo</h2>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">use</span> rayon;
+<span class="kw">use</span> std::sync::mpsc::<span class="op">{</span>Sender, Receiver<span class="op">}</span>;
+<span class="kw">use</span> std::sync::mpsc::<span class="op">{</span>channel<span class="op">}</span>;
+
+<span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="at">)]</span>
+<span class="kw">struct</span> Ball(&amp;<span class="ot">&#39;static</span> <span class="dt">str</span>);
+
+<span class="kw">fn</span> actor(a: &amp;<span class="dt">str</span>, the_ball: <span class="dt">Option</span>&lt;Ball&gt;, tx: Sender&lt;Ball&gt;, rx: Receiver&lt;Ball&gt;) <span class="op">{</span>
+    <span class="kw">if</span> <span class="kw">let</span> <span class="cn">Some</span>(ball) = the_ball <span class="op">{</span>
+        <span class="kw">match</span> tx.send(ball) <span class="op">{</span>
+            <span class="cn">Ok</span>(()) =&gt; <span class="op">{}</span>
+            <span class="cn">Err</span>(err) =&gt; <span class="op">{</span>
+                <span class="pp">println!</span>(<span class="st">&quot;Send failure {:?} on {}&quot;</span>, err, a);
+                <span class="kw">return</span>;
+            <span class="op">}</span>
+        <span class="op">}</span>
+    <span class="op">}</span>
+    <span class="kw">let</span> <span class="kw">mut</span> ball;
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="dv">0.</span>.<span class="dv">100</span> <span class="op">{</span>
+        <span class="kw">match</span> rx.recv() <span class="op">{</span>
+            <span class="cn">Ok</span>(received_ball) =&gt; <span class="op">{</span> ball = received_ball; <span class="op">}</span>
+            <span class="cn">Err</span>(err) =&gt; <span class="op">{</span>
+                <span class="pp">println!</span>(<span class="st">&quot;Receive failure {:?} on {} iter {}&quot;</span>, err, a, i);
+                <span class="kw">break</span>;
+            <span class="op">}</span>
+        <span class="op">}</span>
+        <span class="kw">match</span> tx.send(ball) <span class="op">{</span>
+            <span class="cn">Ok</span>(()) =&gt; <span class="op">{}</span>
+            <span class="cn">Err</span>(err) =&gt; <span class="op">{</span>
+                <span class="pp">println!</span>(<span class="st">&quot;Send failure {:?} on {} iter: {}&quot;</span>, err, a, i);
+                <span class="kw">break</span>;
+            <span class="op">}</span>
+        <span class="op">}</span>;
+    <span class="op">}</span>
+    <span class="pp">println!</span>(<span class="st">&quot;Done with {}&quot;</span>, a);
+<span class="op">}</span>
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> main() <span class="op">{</span>
+    rayon::scope(|s| <span class="op">{</span>
+        <span class="kw">let</span> (tx1, rx1) = channel();
+        <span class="kw">let</span> (tx2, rx2) = channel();
+        <span class="pp">println!</span>(<span class="st">&quot;Spawn Actor 1&quot;</span>);
+        s.spawn(|s| <span class="op">{</span> actor(<span class="st">&quot;Actor 1&quot;</span>, <span class="cn">Some</span>(Ball(<span class="st">&quot;O&quot;</span>)), tx1, rx2); <span class="op">}</span>);
+        <span class="pp">println!</span>(<span class="st">&quot;Spawn Actor 2&quot;</span>);
+        s.spawn(|s| <span class="op">{</span> actor(<span class="st">&quot;Actor 2&quot;</span>, <span class="cn">None</span>, tx2, rx1); <span class="op">}</span>);
+    <span class="op">}</span>);
+<span class="op">}</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">extern</span> <span class="kw">crate</span> cairo;
+<span class="kw">extern</span> <span class="kw">crate</span> gtk;
+<span class="kw">extern</span> <span class="kw">crate</span> rayon;
+
+<span class="kw">use</span> gtk::prelude::*;
+<span class="kw">use</span> gtk::<span class="op">{</span>Button, Window, WindowType<span class="op">}</span>;
+<span class="kw">use</span> gtk::DrawingArea;
+
+<span class="kw">use</span> cairo::enums::<span class="op">{</span>FontSlant, FontWeight<span class="op">}</span>;
+<span class="kw">use</span> cairo::Context;
+
+<span class="kw">use</span> std::<span class="dt">f64</span>::consts::PI;
+<span class="kw">use</span> std::process;
+
+<span class="kw">fn</span> main() <span class="op">{</span>
+    <span class="kw">if</span> gtk::init().is_err() <span class="op">{</span>
+        <span class="pp">println!</span>(<span class="st">&quot;Failed to initialize GTK.&quot;</span>);
+        process::exit(<span class="dv">1</span>);
+    <span class="op">}</span>
+
+    drawable(<span class="dv">500</span>, <span class="dv">500</span>, |_, cr| <span class="op">{</span>
+        cr.set_dash(&amp;<span class="op">[</span><span class="dv">3.</span>, <span class="dv">2.</span>, <span class="dv">1.</span><span class="op">]</span>, <span class="dv">1.</span>);
+
+        cr.scale(<span class="dv">500</span>f64, <span class="dv">500</span>f64);
+
+        cr.set_source_rgb(<span class="dv">250.0</span>/<span class="dv">255.0</span>,
+                          <span class="dv">254.0</span>/<span class="dv">255.0</span>,
+                          <span class="dv">55.0</span>/<span class="dv">255.0</span>);
+        cr.paint();
+
+        cr.set_line_width(<span class="dv">0.05</span>);
+
+        <span class="co">// border</span>
+        cr.set_source_rgb(<span class="dv">0.3</span>, <span class="dv">0.3</span>, <span class="dv">0.3</span>);
+        cr.rectangle(<span class="dv">0.0</span>, <span class="dv">0.0</span>, <span class="dv">1.0</span>, <span class="dv">1.0</span>);
+        cr.stroke();
+
+        cr.set_line_width(<span class="dv">0.03</span>);
+
+        <span class="co">// draw circle</span>
+        cr.arc(<span class="dv">0.5</span>, <span class="dv">0.5</span>, <span class="dv">0.4</span>, <span class="dv">0.0</span>, PI * <span class="dv">2.</span>);
+        cr.stroke();
+
+        <span class="co">// mouth</span>
+        <span class="kw">let</span> mouth_top = <span class="dv">0.68</span>;
+        <span class="kw">let</span> mouth_width = <span class="dv">0.38</span>;
+
+        <span class="kw">let</span> mouth_dx = <span class="dv">0.10</span>;
+        <span class="kw">let</span> mouth_dy = <span class="dv">0.10</span>;
+
+        cr.move_to( <span class="dv">0.50</span> - mouth_width/<span class="dv">2.0</span>, mouth_top);
+        cr.curve_to(<span class="dv">0.50</span> - mouth_dx, mouth_top + mouth_dy,
+                    <span class="dv">0.50</span> + mouth_dx, mouth_top + mouth_dy,
+                    <span class="dv">0.50</span> + mouth_width/<span class="dv">2.0</span>, mouth_top);
+
+        <span class="pp">println!</span>(<span class="st">&quot;Extents: {:?}&quot;</span>, cr.fill_extents());
+
+        cr.stroke();
+
+        <span class="kw">let</span> eye_y = <span class="dv">0.38</span>;
+        <span class="kw">let</span> eye_dx = <span class="dv">0.15</span>;
+        cr.arc(<span class="dv">0.5</span> - eye_dx, eye_y, <span class="dv">0.05</span>, <span class="dv">0.0</span>, PI * <span class="dv">2.</span>);
+        cr.fill();
+
+        cr.arc(<span class="dv">0.5</span> + eye_dx, eye_y, <span class="dv">0.05</span>, <span class="dv">0.0</span>, PI * <span class="dv">2.</span>);
+        cr.fill();
+
+        Inhibit(<span class="cn">false</span>)
+    <span class="op">}</span>);
+
+    drawable(<span class="dv">500</span>, <span class="dv">500</span>, |_, cr| <span class="op">{</span>
+        cr.scale(<span class="dv">500_</span>f64, <span class="dv">500_</span>f64);
+
+        cr.select_font_face(<span class="st">&quot;Sans&quot;</span>, FontSlant::Normal, FontWeight::Normal);
+        cr.set_font_size(<span class="dv">0.35</span>);
+
+        cr.move_to(<span class="dv">0.04</span>, <span class="dv">0.53</span>);
+        cr.show_text(<span class="st">&quot;Hello&quot;</span>);
+
+        cr.move_to(<span class="dv">0.27</span>, <span class="dv">0.65</span>);
+        cr.text_path(<span class="st">&quot;void&quot;</span>);
+        cr.set_source_rgb(<span class="dv">0.5</span>, <span class="dv">0.5</span>, <span class="dv">1.0</span>);
+        cr.fill_preserve();
+        cr.set_source_rgb(<span class="dv">0.0</span>, <span class="dv">0.0</span>, <span class="dv">0.0</span>);
+        cr.set_line_width(<span class="dv">0.01</span>);
+        cr.stroke();
+
+        cr.set_source_rgba(<span class="dv">1.0</span>, <span class="dv">0.2</span>, <span class="dv">0.2</span>, <span class="dv">0.6</span>);
+        cr.arc(<span class="dv">0.04</span>, <span class="dv">0.53</span>, <span class="dv">0.02</span>, <span class="dv">0.0</span>, PI * <span class="dv">2.</span>);
+        cr.arc(<span class="dv">0.27</span>, <span class="dv">0.65</span>, <span class="dv">0.02</span>, <span class="dv">0.0</span>, PI * <span class="dv">2.</span>);
+        cr.fill();
+
+        Inhibit(<span class="cn">false</span>)
+    <span class="op">}</span>);
+
+    <span class="co">/*</span>
+<span class="co">    let window = Window::new(WindowType::Toplevel);</span>
+<span class="co">    window.set_title(&quot;GTK+ Program&quot;);</span>
+<span class="co">    window.set_default_size(350, 70);</span>
+<span class="co">    let button = Button::new_with_label(&quot;Click me!&quot;);</span>
+<span class="co">    window.add(&amp;button);</span>
+<span class="co">    window.show_all();</span>
+
+<span class="co">    window.connect_delete_event(|_, _| {</span>
+<span class="co">        gtk::main_quit();</span>
+<span class="co">        Inhibit(false)</span>
+<span class="co">    });</span>
+
+<span class="co">    button.connect_clicked(|_| {</span>
+<span class="co">        println!(&quot;Clicked!&quot;);</span>
+<span class="co">    });</span>
+<span class="co">     */</span>
+
+    gtk::main();
+<span class="op">}</span>
+
+<span class="kw">pub</span> <span class="kw">fn</span> drawable&lt;F&gt;(width: <span class="dt">i32</span>, height: <span class="dt">i32</span>, draw_fn: F)
+    <span class="kw">where</span> F: <span class="bu">Fn</span>(&amp;DrawingArea, &amp;Context) -&gt; Inhibit + <span class="ot">&#39;static</span>
+<span class="op">{</span>
+    <span class="kw">let</span> window = gtk::Window::new(gtk::WindowType::Toplevel);
+    <span class="kw">let</span> drawing_area = <span class="dt">Box</span>::new(DrawingArea::new)();
+
+    drawing_area.connect_draw(draw_fn);
+    drawing_area.connect_motion_notify_event(|_, event_motion| <span class="op">{</span>
+        <span class="pp">println!</span>(<span class="st">&quot;motion notify event: {:?}&quot;</span>, event_motion);
+        Inhibit(<span class="cn">false</span>)
+    <span class="op">}</span>);
+
+    window.set_default_size(width, height);
+    window.connect_delete_event(|_, _| <span class="op">{</span> gtk::main_quit(); Inhibit(<span class="cn">false</span>) <span class="op">}</span>);
+    window.add(&amp;drawing_area);
+    window.show_all();
+<span class="op">}</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">extern</span> <span class="kw">crate</span> cursive;
+
+<span class="kw">use</span> cursive::Cursive;
+<span class="kw">use</span> cursive::views::<span class="op">{</span>Dialog, TextView<span class="op">}</span>;
+
+<span class="kw">fn</span> main() <span class="op">{</span>
+    <span class="pp">println!</span>(<span class="st">&quot;Hello World from TBall&quot;</span>);
+
+    <span class="kw">let</span> <span class="kw">mut</span> siv = Cursive::new();
+
+    siv.add_layer(Dialog::around(TextView::new(<span class="st">&quot;Hello Dialog!&quot;</span>))
+                  .title(<span class="st">&quot;Cursive&quot;</span>)
+                  .button(<span class="st">&quot;Quit&quot;</span>, |s| s.quit()));
+
+    siv.run();
+<span class="op">}</span></code></pre></div>
+</section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Vertical centering of slides
+        center: false,
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+              { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
