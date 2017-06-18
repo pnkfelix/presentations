@@ -3,7 +3,7 @@ extern crate gtk;
 extern crate rayon;
 
 use gtk::prelude::*;
-use gtk::{Button, Window, WindowType};
+// use gtk::{Button, Window, WindowType};
 use gtk::DrawingArea;
 
 use cairo::enums::{FontSlant, FontWeight};
