@@ -20,7 +20,18 @@ fn run_pandoc() {
 
     fn md_entry<E: ::std::fmt::Debug>(e: &Result<walkdir::DirEntry, E>) -> bool {
         let file_name = e.as_ref().unwrap().file_name().to_string_lossy();
+        let path = e.as_ref().unwrap().path();
 
+        // ignore everything in `bin` directory.
+        for comp in path.components() {
+            if let ::std::path::Component::Normal(s) = comp {
+                if s == "bin" {
+                    return false;
+                }
+            }
+        }
+
+        // otherwise, process everything that ends with `.md` except the `lib.md`.
         file_name.ends_with(".md") && file_name != "lib.md"
     }
 
