@@ -1,0 +1,174 @@
+## Title
+
+Aliasing, Capabilities, and Ownership in Rust
+
+Rust is a new systems programming language providing fast, memory-safe, data-race-free multi-threaded code. Rust has adopted many ideas from programming language research: Its affine type system has ownership and controlled aliasing at the foundation.
+
+This demo will present Rust's ownership and borrowing system at a high level, discuss how we ensure data-race freedom, and explore the different ways that Rust encodes "capabilities" into the language and its libraries.
+
+## Hello World
+
+Hit the 'c' key many times.
+
+```art
+    |
+    |
+    |
+    |
+    | ----------------.       
+    | [t1]             \      
+    |                   \     
+    | ---.               \    
+    | [t2]\               \   
+    |      \               \  
+    |       +               + 
+    |       |               | 
+    |
+    |  .-. +-----------------+ .-.
+    |  | | |                 | | |
+    |  '-' +-----------------+ '-'
+    |  [a]    [c]              [b]
+    |       |               |
+    |       :               :
+    |       :               :
+    |       :               :
+    |       :[t2r]          :[t1r]
+
+[t1]: stroke="#00D000"
+[t2]: stroke="#00A000"
+[t1r]: stroke="#00D000"
+[t2r]: stroke="#00A000"
+[a]: stroke="none", fill="blue"
+[b]: fill="none", stroke="none"
+[c]: stroke="#BB0000"
+```
+
+<script>
+var slide = document.getElementById("hello-world");
+var svg = slide.getElementsByTagName("svg")[0];
+var s = Snap(svg);
+
+// s.text("50%", "50%", "Snap Tutorial").attr({
+//     font: "300 100px Source Sans Pro",
+//     textAnchor: "middle",
+//     fill: "#fff"
+// });
+
+var a_elem = s.select("#a");
+var b_elem = s.select("#b");
+var c_elem = s.select("#c");
+
+var t1 = s.g(s.select("#t1"), s.select("#t1r"));
+var t2 = s.g(s.select("#t2"), s.select("#t2r"));
+
+t1.attr("stroke", "#FFD000");
+t2.attr("stroke", "#FFDA00");
+
+var c_x_final = c_elem.getPointAtLength(0).x;
+var c_y_final = c_elem.getPointAtLength(0).y;
+
+t1.transform("translate(300)");
+t2.transform("translate(300)");
+c_elem.transform("translate("+ -c_x_final + "," + -c_y_final +")");
+
+var a_x = a_elem.getPointAtLength(0).x;
+var b_x = b_elem.getPointAtLength(0).x;
+var a_y = a_elem.getPointAtLength(0).y;
+var b_y = b_elem.getPointAtLength(0).y;
+var delta_x = b_x - a_x;
+var delta_y = b_y - a_y;
+
+var clicks = 0;
+var dx = 0;
+var dy = 0;
+
+var transition = function() {
+    clicks += 1;
+    switch (clicks) {
+        case 1: {
+            // reveal thread 1
+            t1.animate({transform: ""}, 1000);
+            break;
+        }
+        case 2: {
+            // reveal thread 2
+            t2.animate({transform: ""}, 1000);
+            break;
+        }
+        case 3: {
+            // install the channel
+            c_elem.animate({transform: ""}, 1000);
+            break;
+        }
+        default: {
+            dx = (delta_x * (clicks % 2));
+            dy = (delta_y * (clicks % 2));
+            a_elem.animate({transform: "translate("+dx+","+dy+")"}, 1000);
+            break;
+        }
+    }
+};
+
+window.addEventListener("keypress", function(evt) {
+    console.log("keyup key: " + evt.key);
+    if (evt.key == "c") {
+        transition();
+    }
+}, false);
+
+s.click(transition);
+</script>
+
+## Demo
+
+
+```rust
+use rayon;
+use std::sync::mpsc::{Sender, Receiver};
+use std::sync::mpsc::{channel};
+
+#[derive(Debug)]
+struct Ball(&'static str);
+
+fn actor(a: &str, the_ball: Option<Ball>, tx: Sender<Ball>, rx: Receiver<Ball>) {
+    if let Some(ball) = the_ball {
+        match tx.send(ball) {
+            Ok(()) => {}
+            Err(err) => {
+                println!("Send failure {:?} on {}", err, a);
+                return;
+            }
+        }
+    }
+    let mut ball;
+    for i in 0..100 {
+        match rx.recv() {
+            Ok(received_ball) => { ball = received_ball; }
+            Err(err) => {
+                println!("Receive failure {:?} on {} iter {}", err, a, i);
+                break;
+            }
+        }
+        match tx.send(ball) {
+            Ok(()) => {}
+            Err(err) => {
+                println!("Send failure {:?} on {} iter: {}", err, a, i);
+                break;
+            }
+        };
+    }
+    println!("Done with {}", a);
+}
+
+#[test]
+fn main() {
+    rayon::scope(|s| {
+        let (tx1, rx1) = channel();
+        let (tx2, rx2) = channel();
+        println!("Spawn Actor 1");
+        s.spawn(|_s| { actor("Actor 1", Some(Ball("O")), tx1, rx2); });
+        println!("Spawn Actor 2");
+        s.spawn(|_s| { actor("Actor 2", None, tx2, rx1); });
+    });
+}
+```
