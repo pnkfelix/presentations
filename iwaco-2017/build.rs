@@ -123,8 +123,8 @@ step   ANY ANY '|' (N) '┬' draw "";
     let format_table = mon_artist::format::Table::from_lines(format_table.lines().map(|r|Ok(r.to_owned())));
     let s = content.parse::<Grid>().unwrap().into_scene(&format_table, Default::default());
     let r = SvgRender {
-        x_scale: 10, y_scale: 16,
-        font_family: "Menlo".to_string(), font_size: 16,
+        x_scale: 9, y_scale: 14,
+        font_family: "Menlo".to_string(), font_size: 14,
         show_gridlines: false,
         name: (if id == "" { "monartist-padl-2017" } else { id }).to_string(),
         infer_rect_elements: false,
