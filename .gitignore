@@ -1,8 +1,17 @@
+**/.DS_Store
+
 *~
 
 curry-on2015/src/lib.rs
 curry-on2015/tango.stamp
 curry-on2015/target
 curry-on2015/Cargo.lock
+
+iwaco-2017/src/bin/gball.md
+iwaco-2017/src/bin/tball.md
+iwaco-2017/src/lib.md
+iwaco-2017/Cargo.lock
+iwaco-2017/tango.stamp
+iwaco-2017/target
 
 
