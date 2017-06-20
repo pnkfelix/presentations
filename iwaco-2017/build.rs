@@ -38,7 +38,7 @@ fn run_pandoc() {
         O::IncludeInHeader("header.html".into()),
 
         O::Var("theme".to_owned(), Some("mozilla-sandstone".to_owned())),
-        O::Var("center".to_owned(), Some("false".to_owned())),
+        O::Var("center".to_owned(), Some("true".to_owned())),
         O::Var("history".to_owned(), Some("true".to_owned())),
         // O::Var("slideNumber".to_owned(), Some("c / t".to_owned())),
         // O::Var("slideNumber".to_owned(), Some("true".to_owned())),
