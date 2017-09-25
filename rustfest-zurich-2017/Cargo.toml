@@ -1,0 +1,6 @@
+[package]
+name = "rustfest-zurich-2017"
+version = "0.1.0"
+authors = ["Felix S. Klock II <pnkfelix@pnkfx.org>"]
+
+[dependencies]
