@@ -3,4 +3,11 @@ name = "rustfest-zurich-2017"
 version = "0.1.0"
 authors = ["Felix S. Klock II <pnkfelix@pnkfx.org>"]
 
+build = "build.rs"
+
 [dependencies]
+
+[build-dependencies]
+pandoc = "0.6.*"
+tango = "^0.4.*"
+walkdir = "1.0"
