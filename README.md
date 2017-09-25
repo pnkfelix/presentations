@@ -1,4 +1,10 @@
-present-rust-codemesh2013
+pnkfelix/presentations
 =========================
 
-Source for slideshow presentation of Rust at Codemesh 2013
+Source for slideshow presentations, mostly of Rust, at various conferences.
+
+The source for particular presentations tends to be held in individual branches.
+
+The *deployed* presentations are all collected together on the
+`gh-pages` branch.
+
