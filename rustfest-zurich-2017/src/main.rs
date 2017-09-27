@@ -1,4 +1,10 @@
+#![feature(specialization)]
 #![feature(catch_expr)]
+#![feature(proc_macro)]
+
+#[macro_use]
+extern crate weight_derive;
+use weight_derive::*;
 
 pub mod a00;
 pub mod c00_nikos_ghost;
@@ -18,6 +24,7 @@ mod tests {
 
 fn main() {
     println!("It works");
+    g00_epochs_present::main();
     let result = l00_end_of_it::f();
     println!("f: {:?}", result);
 }

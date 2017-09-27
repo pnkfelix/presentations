@@ -6,6 +6,7 @@ authors = ["Felix S. Klock II <pnkfelix@pnkfx.org>"]
 build = "build.rs"
 
 [dependencies]
+weight-derive = { path = "weight-derive" }
 
 [build-dependencies]
 pandoc = "0.6.*"
