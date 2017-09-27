@@ -1,5 +1,6 @@
 Cargo.lock
 src/lib.md
+src/main.md
 src/[a-z]*.rs
 tango.stamp
 target/

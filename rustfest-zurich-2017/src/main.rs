@@ -15,3 +15,9 @@ mod tests {
         assert_eq!(2 + 2, 4);
     }
 }
+
+fn main() {
+    println!("It works");
+    let result = l00_end_of_it::f();
+    println!("f: {:?}", result);
+}
