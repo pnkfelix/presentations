@@ -66,6 +66,10 @@ section.center table, .centertable table {
     margin-bottom: 1em;
 }
 
+.equation .reveal table th, .reveal table td {
+    border-bottom: inherit;
+}
+
 kbd.key {
     padding: 0.04em 0.5em;
     border: 1px solid #CCC;
