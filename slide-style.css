@@ -35,6 +35,14 @@
     list-style: none;
 }
 
+.halfsize code { font-size: 50%; }
+.thirdsize code { font-size: 33%; }
+.quartsize code { font-size: 25%; }
+
+.float_left code { float: left; }
+
+/* .reveal code { font-family: Menlo,monospace; font-size: 100%; line-height: initial; } */
+
 /* div .center_align { text-align: center; } */
 
 div.no_border img {
@@ -83,4 +91,8 @@ kbd.key {
     text-shadow: 0px 1px 0px #FFF;
     font-family: Arial,Helvetica,sans-serif;
     font-size: 75%;
+}
+
+pre, code, p .no_margin {
+    margin: 0 !important;
 }
