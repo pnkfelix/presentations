@@ -54,14 +54,14 @@ fn run_pandoc() {
 
         O::IncludeInHeader("header.html".into()),
 
-        O::Var("theme".to_owned(), Some("mozilla-sandstone".to_owned())),
+        O::Var("theme".to_owned(), Some("mozilla-darkgrey".to_owned())),
         O::Var("center".to_owned(), Some("true".to_owned())),
         O::Var("history".to_owned(), Some("true".to_owned())),
         // O::Var("slideNumber".to_owned(), Some("c / t".to_owned())),
         // O::Var("slideNumber".to_owned(), Some("true".to_owned())),
 
         O::Css("slide-style.css".to_owned()),
-        O::Css("code-style.css".to_owned()),
+        O::Css("code-style-darkgrey.css".to_owned()),
         O::Css("fonts.css".to_owned()),
 
         // Setting this explicitly will hopefully avoid the whole
