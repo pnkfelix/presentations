@@ -1,0 +1,11 @@
+[package]
+name = "weight-derive"
+version = "0.1.0"
+authors = ["Felix S. Klock II <pnkfelix@pnkfx.org>"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "0.11.*"
+quote = "0.3.*"
