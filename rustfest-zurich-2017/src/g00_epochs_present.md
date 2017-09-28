@@ -1,5 +1,21 @@
 # The Second of the Three Spirits
 
+## What are changes that mattered for Rust *today*
+
+## Poll
+
+>- `if let`
+>- `Rc<Unsized>` (e.g. `Rc<str>`
+>- `pub(crate)`
+>- IDE support
+>- `feature(never_type)`: `match x: Result<T, Void> { Ok(_) => ... }`
+>- `rustup`
+>- `impl Trait`
+>- `?` (3)
+>- Error Messages (3)
+>- Custom Derive / Serde ( / Diesel ) (5)
+>- macros 1.1 / `syn` / `quote` (is this part of above? check records)
+
 ## Procedural macros, custom `#[derive]`
 
 ```rust
@@ -282,14 +298,18 @@ yields:
 
 ``` {.rust}
 impl Weight for FrenchToast where {
-    fn weight (&self) -> isize { match *self { FrenchToast => 0, } } }
+    fn weight (&self) -> isize { match *self { FrenchToast => 0, }}}
 ```
 
 . . .
 
+and
+
 ```rust
 #[derive(Weight)]
-struct Pancakes { topping: &'static str, atop: Option<Box<Pancakes>>, }
+struct Pancakes {
+    topping: &'static str, atop: Option<Box<Pancakes>>,
+}
 ```
 
 yields:
@@ -298,7 +318,8 @@ yields:
 impl Weight for Pancakes where {
     fn weight (&self) -> isize {
         match *self {
-            Pancakes { ref topping, ref atop } => 0 + topping.weight() + atop.weight(),
+            Pancakes { ref topping, ref atop } => 
+                0 + topping.weight() + atop.weight(),
         }
     }
 }
@@ -353,3 +374,12 @@ pub fn test_breakfast() { breakfast() }
 pub fn main() { breakfast() }
 ```
 -->
+
+## Serde
+
+TODO
+
+## Insight
+
+"Small" language additions can enable huge library/ecosystem wins
+
