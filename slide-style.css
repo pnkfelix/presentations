@@ -35,7 +35,7 @@
     list-style: none;
 }
 
-.reveal .halfsize code { font-size: 50%; }
+.reveal .halfsize code { font-size: 50% !important; }
 .reveal .thirdsize code { font-size: 33%; }
 .reveal .quartsize code { font-size: 25%; }
 
