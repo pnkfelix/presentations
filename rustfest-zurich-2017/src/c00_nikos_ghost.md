@@ -14,3 +14,9 @@ Language evolution
  * GC support
 
  * ~~`pub(path)`~~ <div class="fragment">`pub(in path)`</div>
+
+. . .
+
+## Boooooo
+
+A dire warning: The chains of stability and backwards compatibility are heavy!
