@@ -20,3 +20,14 @@ Language evolution
 ## Boooooo
 
 A dire warning: The chains of stability and backwards compatibility are heavy!
+
+## Tonight
+
+You will be visited by Three Spirits
+
+ * The Ghost of Epochs Past
+
+ * The Ghost of Epochs Present, and
+
+ * The Ghost of Epochs Yet To Come
+ 
