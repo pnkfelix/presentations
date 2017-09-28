@@ -144,7 +144,7 @@ You don't want to see it.
 Since you asked
 
 <div style="margin: 0 auto;">
-<div style="float: left;">
+<div style="float: left; width: 50%">
 
 ``` {.rust .halfsize}
 #![feature(proc_macro)]
@@ -199,7 +199,7 @@ fn impl_weight(ast: &syn::DeriveInput) -> quote::Tokens {
 ```
 
 </div>
-<div style="float: left;">
+<div style="float: left; width: 50%">
 
 ``` {.rust .halfsize}
 fn generate_match_for_cases<'a, I>(iter: I) -> quote::Tokens
@@ -207,7 +207,7 @@ fn generate_match_for_cases<'a, I>(iter: I) -> quote::Tokens
 {
     let mut arms = quote! { };
     for (variant_ident, variant_data) in iter {
-        let (field_names, code) = generate_variant_data_code(variant_data);
+        let (field_names, code) = generate_variant_code(variant_data);
         let arm = match *variant_data {
             syn::VariantData::Unit =>
                 quote! { #variant_ident => #code },
@@ -221,7 +221,7 @@ fn generate_match_for_cases<'a, I>(iter: I) -> quote::Tokens
     return quote! { match *self { #arms } };
 }
 
-fn generate_variant_data_code(vd: &syn::VariantData) -> (Vec<quote::Tokens>, quote::Tokens)
+fn generate_variant_code(vd: &syn::VariantData) -> (Vec<quote::Tokens>, quote::Tokens)
 {
     let bind_names: Vec<_> = match *vd {
         syn::VariantData::Unit => vec![],
@@ -353,4 +353,3 @@ pub fn test_breakfast() { breakfast() }
 pub fn main() { breakfast() }
 ```
 -->
-
