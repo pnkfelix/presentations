@@ -1,5 +1,11 @@
 # The Second of the Three Spirits (15 min)
 
+## IRC snippets
+
+```irc
+<epochspresent> I am the Ghost of Epochs Present
+```
+
 ## What are changes that mattered for Rust *today*
 
 ## Poll
