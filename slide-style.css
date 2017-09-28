@@ -20,7 +20,7 @@
 
 .reveal pre code {
     font-family: Menlo,monospace;
-    font-size: 125%;
+    // font-size: 125%;
     line-height: initial;
 }
 
