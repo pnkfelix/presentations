@@ -1,4 +1,4 @@
-# The Last of the Spirits
+# The Last of the Spirits (5 min)
 
 ## Graveyard
 

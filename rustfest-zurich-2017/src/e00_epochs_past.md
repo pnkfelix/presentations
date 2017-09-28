@@ -1,4 +1,4 @@
-# The First of the Three Spirits
+# The First of the Three Spirits (8 min)
 
 ## `int`/`uint`
 

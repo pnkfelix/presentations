@@ -1,4 +1,4 @@
-# The End of It
+# The End of It (15 min)
 
 ## Child, what day is it?
 

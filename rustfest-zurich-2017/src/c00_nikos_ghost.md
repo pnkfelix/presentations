@@ -1,4 +1,4 @@
-# Matsakis' Ghost
+# Matsakis' Ghost (5 min)
 
 
 ## PnkScrooge's struggle

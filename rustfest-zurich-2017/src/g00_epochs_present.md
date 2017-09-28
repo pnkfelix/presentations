@@ -1,4 +1,4 @@
-# The Second of the Three Spirits
+# The Second of the Three Spirits (15 min)
 
 ## What are changes that mattered for Rust *today*
 
