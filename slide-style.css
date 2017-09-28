@@ -20,7 +20,7 @@
 
 .reveal pre code {
     font-family: Menlo,monospace;
-    // font-size: 125%;
+    font-size: 125%;
     line-height: initial;
 }
 
@@ -35,9 +35,9 @@
     list-style: none;
 }
 
-.halfsize code { font-size: 50%; }
-.thirdsize code { font-size: 33%; }
-.quartsize code { font-size: 25%; }
+.reveal .halfsize code { font-size: 50%; }
+.reveal .thirdsize code { font-size: 33%; }
+.reveal .quartsize code { font-size: 25%; }
 
 .float_left code { float: left; }
 
