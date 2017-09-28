@@ -30,4 +30,3 @@ You will be visited by Three Spirits
  * The Ghost of Epochs Present, and
 
  * The Ghost of Epochs Yet To Come
- 

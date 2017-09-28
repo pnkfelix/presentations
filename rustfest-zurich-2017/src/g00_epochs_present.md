@@ -382,4 +382,3 @@ TODO
 ## Insight
 
 "Small" language additions can enable huge library/ecosystem wins
-
