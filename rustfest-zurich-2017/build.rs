@@ -30,8 +30,8 @@ fn run_pandoc() {
             }
         }
 
-        // otherwise, process everything that ends with `.md` except the `lib.md`.
-        file_name.ends_with(".md") && file_name != "lib.md"
+        // otherwise, process everything that ends with `.md` except the `lib.md`/`main.md`.
+        file_name.ends_with(".md") && file_name != "lib.md" && file_name != "main.md"
     }
 
     let mut saw_file = false;
