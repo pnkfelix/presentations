@@ -31,6 +31,8 @@ code.sourceCode {
 .sourceCode .bash { background-color: #F0F0F0; }
 .sourceCode .javascript { background-color: #FFFFFF; }
 
+.irc { background-color: #FFFFFF; }
+
 
 /* .sourceCode .rust { overflow: visible; } */
 .sourceCode { overflow: visible; }
