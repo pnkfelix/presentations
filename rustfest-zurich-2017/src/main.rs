@@ -26,6 +26,6 @@ mod tests {
 fn main() {
     println!("It works");
     g00_epochs_present::main();
-    let result = l00_end_of_it::f();
-    println!("f: {:?}", result);
+    // let result = l00_end_of_it::f();
+    // println!("f: {:?}", result);
 }
