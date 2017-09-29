@@ -24,7 +24,7 @@ One might even call him: a Scrooge for 2018
 <aturon> we aren't going to break any code
 ```
 
-## What's today, my fine fellow?
+## What's today, my fine fellow? {.left_align}
 
 Already have:
 
@@ -57,10 +57,10 @@ Each epoch provides
 
  * where tooling, docs and stdlib are updated to mesh with new features
 
-## Having the compatibility cake and eating it too
+## Having compatibility cake and eating it too
 
-Backwards incompatible changes only available if crate *opts into* the
-epoch, via declaration in crate's `Cargo.toml`, e.g.
+Backwards incompatible changes only available if crate *opts into*
+epoch in its `Cargo.toml`, e.g.
 
 ``` {.rust}
 epoch = "2019"
@@ -68,17 +68,20 @@ epoch = "2019"
 
 Otherwise tools assume 2015 epoch.
 
-Rust compilers must support all extant epochs, and a crate dependency
-graph may involve several different epochs simultaneously. (Must
-always be able to link code and preserve its semantics.)
+. . .
 
-Epochs do not split the ecosystem nor do they break existing code.
+Rust compilers must support all extant epochs
 
-Furthermore, each successive epoch is only allowed to introduce a hard
-error for a given input if its predecessor epoch was issuing a
-deprecation warning for that input.
+Crate graph may involve many epochs at once; must be able to link code and preserve semantics.
 
-## Epochs will enable host of future changes {.left_align}
+Each epoch can introduce hard error *only if* preceding epoch issued a
+*deprecation* warning for same input.
+
+. . .
+
+### Epochs do not split ecosystem, nor do they break existing code.
+
+## Epochs let us *consider* new changes {.left_align}
 
 * `catch` (currently implemented as `do catch`)
 
@@ -86,12 +89,15 @@ deprecation warning for that input.
 
 * `dyn Trait`
 
+* visibility (`crate fn foo` instead of `pub(crate) fn foo`)
+
 . . .
 
 Note: epochs will largely focus on syntactic changes
 
  * syntax change *can* enable semantic change
- * but we still need to link old and new code together with coherent result
+ * still need to link old and new code together with coherent result
+ * how you read/write code may change, but mental model should not
 
 ## impl Future for Rust
 
