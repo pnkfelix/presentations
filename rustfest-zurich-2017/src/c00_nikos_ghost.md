@@ -1,4 +1,4 @@
-# Matsakis' Ghost (5 min)
+# Matsakis' Ghost <!-- (5 min) -->
 
 ## IRC snippets
 
@@ -13,7 +13,12 @@ Scrooge's optimism about Rust's future had faltered
 
 ```irc
 <pnkscrooge> What’s Rust to you but a language
-<pnkscrooge> for writing types without code;
+<pnkscrooge> for writing types without deploying apps;
+```
+
+. . .
+
+```irc
 <pnkscrooge> a language for finding yourself a compile-cycle older,
 <pnkscrooge> but not an object file richer?
 ```
@@ -29,14 +34,20 @@ Scrooge's optimism about Rust's future had faltered
 <pnkscrooge> and buried with a bicycle gear through their heart
 ```
 
+```irc
+* pnkscrooge was kicked by &manishearth: eeew
+```
+
 . . .
 
-and he was less than kind to his comrades, as well
+and Scrooge was unkind to his comrades as well
 
 ```irc
 <pnkscrooge> Crichit! Cargo is broken!
 <acrichto> Are you talking to me?
 ```
+
+<!--
 
 ----
 
@@ -46,21 +57,42 @@ and he was less than kind to his comrades, as well
 <pnkscrooge> when I live in such a world of fools as this?
 ```
 
-## PnkScrooge's struggle
+-->
+
+## The Why of Scrooge
+
+```irc
+<pnkscrooge> why invest in adding feature after feature?
+<pnkscrooge> forcing people to learn new idioms
+<pnkscrooge> they'll just leave and learn Java or C++ instead
+<pnkscrooge> change is *death*
+```
+
+ . . .
+
+```irc
+* pnkscrooge was kicked by &manishearth: off-topic philosophizing
+```
+
+<!--
+
+## Footnote: PnkScrooge's struggle
 
 Rust is Research. No, not research.
 
 <div class="fragment"><p>(Yes research?)</p></div>
 
-. . .
-
 Language evolution
 
- * GC support
+ * static drop semantics (abandoned; stuck w/ existing dynamic drop)
+
+ * fallible allocation
 
  * ~~`pub(path)`~~ <div class="fragment">`pub(in path)`</div>
 
 . . .
+
+-->
 
 ## Boo boo
 
@@ -303,21 +335,21 @@ mmmdddddmmmmmdhhhhddddmdddhhhhhhhhhdddddhhhhhhhyyyyyyyyyysssssssssssssssssssssss
 mmmdddddmmmmdhhhhhhdddddddhhhhhhhhhdddddhhhhhhyyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss
 ```
 
-----
+## Tonight You Will Be Visited
 
 ```irc
 <pnkscrooge> its the ghost of nmatsakis!
+```
+```irc
 <nmatsakis> the chains of stability and backwards compat are heavy!
-<nmatsakis> repent!
+<nmatsakis> you must change your way of thinking
+<nmatsakis> tonight you will be visited by three spirits
 ```
 
+## Footnote
 
-## Tonight
+Niko is not dead
 
-You will be visited by Three Spirits
+(Well, maybe he is in this story)
 
- * The Ghost of Epochs Past
-
- * The Ghost of Epochs Present, and
-
- * The Ghost of Epochs Yet To Come
+(Or at least overwhelmed)

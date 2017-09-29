@@ -1,33 +1,59 @@
-# The Second of the Three Spirits (15 min)
+# The Second of the Three Spirits <!-- (15 min) -->
 
 ## IRC snippets
 
 ```irc
 <epochspresent> I am the Ghost of Epochs Present
+<pnkscrooge> Spirit, conduct me where you will
+<pnkscrooge> I went forth last night on compulsion,
+<pnkscrooge> and I learnt a lesson which is working now.
+<pnkscrooge> if you have aught to teach me, let me profit by it.
 ```
 
 ## What are changes that mattered for Rust *today*
 
-## Poll
+## Poll {.left_align}
 
->- `if let`
->- `Rc<Unsized>` (e.g. `Rc<str>`
->- `pub(crate)`
->- IDE support
->- `feature(never_type)`: `match x: Result<T, Void> { Ok(_) => ... }`
->- `rustup`
->- `impl Trait`
->- `?` (3)
->- Error Messages (3)
->- Custom Derive / Serde ( / Diesel ) (5)
->- macros 1.1 / `syn` / `quote` (is this part of above? check records)
+Compared to 1.0
+
+. . .
+
+* some things falling outside lang/libs
+
+IDE support, `rustup`, nicer diagnostics (noted by many)
+
+. . .
+
+* some features in Rust nightly channel today
+
+never_type: `match x: Result<T, Void> { Ok(_) => ... }`
+
+. . .
+
+* some features in Rust beta channel today
+
+`Rc<str>` ([RFC 1845][])
+
+[RFC 1845]: https://github.com/rust-lang/rfcs/blob/master/text/1845-shared-from-slice.md
+
+. . .
+
+* some features in stable Rust today
+
+`if let`, `?`-syntax, `pub(crate)`, `impl Trait`
+
+. . .
+
+macros 1.1 / Custom Derive / Serde (noted by *many*)
 
 ## Procedural macros, custom `#[derive]`
+
+## Lets hack some code
 
 ```rust
 /// Measure number of heap-allocated values owned by self.
 trait Weight {
-    // Base assumption: most values are allocated inline, not a separate `malloc`
+    // default: most values laid inline, not separate `malloc`'ed
     fn weight(&self) -> isize { 0 }
 }
 ```
@@ -39,9 +65,9 @@ impl Weight for i32 { }
 impl Weight for i64 { }
 // (et cetera)
 
-impl<'a, T: ?Sized> Weight for &'a T { } // someone else owns this, not our problem.
-impl<'a, T: ?Sized> Weight for &'a mut T { } // ditto
-// (aside: `?Sized` marker is to allow things like `str` or `[i32]` in for `T`.)
+impl<'a, T: ?Sized> Weight for &'a T { }     // someone else owns `T`
+impl<'a, T: ?Sized> Weight for &'a mut T { } // not us
+// (`?Sized` marker allows things like `str` or `[i32]` as the `T`.)
 ```
 
 ## The first interesting cases
@@ -71,9 +97,62 @@ fn test_box_chain() {
 }
 ```
 
+## Over Weight Demo {.no_margin}
+
+```rust
+pub fn breakfast() {
+    let f = FrenchToast;
+    assert_eq!(f.weight(), 0);
+    let p1 = Pancakes { topping: "syrup", atop: None };
+```
+
+Pop quiz: what's `p1.weight()`?
+
+<div class="fragment">
+
+```rust
+    assert_eq!(p1.weight(), 0);
+```
+
+</div>
+
+```rust
+    let p3 = Pancakes {
+        topping: "butter",
+        atop: Some(Box::new(
+            Pancakes { topping: "berries",
+                       atop: Some(Box::new(
+                           Pancakes { topping: "syrup",
+                                      atop: None })) }))};
+```
+
+How about `p3.weight()`?
+
+<div class="fragment">
+
+```rust
+    assert_eq!(p3.weight(), 2);
+```
+
+("just count the boxes!")
+
+</div>
+
+```rust
+}
+```
+
+<!--
+```rust
+#[test]
+pub fn test_breakfast() { breakfast() }
+pub fn main() { breakfast() }
+```
+-->
+
 ----
 
-`Vec` is similar to `Box`: pay for own heap allocation, plus those of contents.
+`Vec` is like `Box`: pay for own heap alloc, plus those (if any) of contents
 
 ```rust
 impl<T: Weight> Weight for Vec<T> {
@@ -84,14 +163,42 @@ impl<T: Weight> Weight for Vec<T> {
 
 #[test]
 fn test_vec_of_boxes() {
-    assert_eq!( vec![Box::new(1), Box::new(2), Box::new(3)].weight(), 4 );
-}
-
-#[test]
-fn test_option_box() {
-    assert_eq!( Some(Box::new(1)).weight(), 1 );
+    assert_eq!( vec![Box::new(1), Box::new(2), Box::new(3)].weight(),
+                4 );
 }
 ```
+
+## Well...
+
+I just lied to you. Code like
+
+``` {.rust}
+    let p1 = Pancakes { topping: "syrup", atop: None };
+    p1.weight()
+```
+
+doesn't work yet; why not?
+
+
+
+. . .
+
+Likewise, `Option<Box<T>>` won't work either.
+
+But we *want* it to work, like this:
+
+```rust
+#[test]
+fn test_option_box() {
+    let s: Option<Box<i32>> = Some(Box::new(10));
+    assert_eq!( s.weight(), 1 );
+
+    let n: Option<Box<i32>> = None;
+    assert_eq!( n.weight(), 0 );
+}
+```
+
+("just count the boxes")
 
 ## The first annoying cases
 
@@ -125,8 +232,8 @@ impl<T: Weight, E: Weight> Weight for Result<T, E> {
 
 ----
 
-Implementations for `Option<T>` and `Result<T, E>` were entirely mechanical,
-derived from the structure of the type.
+Implementations from previous slide were entirely mechanical,
+derived directly from structure of `Option` and `Result` types, respectively.
 
   . . .
 
@@ -145,12 +252,14 @@ use weight_derive::impl_weight_for;
 impl_weight_for!(enum Option<T> { Some(T), None });
 ```
 
-yields (after some human adjustment of whitespace):
+. . .
+
+expands to (after some human adjustment of whitespace):
 
 ``` {.rust}
 impl<T> Weight for Option<T> where T: Weight, {
     fn weight (&self) -> isize { match *self {
-        Some (ref x_0) => 0 + x_0.weight(), None => 0, } } }
+        Some(ref x_0) => 0 + x_0.weight(), None => 0, } } }
 ```
 
  . . .
@@ -331,59 +440,37 @@ impl Weight for Pancakes where {
 }
 ```
 
-## Over Weight Demo {.no_margin}
+## `derive` *is* the important special case
 
-```rust
-pub fn breakfast() {
-    let f = FrenchToast;
-    assert_eq!(f.weight(), 0);
-    let p1 = Pancakes { topping: "syrup", atop: None };
-```
+While it *is* painful to write out the implementations for standard library
+types like `Option` and `Result`, at least the author of a crate providing
+`trait Weight` has the option of *doing* that work.
 
-(Pop quiz: what's `p1.weight()`?)
+But that is useless when it comes to supporting downstream crates of
+their *clients*.
 
-<div class="fragment">
-
-```rust
-    assert_eq!(p1.weight(), 0);
-```
-
-</div>
-
-```rust
-    let p3 = Pancakes { topping: "butter",
-                        atop: Some(Box::new(
-                            Pancakes { topping: "berries",
-                                       atop: Some(Box::new(
-                                           Pancakes { topping: "syrup",
-                                                      atop: None })) }))};
-```
-
-(How about `p3.weight()`?)
-
-<div class="fragment">
-
-```rust
-    assert_eq!(p3.weight(), 2);
-```
-
-</div>
-
-```rust
-}
-```
-
-<!--
-```rust
-#[test]
-pub fn test_breakfast() { breakfast() }
-pub fn main() { breakfast() }
-```
--->
+That is why support for `derive` is so important: It enables crates to
+to provide a trait and then give clients a zero-cost way to get impl's
+on their own types.
 
 ## Serde
 
-TODO
+By implementing Serde's `Serialize` and `Deserialize` traits (or using
+`derive` to do it automatically), data structures acquire the ability
+to serialize and deserialize themselves.
+
+The serializaton works with many data formats: JSON, CBOR, YAML, TOML,
+Pickle (common in Python), BSON (used by MongoDB), URL, et cetera.
+
+They do this via code generated at compile-time; no need for
+reflection nor runtime type introspection!
+
+In many situations Serde serialization performs at same speed as a
+handwritten serializer.
+
+## Other crates
+
+`derive` isn't special-cased around `Serde`; see also e.g. `Deisel` crate.
 
 ## Insight
 
