@@ -340,6 +340,8 @@ mmmdddddmmmmdhhhhhhdddddddhhhhhhhhhdddddhhhhhhyyyyyyyyyyysssssssssssssssssoooooo
 ```irc
 <pnkscrooge> its the ghost of nmatsakis!
 ```
+. . .
+
 ```irc
 <nmatsakis> the chains of stability and backwards compat are heavy!
 <nmatsakis> you must change your way of thinking
