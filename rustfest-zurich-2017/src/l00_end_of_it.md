@@ -16,8 +16,7 @@ Fundamentally different from the man from a year before
 
 One might even call him: a Scrooge for 2018
 
-----
-
+## Epilogue
 
 ```irc
 <aturon> what has pnkscrooge been ranting about?
