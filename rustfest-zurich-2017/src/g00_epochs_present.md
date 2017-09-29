@@ -150,6 +150,8 @@ pub fn main() { breakfast() }
 ```
 -->
 
+<!--
+
 ----
 
 `Vec` is like `Box`: pay for own heap alloc, plus those (if any) of contents
@@ -167,6 +169,8 @@ fn test_vec_of_boxes() {
                 4 );
 }
 ```
+
+-->
 
 ## Well...
 
