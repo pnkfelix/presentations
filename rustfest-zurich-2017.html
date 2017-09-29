@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title></title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/mozilla-darkgrey.css" id="theme">
+  <link rel="stylesheet" href="slide-style.css"/>
+  <link rel="stylesheet" href="code-style-darkgrey.css"/>
+  <link rel="stylesheet" href="fonts.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <!-- Nothing here yet; in my IWACO talk, I used this to pull in support for Snap.svg. -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+
+<section><section id="change" class="titleslide slide level1"><h1>CHANGE <!-- (2 min) --></h1></section><section id="a-rustfest-carol" class="slide level2">
+<h2>A RustFest Carol</h2>
+<div class="fragment">
+<p><code>impl</code>'ementing</p>
+<h3 id="a-ghost-story-of-rustfest">A Ghost Story of RustFest</h3>
+<p>by</p>
+<p>Felix S. Klock II (<code>@pnkfelix</code>)</p>
+<div class="fragment">
+<p>with apologies to</p>
+<p>Charles Dickens, David Foster Wallace, and Mark Z. Danielewski</p>
+</div>
+<div class="fragment">
+<p>This is a work of fiction. Names, characters, businesses, places, events and incidents are either the products of the author’s imagination or used in a fictitious manner. Any resemblance to actual persons, living or dead, or actual events is purely coincidental.</p>
+</div>
+</div>
+</section></section>
+<section><section id="matsakis-ghost" class="titleslide slide level1"><h1>Matsakis' Ghost <!-- (5 min) --></h1></section><section id="irc-snippets" class="slide level2">
+<h2>IRC snippets</h2>
+<pre class="irc"><code>&lt;manishearth&gt; RIIR!
+&lt;pnkscrooge&gt; Bah! Humbug!</code></pre>
+<div class="fragment">
+<p>Scrooge's optimism about Rust's future had faltered</p>
+<pre class="irc"><code>&lt;pnkscrooge&gt; What’s Rust to you but a language
+&lt;pnkscrooge&gt; for writing types without deploying apps;</code></pre>
+</div>
+<div class="fragment">
+<pre class="irc"><code>&lt;pnkscrooge&gt; a language for finding yourself a compile-cycle older,
+&lt;pnkscrooge&gt; but not an object file richer?</code></pre>
+</div>
+<div class="fragment">
+<pre class="irc"><code>&lt;pnkscrooge&gt; If I could work my will,
+&lt;pnkscrooge&gt; every idiot who goes about with &quot;RIIR&quot; on their lips
+&lt;pnkscrooge&gt; should be nailed up in their own crate
+&lt;pnkscrooge&gt; and buried with a bicycle gear through their heart</code></pre>
+<pre class="irc"><code>* pnkscrooge was kicked by &amp;manishearth: eeew</code></pre>
+</div>
+<div class="fragment">
+<p>and Scrooge was unkind to his comrades as well</p>
+<pre class="irc"><code>&lt;pnkscrooge&gt; Crichit! Cargo is broken!
+&lt;acrichto&gt; Are you talking to me?</code></pre>
+<!--
+
+----
+
+```irc
+<manishearth> Don't be cross, Scrooge!
+<pnkscrooge> What else can I be,
+<pnkscrooge> when I live in such a world of fools as this?
+```
+
+-->
+</div>
+</section><section id="the-why-of-scrooge" class="slide level2">
+<h2>The Why of Scrooge</h2>
+<pre class="irc"><code>&lt;pnkscrooge&gt; why invest in adding feature after feature?
+&lt;pnkscrooge&gt; forcing people to learn new idioms
+&lt;pnkscrooge&gt; they&#39;ll just leave and learn Java or C++ instead
+&lt;pnkscrooge&gt; change is *death*</code></pre>
+<div class="fragment">
+<pre class="irc"><code>* pnkscrooge was kicked by &amp;manishearth: off-topic philosophizing</code></pre>
+<!--
+
+## Footnote: PnkScrooge's struggle
+
+Rust is Research. No, not research.
+
+<div class="fragment"><p>(Yes research?)</p></div>
+
+Language evolution
+
+ * static drop semantics (abandoned; stuck w/ existing dynamic drop)
+
+ * fallible allocation
+
+ * ~~`pub(path)`~~ <div class="fragment">`pub(in path)`</div>
+
+. . .
+
+-->
+</div>
+</section><section id="boo-boo" class="slide level2">
+<h2>Boo boo</h2>
+<p>After <del>Crichit</del> Crichton had gone home, Scrooge pondered over the borrowck error on his screen.</p>
+</section><section id="boo-boo-1" class="slide level2" data-transition="concave">
+<h2>Boo boo</h2>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">error<span class="op">[</span>E0597<span class="op">]</span>: `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` does not live long enough
+  --&gt; errmsg.rs:<span class="dv">11</span>:<span class="dv">5</span>
+   |
+<span class="dv">10</span> |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+   |              ---------------------------------------------------------------------------------------------------------------------------------------------------------- borrow occurs here
+<span class="dv">11</span> |     <span class="op">}</span>
+   |     ^ `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` dropped here <span class="kw">while</span> still borrowed
+<span class="dv">12</span> |     <span class="pp">println!</span>(<span class="st">&quot;x: {}&quot;</span>, x);
+<span class="dv">13</span> | <span class="op">}</span>
+   | - borrowed value needs to live until here
+
+error: aborting due to <span class="dv">6</span> previous errors</code></pre></div>
+<p>Scrooge decided he needed a larger screen to get perspective</p>
+</section><section id="booooooo" class="slide level2" data-transition="fade-out">
+<h2>Booooooo</h2>
+<div class="sourceCode"><pre class="sourceCode rust quartsize"><code class="sourceCode rust"> --&gt; errmsg.rs:<span class="dv">5</span>:<span class="dv">9</span>
+  |
+<span class="dv">5</span> |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+  |         ^
+  |
+  = note: <span class="at">#[</span>warn<span class="at">(</span>unused_assignments<span class="at">)]</span> on by default
+
+warning: value assigned to `x` is never read
+ --&gt; errmsg.rs:<span class="dv">6</span>:<span class="dv">9</span>
+  |
+<span class="dv">6</span> |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+  |         ^
+
+warning: value assigned to `x` is never read
+ --&gt; errmsg.rs:<span class="dv">7</span>:<span class="dv">9</span>
+  |
+<span class="dv">7</span> |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+  |         ^
+
+warning: value assigned to `x` is never read
+ --&gt; errmsg.rs:<span class="dv">8</span>:<span class="dv">9</span>
+  |
+<span class="dv">8</span> |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+  |         ^
+
+warning: value assigned to `x` is never read
+ --&gt; errmsg.rs:<span class="dv">9</span>:<span class="dv">9</span>
+  |
+<span class="dv">9</span> |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+  |         ^
+
+error<span class="op">[</span>E0597<span class="op">]</span>: `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` does not live long enough
+  --&gt; errmsg.rs:<span class="dv">11</span>:<span class="dv">5</span>
+   |
+<span class="dv">5</span>  |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+   |              ---------------------------------------------------------------------------------------------------------------------------------------------------------- borrow occurs here
+...
+<span class="dv">11</span> |     <span class="op">}</span>
+   |     ^ `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` dropped here <span class="kw">while</span> still borrowed
+<span class="dv">12</span> |     <span class="pp">println!</span>(<span class="st">&quot;x: {}&quot;</span>, x);
+<span class="dv">13</span> | <span class="op">}</span>
+   | - borrowed value needs to live until here
+
+error<span class="op">[</span>E0597<span class="op">]</span>: `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` does not live long enough
+  --&gt; errmsg.rs:<span class="dv">11</span>:<span class="dv">5</span>
+   |
+<span class="dv">6</span>  |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+   |              ---------------------------------------------------------------------------------------------------------------------------------------------------------- borrow occurs here
+...
+<span class="dv">11</span> |     <span class="op">}</span>
+   |     ^ `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` dropped here <span class="kw">while</span> still borrowed
+<span class="dv">12</span> |     <span class="pp">println!</span>(<span class="st">&quot;x: {}&quot;</span>, x);
+<span class="dv">13</span> | <span class="op">}</span>
+   | - borrowed value needs to live until here
+
+error<span class="op">[</span>E0597<span class="op">]</span>: `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` does not live long enough
+  --&gt; errmsg.rs:<span class="dv">11</span>:<span class="dv">5</span>
+   |
+<span class="dv">7</span>  |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+   |              ---------------------------------------------------------------------------------------------------------------------------------------------------------- borrow occurs here
+...
+<span class="dv">11</span> |     <span class="op">}</span>
+   |     ^ `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` dropped here <span class="kw">while</span> still borrowed
+<span class="dv">12</span> |     <span class="pp">println!</span>(<span class="st">&quot;x: {}&quot;</span>, x);
+<span class="dv">13</span> | <span class="op">}</span>
+   | - borrowed value needs to live until here
+
+error<span class="op">[</span>E0597<span class="op">]</span>: `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` does not live long enough
+  --&gt; errmsg.rs:<span class="dv">11</span>:<span class="dv">5</span>
+   |
+<span class="dv">8</span>  |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+   |              ---------------------------------------------------------------------------------------------------------------------------------------------------------- borrow occurs here
+...
+<span class="dv">11</span> |     <span class="op">}</span>
+   |     ^ `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` dropped here <span class="kw">while</span> still borrowed
+<span class="dv">12</span> |     <span class="pp">println!</span>(<span class="st">&quot;x: {}&quot;</span>, x);
+<span class="dv">13</span> | <span class="op">}</span>
+   | - borrowed value needs to live until here
+
+error<span class="op">[</span>E0597<span class="op">]</span>: `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` does not live long enough
+  --&gt; errmsg.rs:<span class="dv">11</span>:<span class="dv">5</span>
+   |
+<span class="dv">9</span>  |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+   |              ---------------------------------------------------------------------------------------------------------------------------------------------------------- borrow occurs here
+<span class="dv">10</span> |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+<span class="dv">11</span> |     <span class="op">}</span>
+   |     ^ `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` dropped here <span class="kw">while</span> still borrowed
+<span class="dv">12</span> |     <span class="pp">println!</span>(<span class="st">&quot;x: {}&quot;</span>, x);
+<span class="dv">13</span> | <span class="op">}</span>
+   | - borrowed value needs to live until here
+
+error<span class="op">[</span>E0597<span class="op">]</span>: `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` does not live long enough
+  --&gt; errmsg.rs:<span class="dv">11</span>:<span class="dv">5</span>
+   |
+<span class="dv">10</span> |         x = &amp;yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss;
+   |              ---------------------------------------------------------------------------------------------------------------------------------------------------------- borrow occurs here
+<span class="dv">11</span> |     <span class="op">}</span>
+   |     ^ `yyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss` dropped here <span class="kw">while</span> still borrowed
+<span class="dv">12</span> |     <span class="pp">println!</span>(<span class="st">&quot;x: {}&quot;</span>, x);
+<span class="dv">13</span> | <span class="op">}</span>
+   | - borrowed value needs to live until here
+
+error: aborting due to <span class="dv">6</span> previous errors</code></pre></div>
+</section><section id="boooooo" class="slide level2" data-transition="fade-in">
+<h2>Boooooo!</h2>
+<div class="sourceCode"><pre class="sourceCode rust quartsize"><code class="sourceCode rust">ssyyyhhhhhhhhhhyyyhhhhhddhhhdddddddhhhdddddddddddddhhhhdddddddddddmmmmddmmmmdddddddddddddddddddddddddmmdddddddmmdddhhhyssooooooooooooosssssssyyyyyyyyyyyyyhhhhyys+:-````````````````````````````````````
+yyyyhhhhhhhhhhhhhyyyyyhddhhhddddddddhhdddddddddddddddhddddddddddddmmmddddmmddddddddddddddhhhhhhddddddddddddddmmmddhhyyssooooo++++++ooooosssssssyyyyyyyyyyyyyyyyyso/-.```````````````````````````````````
+yyhhhhhhhhhhhhhhhyyyyyhddhhhdddhddddddddddddddddddddddddddmdddhhddddddddddddddddddddddhhhhhhhhhhhhdddddddddddddddhyyssoo++++++++++++++ooooooosssssssssssssyyyyyyyo+:..``````````````````````````````````
+hhhhhddhhhhhhdhhhyyyyyhhhhhdddhhhdddddddddddddddddddddddddddddhhhdddddddddddddddddddhhhhhhhhhyhhhhhdddddddddddhhhyssso++++++++++++++++++++++ooossssoooooosssyyyyyso/-.``````````````````````````````````
+yhhhdddddddddhhyyyyyyyyhhhhddddhddddmddddddddddddddddddddddddddhddddddddddddddddhhhhhhyyyyyyyyyyyhhhdddddhhhhyyyssooo++++++++++/++++++++++++++ooooo++++++oosssyyyyo/:.``````````````````````````````````
+yyhhddddddddddhyyyyyyyyhhhddmmdddddmmddddddddddddddddddddddddddhhdddddddddddhhhhhyyyyyssssssssssyyyhhhhhhhyyysssoo++++++++++<span class="co">/////////+++++++++++++////////++ooosyso+:-``````````````````````````````````</span>
+yyyhhddddddmddhyyyyyyyyhhdddmmmdddddmddddddddddddddddddddddddddhhhddddddhhhhhhhyyyyyssssoosssssssssyyyyyyysssooo+++++++++++<span class="co">//////////////////////////////////+++oso+/-.`````````````````````````````````</span>
+ssyyhhdddddmmddhyyyyyyhhdddmmmmmmdddddddddddddddddddddddddddddhhhhhhhhhhhhhhhhyyyyssssooooooooooooooosssssoooo++++<span class="co">/////++++//////////////////////////////::::/:/++++/-.`````````````````````````````````</span>
+ssssyyhhhddddddhyyyyyyhhddddmmmmddddddmdddddddddddddddhdddhhhhhhhhhhhhhhyyhhhyyysssssooooooooooo++++++ooo+++++++++<span class="co">//////++++/////////////////////////////::::::::/+++:...```````````````````````````````</span>
+yysssyyhhhhddddhyyyyyyyhdddddmmmddddddmddddddddddddddhhhhhhhhhhhhhhhhyyyyyyyyyyssoooooooooooooo++++++++++++/+++++++<span class="co">//++++///////////////////////////////::::::::::/++:-..`````````...```````````````````</span>
+yyyssyyyyyhhdddhhyyyyyyhhddddddddddddddddhhddddddddddhhhhhhhhhyyyyyyyyyyysssssssoooooooooooooo+++++++++++++<span class="co">////+/+++++++++/////////////////////////////////:::::::://:-..```````````````````````````````</span>
+yyyssyyyyyhhddhhhyyyyyhhhdddddddddddmddddhhdddddddddhhhhhhhyyyyyyyyyysssssssooooooooooooooooo++++++++++++++<span class="co">///////++++++++/////////////////////////////////::::::::::::-..``````.```````````````````````</span>
+yssssyyysyhhhhyhhhhyyyhhdddddddddddddddddhhdddddddddhhhhhyyyyysssssssssssoooooooooooooooooooo++++++++++++++<span class="co">/////++++/+++++////////////////////////////////:::::::::::::-..``````.....```````````````````</span>
+sssssyyyssyhhyyyhhhhhhhhhhdddddddddddddddddddddddddhhhhhyyyyysssssssssooooooooooooooooooooooo+++++++++++++++++++++++/+++++<span class="co">///////////////////////////////::::::::::::::-.``````````..```......``````````</span>
+ssssssyyyyyyyyyyyyhhhhhyhhhhddddddddddddddddddddddhhhhhhyyyyssssssssooooooooooooo++oooooooooo++++++++++++++++++++++++++++<span class="co">/////////////////////////////////::::::::::::--.`````````...........```````````</span>
+sssssssyyyyyyyyysyyhhhhyyhhhddddddddddddddddddddddhhhhhyyyyysssssssooooooooooooooooooooooooooo++++++++++++++++++++++++++<span class="co">////////////////////////////////////:::::::::::-.````..```..````.```````````````</span>
+ssssssssyyyssyyyssyyyhhyyhhdddddddddddddddddddddddhhhhyyyyysssssssoooooooooooooooooooooo+ooo+++++++++++++++++++++++++<span class="co">///////////////////////////////////////:::::::::::-..```..`````````````````````````</span>
+ssssssosyyysssssssssyyyyhhddddddddddhhddddddddddddhhhhyyyysssssssooooooooooooooooooo+o++++++++++++++++++++++++/+<span class="co">//////////////////////////////////////////////:::::::::--..``..`````````````````````````</span>
+ssssssssyyssssssssyyyyyyyhddhhddddddhhdddddddddddddhhhyyyysssssssooooooooooooooooooo+oo++ooooo++++++++++++++++<span class="co">/////////////////////////////////////////////////////:::::---..```````````````...`````````</span>
+ssssssssssssssssssyyyyyyyhdhhhddmmdddddddddddddddddhhhhyyyysssssssooooooooooooooooooooooooooooo+++++++++++++++<span class="co">/////////////////////////////////////+////////+++++///////::--..``..```..`````...`````````</span>
+oosssssssssssoosssyyyyyyyhhhhhdmmddddddddddddddddddhhhhyyyyssssssssooooooooooooooooooooooo++ooo++++++++++++++<span class="co">//////////////////////////////////+++++++++++++oooooo++++/////:-..`.``...........``````````</span>
++osyyyssssssssssssyyyyyyyhhhhhddddhhdddddddddddddddhhhhyyyssssssssssoooooooooooooooooooooo+++o+++++++++++++++++/++++++<span class="co">//////////+++++++++++++++++++++ooooooossyyyssssooo++++/:-..`....``.......`````````</span>
+oosyyysssooosssssssysssyyhhhhhhhhhhddddddddddddddddhhhhyyyssssssoooooooooooooooooooooooooooooo++++++++++++++++++++++++++++++++++++++++++++++++++oooosssssssyyhhhhhhhyyyyyssooo+:.......`````....```...``
+oosyyssooooossssossysssyhhhhhhhhhhhddddddddddddddddhhhhyysssssssooooooooooooooooooooooooo+++++++++++++++++++++++++++++++++++++++oooooooooooooooosssyyyyyyyhhhddddhhhdhhhhhyyyyo/-..``....```..``````.```
+ooossssooossssssossyssyyhhhhdhhyyyhhhddddddddddddddhhhyyysssssssoooosoooooooooooooooo++++++++++++++++++++++++++++oooo++++ooooooooooooooooooooooossyyyhhhhhddddddddddddddhhhyyys+/:-..-----..-......```..
+ooossssooosyysssssssyyyhhhhhhhyyyyyhhhddddddddddddhhhhyyyssssssooooooooooooooooooo+++++++++++++++++++++oooooooosssssssoooossssssssssssssssoooooossyyhhhhdddddddddddhhhhhyyyyyyssoo+++++++ooo+++/:--.``..
+oooosssoosyyyysssssyyyyhhyyyyyysyyyhhhhddddddddddhhhhyyssssssooooooooooo+oooooooo++++++ooooo+++++++oooooossssyyyyhhyyyyssssyyyyyyyssssssssssoooossyyhhhhddddddhhhhhyyyyyyysssyyyyyyhhhhyhhhdddhhso/-.```
+oooooooossyyyyyyyyyyyyyhhyyyyyssyhhhhhhddddddddddhhyyysssssooooooooo+++++++++o+oooooooooooooooooooosssyyyhhhhhddddddddhhhyyhhhhhyyyssssssssssssosssyhhhhhhhhhhhhhhhhhhyyyyysssssyyyyyhyyyyyhdmmdhy+:.``.
++++oo++osyyyyyyyyyhyysyyhhyyysssyyhhhhdddddddddhhhyyysssoooooooooo+++<span class="co">////++++++ooooooooooooosssyyyyyhhhddddmmmddddddddddhhhhhhhhhyyssssssssooooossyhhhddddhhddhhhhhhhhyyhhysssssyyhhhhhhyssydmmdhyo:.`..</span>
++++ooooossssyyyyhhhhyyyyyyyssssyyhhhyhdddddddhhhhyysssooooooo++++++<span class="co">//////+++oooooosssssssssyyyhhhhhddddddmmmdddddmmdddddddhhhhhyyyssssoooooooooosyyhdddddddddddhhyyyyyhhhhhysso+++ooossssssydmmmhy+:.``.</span>
+ooooooossssssyyhhhhhyyyyyyssossyhhhhhhddddddhhhyyysssoooo++++++++<span class="co">///::///++ooooossyyyyyhhhyhhhhddddddddddddddddddddddddddddhhhhyyysssooooooo++osyhhddddddddddddhyssossyhhdhyso/:-----:/ooosydmmdyo:-....</span>
+sso++oosssssyyyhhhhyyyyyyssoosyyhhhhhdddmdddhyyysssooo++++++++<span class="co">/////::://++oosssyyyhhhhhhhhhhhddddhhhhdddddddddhhhhhhhhhdddddhhhhhyysssooo++++ooyhhdddddddddhhhhyyso++osyhhhyo/:-....`.-+oooyddhs/-......</span>
+ssoooooosssyysyyhhhhhhhhyyssssyhhhhhhddddddhhyyssooo++++++++++<span class="co">//::::://++ossyyyhhdddddddddhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhdddddddddhyyssoooooosyhhdddddddddddhhhhyyo++osyyyso+/--......:+oooydho:......``</span>
+oosssoooossssssyyhhhhhhhhyyyyyhhdddhhddddhhhyyssoo++++++++++++/:::<span class="co">/////+osyyhhhdddhhhhhhhhhhhyyhhhhhhhhhhhhhhhddddhhhhhhhhhhhhhddddddhhhhhhhhhdddddddddddddhhhhhyyssssyyyso+/:-.......:+ooosys/.`.......</span>
+ssssssooossssssyyhhhhhhhhhhhhhdddddhhhddhhhyyysoo+++++++++++<span class="co">//:::////++osyyhhhhhhhhhhhhhhhhhhhhhhdddddhhyyyyyhhdddhhhhyyyyyyyyhhddddddmmmmmmddddddddhhhhhhhhyyyyyysssssssoo+/:-......-/+ossso+:.`..``...</span>
+yyysssssssssyyyyyyhhyyyhhhhhhhhhhhhhyhhhhyyyssoo++<span class="co">///////////////+++oossssyyyhyyyhhhhhdddddddddddddddhhhysssssyyhhhhhhyyyyyyyyhhhddddddmmmddhyyyyhddhhyyyyyyyyssssssssooooo+/:-....-:///+syo/:-.`.`.....</span>
+yyyssssssyyhhyysoooooooooooooooosssooossoooo+++<span class="co">///::////++++oooosssssyyysssyyhhdddddddddddddddddddddhhyyysooosssyyyyyyyyyyyyyyyhhhddddddhhysoo+++oshhhyssyyyyyyssssssssoooo+/::--..-:///+syo:..........`</span>
+yyyssyyyyyhhhso+/:::::::::::--::::::::::::::<span class="co">/////////++oossssyyhhhhhhhhhyyyyhddddmmmddddddddddddddddddhhys+oossyyyyyyyysssssyyhhhhdddddhysooo++//++oyyyssyyyyyyyysssssssoo++//:-...-:/+osyys/::----.....</span>
+sso+++ooossssoooooooo++++++++++++++<span class="co">//////////+++++++ooossyyyyhhddddhhhhhhyyhhddmmmmmmdddddddddddddddddhhysossyyyyyyyyyssssssyyyhhhhddddhysooo+++///++osssssssssssssooooooo+++/:---:/+osyyyssoo++++//////</span>
+<span class="co">///////+++oooossyhhhhhhhhhyhhhhhhhyyyyysssssssssssssssyyyyhhhhdddddddhhhhhhhhddmmmmmmmddddddddddddddhhhyyyyyyyyyyyyyyysssssssyyhhhhddddhyssoo++++////++oooooooooooooo++++oooo+++++ossyyyysssssssssoooooo</span>
+-::/++oooooooooosyhhddddddddmmmdddddddddddhhhyyyyssssyyyyyyhhhhhhddddddhhhhhhddmmmmmmddddhhhhhhhhhhhhyyyyyyyyyyyyyyyyysssssssyhhhhddddhysssoo+++++<span class="co">//////+oooooooooooooooooooosssssssyyssssssyssssssoosss</span>
+<span class="co">//+oossssssssooossyyhhddddddmmmmddddddddddhhhyssooooooooooosssssyyhhddhhhhhhdddmmmmmmddhhhhhhhhyyyyyyysssssssssyyyyysssssssssyyhhhdddhyysssoo+++++//////+oosssssssssyyyyssssso++//+osyyssssyyyysssssssss</span>
+oossyyyyyyyyyysssssyyhhhdddddmmmdddddddddhhhhysoo+++++++ooooooossyyyhhhhhhhhhhhddddmdhhhhhyyyyyyyyyysssssssyyyyyyysssssssssssyhhhhhhhysssssoooo++++<span class="co">//////+oossssssssssooooo+++//::/+oyyssssyyyyyssssssss</span>
+ssyyyyyyyyyyyyyyyyyyyyyhhhdddddddddddddddhhhyysoo++++++++ooooooossyyyyyyyyhhhhhhhhhddhhhhhhyyyyyyyyyyyyyyyssysssssssssssoosssyhhhhhhyysssssoooo+++++<span class="co">///////+ooooooo+++++++//////:::/ossssssyyyyyssssssss</span>
+syyyyysssssssyyyhhyyyyyyhhhddddddmdddddddhhhyssoo+++++++++oo+++oossyyyyyyyyyyyyyyyyhhdhhyyyyyyyyyyyyyyyyyssssssoooooooossssyyyhhhhyyysssoooooooo+++++<span class="co">/////:///+++++++///++///////::/+osssssyyyyyssssssss</span>
+ssyyysssooooossyyyyyyyyyyhhhhhhddmmmdddddhhyyssoo+++++++++++++++osssyyyyyyyyyyysssssyhdhyyyyyyyyyyysssssssssssssssssssssyyyyhhyyyyssssoooooooooooo+++++<span class="co">///////////+++/////////////:/+oosssssyyyyysssssss</span>
+ssyyyssooo+oooossyyyyyyyyhhhhhhhddmmddddhhhyyssoo+++++++++++++++oosssyssssssyssssssssyhhhhyyysssssssssssssssssssyyyyyhhhhhhhyyyssssooooooooooooooo++++++<span class="co">//////////++++////////////://+osysssyyyyysssssss</span>
+ssyyysooooooooossyyhhhhhhhhhhhyhhdddddddhhyyysooo+++++++++++++++ooossssssssssssssssssyyhddhhhhyyyyyyyyyyyyyyyhhhhyyyyyyyyyyyyssssssooooooooooooooo++++++<span class="co">////:::////++////////////:::/+osyyssyyyyyyssssss</span>
+ssyyysooooooosssyyhhhhhhhhhhhyyyyhhddddddhhyysooo+++++++++++oooooooosssssssssssssssssssyyhyyyyyyyyyyyyyyyyyyyyyyyyssssssssssssssssoosossooooooooooo++++++<span class="co">/////:://////////////////:::/oyyyssyyyyyyysssss</span>
+ssyyysooooooosssyhhhdddhhhhhhyyyyyhhdmmmddhyyssooo+++++++++oooooooooossssssssssssssssssssssssssssssssssssssooooooooooooooooooossssssssssssoooooooooo+++++++<span class="co">////////////////////////::/oyhyssyyyyyyysssss</span>
+ssyyysooooooosssyyyhhhhhhhhhhyyyyyyhddmmmddhyyssoooo+++++++oooooooooooooossssssssssssssooooooooooooooooooooooooooooooooooooooossssssssssssooooooooooo+++++++<span class="co">/////::://++++/////////::/oyhyssyyyyyyyyssss</span>
+ssyyysooooooosssyyyyhhhhhhhyyyyyyyyyhddmmddhhhysssooo++++++oooooo++++ooooossssoooooooooooooooooooooooooooooo++++ooooooooooooooossssyssssssssoooooooooo++++++<span class="co">//////:::/+++++//++///////oyhyssyyyyyyysssss</span>
+ssyyyysooooooossyysyyyhhhhyyysyyyyyyhhdmmdddhhhyyssooo+oooooooooo++++++ooooooooooooooooooooooooooooo++++++++++++++++++oooooooosssssysssssssoooooooooooo++++++<span class="co">/////:::://++++++++++////oyhyysyyyyyyyyssss</span>
+sssyyyysooooooosssssyyhhhyyssssyyyyyyhddmddddhhhyyssooooooooooooo++++++oooooooooooooooo+++++oooo+++++++++++++++++++++ooooooossssssssssssssoooooooooooooo+++++<span class="co">///////::::/++oo+++o+++//oyhyyyyyyyyyyyssss</span>
+hhyssyyssooooossssssyyhhhhyysssyyyyyyhddddddddhhhyyssooooooooooooo+++++ooooooooooooo++++++++++++++++++++++++++++++++oooooosssyyysssooooooooooooooooooooo++++<span class="co">/////////:::/+ooo+++ooo+++oyhhyyssyyyyyyysss</span>
+ddhsssyyssoooooooossyyhhdhhysssyyyyyyyhddddddddhhyyyssooooooooooooooooooooooooooooooo+++++++++++++++++++++++++++++ooooooossyyyyssoooooooooooooooooooooooo++++<span class="co">///////////++ooo++++ooo++syhhyyssyyyyyyysss</span>
+mmdhyysyyysoooooosssyyhdddhyssssyyyyyyhhddddddhhhyyyssssoooooooooooooooooooooooooooooo+++++++++++++++++++++++++ooooooooossyyyyysooooooooooooooooooooooooooo++++++++<span class="co">////+++oooooo+++++osyhhyyyssyyyyyysss</span>
+mmmmdhysysssoooooossyyhhhhhyysssyyyyyyyyhhhhhhhhyyyyssssssooooooooooooooooooooooooooooo+++++++++++++++++++ooooooooooooosssyhhyyssooooooooooossssssssssssssoooo++oo+++++++++oooooo++++osyhhyyyssyyyyyysss
+NNNNmdhyssssssooooossyyyyyyyyyyhhyyyyyyyyyyyyyyyyysssssssssssoooooooooooooooooooooooooooooooooooooo+oooooooooooooooossssssyhhhyyysssssssosssssyyyyyyyyyyyssssoooooo+++/++++++++ooo++osyyhhyyyyysyyyyssss
+NNNNNmdhysssssssooooossssssyyhhdhhhhyyyyyyyyyyyyyyssssssssssssooooooooooooooooooooooooooooooooooooooooooooooooooosssssossssyyyyyyyyyyyyyyyyyyyyyhhhhhhhhyyyyssssooo+++<span class="co">//////+++ooo++osyyhhyyyyyyyyyyssss</span>
+mmNNNNmmdyysssssssoosssssooossyhhhhhhhyyyyyyyyyyyysssssssssssssssooosssssssoooooooooooooooooooooooooooooooooooosssssssoossssyyyyyyyyyyhhhyyyyyyhhhhhhhhhhyyyysssooo++<span class="co">//////++++oo++oosyhhyyyyyysyyysssss</span>
+mmmNNNNmmdhyssoooooosssssooooossyyyyyhyyyyyyyyyyyyyysssssssssssssssssssssssssssssssooooooooooooooooooosososssssssssossosssssssssssyyyyyyyyyyyyyyyyhhhhhyyyyssssoooo++++<span class="co">///+++++++++osyyyyyyyyyyyyyysssss</span>
+mmNNNNNNmmdhyssoooooossssooooooosssyyyyhyyyhyyyyyyyyysssssssssssssssssssssssssssssssssssoooooooooososssyyyyysssssssssssssssssssssssssssssssssssssssssssssssssssyyssssoo+++++++++oooosyyyyyyyhyyyyyysssss
+mmNNNNNNmmdhyyyssoooooooooooooooossssyyyyyhhyyyyyyyyyysssssssssssssssssssssyssssssssssssooooossssssososyyyyysssssssssssssssssssssssssssssssssssssssssssssoossssssssssoooo+++++<span class="co">//ooossyyyyyyyhhyyyyysssss</span>
+mmmNNNNNmmdhhyyyssssoooooooooooooooossyyyhhyhhhhyyyyyyyssssssssssssssssssyyyyysssssssssssooossssssssssyyyyyyssssssssssssssssssssssssssssssssssssssssssssssoooossssssooooo++++<span class="co">///ooosssyyyyyyhhhyyyssssss</span>
+mmmmNNNNmmdhhyyyyyyyyssoooooooooooooossyyhhhhhhhyyyyyyyyssssssssssssssssyyyyyyysssssssssssssssssssssssyyyyyssssssssssssssssssssssssssssssssssssssssssssssoooooooooooooooo++++<span class="co">///+oosssyyyyyyyhhhyyssssss</span>
+mmmmmNNNNmddhyyyyhhhhhysssoooooooooooossyhhhhhhhhyyyyyyyyysssssssssssysyyyyyyyyysssssssssssssyysssssssyyyyssssssssssssssssssssssssssssssssssssssssssooooooooooooooooooooo++++<span class="co">///+ossssyyyyyyyhhhyyssssss</span>
+mmmmmmNNNNmdhyyyyyhhdddhyysssooooooooossyhdddhhhhhyyyyyyyyysyysssssyyyysyyyyyyyyyyyysssssssssyyssssssssysssssssssssssssssssssssssssssssssssssssssssssssoooooooooooooooooo++++<span class="co">///osssssyyyyyyyhhhhyssssss</span>
+ddddmmmNNNmdhhyyyyyhdmmmddhyyysssssssssyhdddddhhhhhyyyyyyyyyyyysyyyyyyyyyyyyyyyyyyyyssssssssyysssssssssssssssssssssssssssssssssssyyyysssssysssssssssssssssoooooooooooooo++++<span class="co">////sssssssyyyyyyhhhhyysssss</span>
+dddddmmNNNmmdhyyyssydmNNNmmddhhyyyyyyyhhhdddddhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyssssssyyyssssssssssssosssssssssssssssssssyyyyhyysssssyssooosssssoooooosssssoooooooo+++<span class="co">/////ssssssssyyyyyhhhhyysssss</span>
+hddddmmmNNmmddhyyysyhmmNNNNmmddddhhhhhhhdddddddhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyssssyyyssssssssssosssssssssssssssyyyyyyyyyyhhyssoossso+++oooo+++++++++++++ossssooo++<span class="co">/////yyssssssyyyyyhhhhhyysssy</span>
+hhhdddmmNNNmmdhhyysyhdmNNNNNmmmdddddddddddddddddhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyssssyyysssssssssssssssysssssyyyyhhhhhhhyyyyhyyssoosso++++oooo++<span class="co">////++++///++osssso+++////yyssssssyyyyyhhhhhyyssss</span>
+hhhdddmmmNNNmmdhhysyyhdNNNNNNmmdddhddddhhhhhhhdhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyssyyyyysssssssssssssyyyyyyyyhhhhhhhhhhyyyyyyyyysssssoooossssoo++++++++<span class="co">/////++ooooo++////yysssssssyyyyhhhhhyyssss</span>
+dddddddmmmNNmmddhyyyyhdmNNNNNmmmddhhhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyssssssssssssyyyyyyyhhhhhhhyyyyyyyyyyyyyyyyyyyyssyyysssssssssooo++<span class="co">////++osoo++///yysssssssyyyyhhhhhhyssss</span>
+dddddddmmmNNNmmdhhhyyyhdmNNNNNmmdddhhhhhhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyysssoossssssssyyyyyyyyyyyssssssssssssssssssssssssssssyysssssssssoo++<span class="co">//+ossso++//yysssssssyyyyhhhhhhyssss</span>
+mmddddddmmmNNNmddhhhyyhdmNNMNNNmmddhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyysssssssssssssssssssssssssssssssssoooooooooooooooooooooooooossssooo++ossssso+++syssssssssyyyhhhhhhyssss
+mmddhhdddmmmNNmmddhhyyhhdmNNNNNmmdddhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyssssssssssssssssssssssssssssssssssooooooooooooooooo+++ooooo+oooooooossssso+++ssssssssssyyyhhhhhhyysss
+mmdhhhhddmmmmNNmmddhhhhhdmNNNNNNmmddhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyssssssssssssssssssssssssssssssssssoooooooooooooo++++ooo+++++++++oooooooo+++osssssssssyyyyhhhhhyysss
+mmdhhhhhdddmmNNNNmmddhhhhdmNNNNNmmddhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyssssssssssoooosssssssssssssssssssoooooooooossooooooooooo++++++++++++++++++oossssssssyyyyhhhhhyysss
+mmddhhhhdddmmmNNNNmmddhhhddmNNNNmmdddhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyssssssssssssssososssssssssssssssssssoossssssssssoooooooooo+++++++++/+<span class="co">///+++ossyyssssyyyyyhhhhyysss</span>
+mmddhhhhhdddmmmNNNNNmdhhhhhdmNNNmmmdddhhhhhhhhhhhhhhhhhdddhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyssssssssssssssssssssssssssssssssssssssssssssssssssssssssooooo++++++<span class="co">/////++ossyyysssyyyyyhhhhyysss</span>
+mmddddhhhhddmmmNNNNNmddhhhhdmmdddmmddddhhhhhhhhhhhhhhhhhdddhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyssssssssssssssssssssssssssssssssssssssssssssoossssyyyysssoo+++++++<span class="co">///++/+ossyyysssyyyyyhhhhyysss</span>
+dddmmdhhhhdddmmNNNNNmmdhhhhdddysydmmdddhhhhhhhhhhhhhhhhhhhddddhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyssssssssssssssssssssssssssssssssssssssssssssssssyyyyyyssoo++++++<span class="co">//++++++ossyyysssyyyyyhhhhyysss</span>
+dddmmmddddddmmmNNNNNNNmdhhhhhhoosdmmddddhhhhhhhhhhhhhhhhhhdddddddhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyssssssssssssssssssssssssssssssssssssssssssssssyyhhhyysso++++++<span class="co">//+++oooooossssysssyyyyyhhhyysss</span>
+hhdmmmmmddddmmmmNNNNNNmmdhhhhy+/ohmmdddddhhhhhhhhhhhhhhhhhhddddddddhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyysssssssssssssssssssssssssssssssssssssssssosssyyhhhhhyso++++++<span class="co">//+++ooooossssssyssyyyyhhhhyysss</span>
+hhddmmmmmdddmmmmNNNNNNNmddhhhy+/ohmmdddddhhhhhhhhhhhhhhhhhhhdddddddddhhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyssssssssssssssssssssssssssssssssssssssssosssyyhhhhyyso+++++<span class="co">//++oooooooosssyyysssyyyhhhhyssss</span>
+hhhddmmmmddmmmmmmNNNNNNmddhhhy+/oydmmmdddhhhhhhhhhhhhhhhhhhhhdddddddddddhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyysssssssssssssssssssssssssssssssssoosssssssssyyyyssooo+++<span class="co">////+oossssoooossssssssyyyyhhhyysss</span>
+hhhhdmmmmmmmmmmmmNNNNNNmmddddho+oyhdmmdddhhhhhhhhhhhhhhhhhhhhhhddddddddddddhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyysssssssssssssssssssssssssssssoooooooooooooooooooo++++++++<span class="co">//+ossyyyssssoooooosssyyyhhhyysss</span>
+hhhhddmmmmmmmmmmmNNNNNNNmdddmhsooshdddddddhhhhhhhhhhhyyyhhhhhhhhhddddddddddddhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyssssssssssssssssssssssssssoooooooooo+++++++++++++++++++<span class="co">///+ossyyyyyyssooooooosssssssssss</span>
+hhhhhdmmmmmmmmmmmmNNNNNNmmddmdysosyhddddddhhhhhhhhhhyyyyyyyyyhhhhhhddddddddddddddhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyysssssssssssssssssssssoooooooooo+++++++++++++++++++<span class="co">///+ossyyyyyyyyyssoooooooooooooooo</span>
+hhhhhdmmNNmmmmmmmmmNNNNNNmddddyssoshddddddhhhhhhhhhyyyyyyyyyyyyhhhhhhhddddddddddddddhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyyyysssssssssssssssssooooooooo++++++++++++++++++++<span class="co">//++syyyyyyyssyyyyysssssssoooo+ooo</span>
+ddhhdddmNNmmmmmmmmmmNNNNmmdddhhysoshddddddhhhhhhhhyyyyyyyyyyyyyyyhhhhhhhddddddddddddddhhhhhhhhhhhhhhhhyyyyyyhhyyyyyyyyyyyysssssssssssssssooooooooo++++++++++++++++++++++++syhhhhyyyssssyyyyyyssssssssooo
+dddddddmNNmmmmmmmmmmNNNNmddhhhhhysshddddddhhhhhhhhyyyyyyyyyyyyyyyyyyhhhhhhhddddddddddddddddddhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyssssssssssssooooooooooo+++++oo++++++o+++++++oshhhhhhyyyyyssyyhhyyyyyyyyysoo
+ddddddmmNNmmmmmmmmmmNNNmmdhhhdddhyyhddddddhhhhhhhhyyyyyyyyysssssyyyyyyyhhhhhhdddddddddddddddddddhhhhhhhhhhhhhhhhhhhhyyyyyyyyyysssssssssssoooooooooooo++++ooo+++++o++ooooosyhhhhhhhhhyyyssyyyyyyyyyyyysoo
+ddddddmmmNmmmmmmmmmmNNNmmdhhddddhyyhddddddhhhhhhhhyyyyyyyysssssssssyyyyyyyyhhhhhhddddddddddddddddddddhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyysssssssssoooooooooooooooooooooooooossyyhhhhhhhhhhyyyyyyyyyhhhhyyysoo
+ddddddmmmNmmmmmmmmmmmNmmdhhhddddhyyhddddddhhhhhhhyyyyyyyyssssssssssssssyyyyyyyyhhhhhhhddddddddddddddddddddhhhhhhhhhhhhhhhhhhhhyyyyyyyyyssssssssooosooooooooooooooooooossyyyyyhhhhhhhhhhhyyyyyyyhhhhyssoo
+ddddddmmmNmmmmmmmmmmmmmmddhhdddhhyyhdddddhhhhhhhhyyyyyyyysssssssssssssssssyyyyyyyhhhhhhhhhhhhhhhdddddddddddddddhdhhhhhhhhhhhhhhhhhyyyyyyyyyssssssssssssssssssssssssssssyyyssyyhhhhhhhhhhhhyyyyyhhhhysooo
+mmmdddmmmmmmmmdddddmmmmmmdhhhhhhhyhhdddddhhhhhhhhyyyyyyyyssssssssssssssssssssssyyyyyyyhhhhhhhhhhhhdddddddddddddddddddhhhhhhhhhhhhhhhhhhyyyyyyyyysssssssssssyyssssssyyyyyyyyyyyyyhhhdddhhhhhyyyyyhhyssooo
+mmmddddmmmmmmddddddddmmmddhhhhhhhhhdddddhhhhhhhhhyyyyyyyyssssssssssssssssssssssssssyyyyyyyhhhhhhhhhhdddddddddddddddddddddddhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyyyyyyssssyyyyyyyyyyyyyyhhhdddddhhhyyyyyysooss
+mmmddddmmmmmmddhhddddmmmddhhhhhhhhhdddddhhhhhhhyyyyyyyyyysssssssssssssssssssssssssssssyyyyyyyhhhhhhhhhhhhhhhhhhhhhhhhhhhdhhhhhhhhhhhhhhhhhhyyyyhhhyyyyyyyyyyyyyysssssssyyyyhhyyyyyyyhhddddddhhyyyyysssss
+mmmdddddmmmmmdhhhhddddmdddhhhhhhhhhdddddhhhhhhhyyyyyyyyyyssssssssssssssssssssssssssssssssyyyyyyyyyyhhhhhhhhhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyssssssyyyyyyyyyyyyyyyyyyyyyssssyyyyyhhhhyyyhhhddddddhhhyyysssss
+mmmdddddmmmmdhhhhhhdddddddhhhhhhhhhdddddhhhhhhyyyyyyyyyyysssssssssssssssssoooooosoosssssssssssyyyyyyyyhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyssssoooooosyyyyyyyyyyyyyyyyyyyyyyysssssyhhhhhhhhyhhhhddddddhyssyyss</code></pre></div>
+</section><section id="tonight-you-will-be-visited" class="slide level2">
+<h2>Tonight You Will Be Visited</h2>
+<pre class="irc"><code>&lt;pnkscrooge&gt; its the ghost of nmatsakis!</code></pre>
+<div class="fragment">
+<pre class="irc"><code>&lt;nmatsakis&gt; the chains of stability and backwards compat are heavy!
+&lt;nmatsakis&gt; you must change your way of thinking
+&lt;nmatsakis&gt; tonight you will be visited by three spirits</code></pre>
+</div>
+</section><section id="footnote" class="slide level2">
+<h2>Footnote</h2>
+<p>Niko is not dead</p>
+<p>(Well, maybe he is in this story)</p>
+<p>(Or at least overwhelmed)</p>
+</section></section>
+<section><section id="whats-going-on-in-this-talk" class="titleslide slide level1"><h1>What's going on in this talk?</h1></section><section id="tonight" class="slide level2">
+<h2>Tonight</h2>
+<p>You will be visited by Three Spirits</p>
+<ul>
+<li>The Ghost of Epochs Past
+<div class="fragment">
+Changes running up to 1.0
+</div></li>
+<li>The Ghost of Epochs Present, and
+<div class="fragment">
+Changes since 1.0 up to now
+</div></li>
+<li>The Ghost of Epochs Yet To Come
+<div class="fragment">
+Changes anticipated for future releases
+</div></li>
+</ul>
+</section></section>
+<section><section id="the-first-of-the-three-spirits" class="titleslide slide level1"><h1>The First of the Three Spirits <!-- (8 min) --></h1></section><section id="irc" class="slide level2">
+<h2>IRC</h2>
+<pre class="irc"><code>&lt;epochspast&gt; I am the Ghost of Epochs Past
+&lt;pnkscrooge&gt; Long past?
+&lt;epochspast&gt; No. Rust&#39;s past.
+&lt;pnkscrooge&gt; What business brought you here?
+&lt;epochspast&gt; Rust&#39;s welfare!</code></pre>
+</section><section id="the-run-up-to-1.0" class="slide level2">
+<h2>The run-up to 1.0</h2>
+<table>
+<tbody>
+<tr class="odd">
+<td></td>
+<td style="text-align: left;">Rust 1.0 alpha</td>
+<td style="text-align: left;">9 January 2015</td>
+</tr>
+<tr class="even">
+<td>six weeks later</td>
+<td style="text-align: left;">Rust 1.0 alpha.2</td>
+<td style="text-align: left;">20 February 2015</td>
+</tr>
+<tr class="odd">
+<td>six weeks later</td>
+<td style="text-align: left;">Rust 1.0 beta</td>
+<td style="text-align: left;">3 April 2015</td>
+</tr>
+<tr class="even">
+<td>six weeks later</td>
+<td style="text-align: left;">Rust 1.0</td>
+<td style="text-align: left;">15 May 2015</td>
+</tr>
+</tbody>
+</table>
+<p>What big changes happened back then?</p>
+</section><section id="alpha-the-int-pocalypse" class="slide level2">
+<h2>1.0 alpha: the <code>int</code>-pocalypse</h2>
+<h3 id="rfc-544">(<a href="https://github.com/nox/rust-rfcs/blob/master/text/0544-rename-int-uint.md">RFC 544</a>)</h3>
+<p>Once had <code>int</code> and <code>uint</code>. It was confusing.</p>
+<p>Many renaming initiatives (<a href="https://github.com/rust-lang/rust/issues/9940">rust-lang/rust#9940</a> in 2013, <a href="https://github.com/rust-lang/rfcs/pull/464">RFC 464</a> in 2014); all met with resistance</p>
+<p>Team almost launched 1.0 with <code>int</code>/<code>uint</code>.</p>
+<p>Core team learned important lessons about community input and interaction.</p>
+<div class="fragment">
+<p>After considering many options {<code>imem</code>/<code>umem</code>, <code>offset</code>/<code>size</code>, <code>intp</code>/<code>uintp</code>, ...} finally settled on <code>isize</code>/<code>usize</code> we have today.</p>
+<!-- 
+
+> The type is destined for heavy use representing vector/slice indexes, not just addresses.
+>
+> `usize` (or `size`) may be the best compromise between clarity (since it can be understood equally as container size and memory address space size, and it's used for both) and friendliness (in comparison to something like `umem`).
+
+-->
+</div>
+</section><section id="alpha.2-drop-check" class="slide level2">
+<h2>1.0.0-alpha.2: Drop Check</h2>
+<h3 id="rfc-769">(<a href="https://github.com/nox/rust-rfcs/blob/master/text/0769-sound-generic-drop.md">RFC 769</a>)</h3>
+<p>Rust used to not allow this:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">pub</span> <span class="kw">struct</span> A&lt;<span class="ot">&#39;a</span>, X&gt;(&amp;<span class="ot">&#39;a</span> <span class="dt">i32</span>, X);
+<span class="kw">impl</span>&lt;<span class="ot">&#39;a</span>, X&gt; <span class="bu">Drop</span> <span class="kw">for</span> A&lt;<span class="ot">&#39;a</span>, X&gt; <span class="op">{</span>
+    <span class="kw">fn</span> drop(&amp;<span class="kw">mut</span> <span class="kw">self</span>) <span class="op">{</span> <span class="pp">println!</span>(<span class="st">&quot;dropping A&quot;</span>); <span class="op">}</span>
+<span class="op">}</span></code></pre></div>
+<p>(<code>rustc</code> did not know/require the <code>&amp;'a i32</code> be valid while destructor was running)</p>
+<div class="fragment">
+<p><code>dropck</code> rules fixed that, ...</p>
+<p>... and, yes, caused some code to start being rejected.</p>
+</div>
+</section><section class="slide level2">
+
+<pre class="irc"><code>&lt;epochspast&gt; You were once willing to accept breakage
+&lt;pnkscrooge&gt; &quot;I was young and foolish then; ...
+&lt;pnkscrooge&gt; ... I feel old and foolish now.&quot;</code></pre>
+</section><section id="footnote-on-drop-check" class="slide level2">
+<h2>Footnote on Drop Check</h2>
+<p>The full and true history is probably a 45 minute talk in itself.</p>
+</section><section id="beta-catch_panic" class="slide level2">
+<h2>1.0 beta: <code>catch_panic</code></h2>
+<h3 id="pr-23651rust-langrustpull23651">(<a href="https://github.com/rust-lang/rust/pull/23651">PR 23651</a>)</h3>
+<p>Was not possible to recover from a panic on the thread that caused it. (Forced monitor/worker split in separate threads, due to the API's in place.)</p>
+<p>Initially landed as <code>catch_panic</code> in <a href="https://github.com/rust-lang/rust/pull/23651">rust-lang/rust/pull/23651</a>.</p>
+<p>Later renamed to <code>panic::recover</code> as part of <a href="https://github.com/nox/rust-rfcs/blob/master/text/1236-stabilize-catch-panic.md">RFC 1236</a>; but today we know it as ...</p>
+<div class="fragment">
+<p><code>panic::catch_unwind</code></p>
+<p>it was finally stabilized in <em>1.9</em> release (May 2016); much discussion on <a href="https://github.com/rust-lang/rust/issues/27719">rust-lang/rust#27719</a></p>
+</div>
+</section><section id="memforget-is-safe" class="slide level2">
+<h2>1.0: <code>mem::forget</code> is safe</h2>
+<h3 id="rfc-1066">(<a href="https://github.com/nox/rust-rfcs/blob/master/text/1066-safe-mem-forget.md">RFC 1066</a>)</h3>
+<p>Represented firming up of collective thinking about what <code>unsafe</code> is meant for.</p>
+</section><section id="irc-1" class="slide level2">
+<h2>IRC</h2>
+<pre class="irc"><code>&lt;epochspast&gt; You see? Rust can change!
+&lt;pnkscrooge&gt; That was all madness running up to 1.0.
+&lt;pnkscrooge&gt; It proves nothing about where we are now.</code></pre>
+</section></section>
+<section><section id="the-second-of-the-three-spirits" class="titleslide slide level1"><h1>The Second of the Three Spirits <!-- (15 min) --></h1></section><section id="irc-snippets-1" class="slide level2">
+<h2>IRC snippets</h2>
+<pre class="irc"><code>&lt;epochspresent&gt; I am the Ghost of Epochs Present
+&lt;pnkscrooge&gt; Spirit, conduct me where you will
+&lt;pnkscrooge&gt; I went forth last night on compulsion,
+&lt;pnkscrooge&gt; and I learnt a lesson which is working now.
+&lt;pnkscrooge&gt; if you have aught to teach me, let me profit by it.</code></pre>
+</section><section id="what-are-changes-that-mattered-for-rust-today" class="slide level2">
+<h2>What are changes that mattered for Rust <em>today</em></h2>
+</section><section id="poll" class="slide level2 left_align">
+<h2>Poll</h2>
+<p>Compared to 1.0</p>
+<div class="fragment">
+<ul>
+<li>some things falling outside lang/libs</li>
+</ul>
+<p>IDE support, <code>rustup</code>, nicer diagnostics (noted by many)</p>
+</div>
+<div class="fragment">
+<ul>
+<li>some features in Rust nightly channel today</li>
+</ul>
+<p>never_type: <code>match x: Result&lt;T, Void&gt; { Ok(_) =&gt; ... }</code></p>
+</div>
+<div class="fragment">
+<ul>
+<li>some features in Rust beta channel today</li>
+</ul>
+<p><code>Rc&lt;str&gt;</code> (<a href="https://github.com/rust-lang/rfcs/blob/master/text/1845-shared-from-slice.md">RFC 1845</a>)</p>
+</div>
+<div class="fragment">
+<ul>
+<li>some features in stable Rust today</li>
+</ul>
+<p><code>if let</code>, <code>?</code>-syntax, <code>pub(crate)</code>, <code>impl Trait</code></p>
+</div>
+<div class="fragment">
+<p>macros 1.1 / Custom Derive / Serde (noted by <em>many</em>)</p>
+</div>
+</section><section id="procedural-macros-custom-derive" class="slide level2">
+<h2>Procedural macros, custom <code>#[derive]</code></h2>
+</section><section id="lets-hack-some-code" class="slide level2">
+<h2>Lets hack some code</h2>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="co">/// Measure number of heap-allocated values owned by self.</span>
+<span class="kw">trait</span> Weight <span class="op">{</span>
+    <span class="co">// default: most values laid inline, not separate `malloc`&#39;ed</span>
+    <span class="kw">fn</span> weight(&amp;<span class="kw">self</span>) -&gt; <span class="dt">isize</span> <span class="op">{</span> <span class="dv">0</span> <span class="op">}</span>
+<span class="op">}</span></code></pre></div>
+<p>Some base cases:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">impl</span> Weight <span class="kw">for</span> <span class="dt">i32</span> <span class="op">{</span> <span class="op">}</span>
+<span class="kw">impl</span> Weight <span class="kw">for</span> <span class="dt">i64</span> <span class="op">{</span> <span class="op">}</span>
+<span class="co">// (et cetera)</span>
+
+<span class="kw">impl</span>&lt;<span class="ot">&#39;a</span>, T: ?<span class="bu">Sized</span>&gt; Weight <span class="kw">for</span> &amp;<span class="ot">&#39;a</span> T <span class="op">{</span> <span class="op">}</span>     <span class="co">// someone else owns `T`</span>
+<span class="kw">impl</span>&lt;<span class="ot">&#39;a</span>, T: ?<span class="bu">Sized</span>&gt; Weight <span class="kw">for</span> &amp;<span class="ot">&#39;a</span> <span class="kw">mut</span> T <span class="op">{</span> <span class="op">}</span> <span class="co">// not us</span>
+<span class="co">// (`?Sized` marker allows things like `str` or `[i32]` as the `T`.)</span></code></pre></div>
+</section><section id="the-first-interesting-cases" class="slide level2">
+<h2>The first interesting cases</h2>
+<p>Heap-allocated things like <code>String</code> and <code>Box</code> must be accounted for.</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">impl</span> Weight <span class="kw">for</span> <span class="dt">String</span> <span class="op">{</span>
+    <span class="kw">fn</span> weight(&amp;<span class="kw">self</span>) -&gt; <span class="dt">isize</span> <span class="op">{</span> <span class="dv">1</span> <span class="op">}</span> <span class="co">// just a single heap allocation</span>
+<span class="op">}</span></code></pre></div>
+<p><code>Box</code> has a heap allocation ...</p>
+<p class="fragment">
+<em>plus</em> its contents may own others!
+</p>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">impl</span>&lt;T: Weight&gt; Weight <span class="kw">for</span> <span class="dt">Box</span>&lt;T&gt; <span class="op">{</span>
+    <span class="kw">fn</span> weight(&amp;<span class="kw">self</span>) -&gt; <span class="dt">isize</span> <span class="op">{</span> <span class="dv">1</span> + (**<span class="kw">self</span>).weight() <span class="op">}</span>
+<span class="op">}</span>
+
+<span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> test_box_chain() <span class="op">{</span>
+    <span class="pp">assert_eq!</span>( <span class="dt">Box</span>::new(<span class="dt">Box</span>::new(<span class="dt">Box</span>::new(<span class="st">&quot;hi&quot;</span>))).weight(), <span class="dv">3</span> );
+<span class="op">}</span></code></pre></div>
+</div>
+</section><section id="over-weight-demo" class="slide level2 no_margin">
+<h2>Over Weight Demo</h2>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">pub</span> <span class="kw">fn</span> breakfast() <span class="op">{</span>
+    <span class="kw">let</span> f = FrenchToast;
+    <span class="pp">assert_eq!</span>(f.weight(), <span class="dv">0</span>);
+    <span class="kw">let</span> p1 = Pancakes <span class="op">{</span> topping: <span class="st">&quot;syrup&quot;</span>, atop: <span class="cn">None</span> <span class="op">}</span>;</code></pre></div>
+<p>Pop quiz: what's <code>p1.weight()</code>?</p>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">    <span class="pp">assert_eq!</span>(p1.weight(), <span class="dv">0</span>);</code></pre></div>
+</div>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">    <span class="kw">let</span> p3 = Pancakes <span class="op">{</span>
+        topping: <span class="st">&quot;butter&quot;</span>,
+        atop: <span class="cn">Some</span>(<span class="dt">Box</span>::new(
+            Pancakes <span class="op">{</span> topping: <span class="st">&quot;berries&quot;</span>,
+                       atop: <span class="cn">Some</span>(<span class="dt">Box</span>::new(
+                           Pancakes <span class="op">{</span> topping: <span class="st">&quot;syrup&quot;</span>,
+                                      atop: <span class="cn">None</span> <span class="op">}</span>)) <span class="op">}</span>))<span class="op">}</span>;</code></pre></div>
+<p>How about <code>p3.weight()</code>?</p>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">    <span class="pp">assert_eq!</span>(p3.weight(), <span class="dv">2</span>);</code></pre></div>
+<p>(&quot;just count the boxes!&quot;)</p>
+</div>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="op">}</span></code></pre></div>
+<!--
+```rust
+#[test]
+pub fn test_breakfast() { breakfast() }
+pub fn main() { breakfast() }
+```
+-->
+<!--
+
+----
+
+`Vec` is like `Box`: pay for own heap alloc, plus those (if any) of contents
+
+```rust
+impl<T: Weight> Weight for Vec<T> {
+    fn weight(&self) -> isize {
+        1 + self.iter().map(|x|x.weight()).sum::<isize>()
+    }
+}
+
+#[test]
+fn test_vec_of_boxes() {
+    assert_eq!( vec![Box::new(1), Box::new(2), Box::new(3)].weight(),
+                4 );
+}
+```
+
+-->
+</section><section id="well..." class="slide level2">
+<h2>Well...</h2>
+<p>I just lied to you. Code like</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">    <span class="kw">let</span> p1 = Pancakes <span class="op">{</span> topping: <span class="st">&quot;syrup&quot;</span>, atop: <span class="cn">None</span> <span class="op">}</span>;
+    p1.weight()</code></pre></div>
+<p>doesn't work yet; why not?</p>
+<div class="fragment">
+<p>Likewise, <code>Option&lt;Box&lt;T&gt;&gt;</code> won't work either.</p>
+<p>But we <em>want</em> it to work, like this:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>test<span class="at">]</span>
+<span class="kw">fn</span> test_option_box() <span class="op">{</span>
+    <span class="kw">let</span> s: <span class="dt">Option</span>&lt;<span class="dt">Box</span>&lt;<span class="dt">i32</span>&gt;&gt; = <span class="cn">Some</span>(<span class="dt">Box</span>::new(<span class="dv">10</span>));
+    <span class="pp">assert_eq!</span>( s.weight(), <span class="dv">1</span> );
+
+    <span class="kw">let</span> n: <span class="dt">Option</span>&lt;<span class="dt">Box</span>&lt;<span class="dt">i32</span>&gt;&gt; = <span class="cn">None</span>;
+    <span class="pp">assert_eq!</span>( n.weight(), <span class="dv">0</span> );
+<span class="op">}</span></code></pre></div>
+<p>(&quot;just count the boxes&quot;)</p>
+</div>
+</section><section id="the-first-annoying-cases" class="slide level2">
+<h2>The first annoying cases</h2>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">impl</span>&lt;T: Weight&gt; Weight <span class="kw">for</span> <span class="dt">Option</span>&lt;T&gt; <span class="op">{</span>
+    <span class="kw">fn</span> weight(&amp;<span class="kw">self</span>) -&gt; <span class="dt">isize</span> <span class="op">{</span>
+        <span class="kw">match</span> *<span class="kw">self</span> <span class="op">{</span>
+            <span class="cn">Some</span>(<span class="kw">ref</span> t) =&gt; t.weight(),
+            <span class="cn">None</span> =&gt; <span class="dv">0</span>,
+        <span class="op">}</span>
+    <span class="op">}</span>
+<span class="op">}</span></code></pre></div>
+<p>(bog standard recursion)</p>
+<div class="fragment">
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">impl</span>&lt;T: Weight, E: Weight&gt; Weight <span class="kw">for</span> <span class="dt">Result</span>&lt;T, E&gt; <span class="op">{</span>
+    <span class="kw">fn</span> weight(&amp;<span class="kw">self</span>) -&gt; <span class="dt">isize</span> <span class="op">{</span>
+        <span class="kw">match</span> *<span class="kw">self</span> <span class="op">{</span>
+            <span class="cn">Ok</span>(<span class="kw">ref</span> t) =&gt; t.weight(),
+            <span class="cn">Err</span>(<span class="kw">ref</span> e) =&gt; e.weight(),
+        <span class="op">}</span>
+    <span class="op">}</span>
+<span class="op">}</span></code></pre></div>
+<p>(yadda yadda yadda)</p>
+</div>
+</section><section class="slide level2">
+
+<p>Implementations from previous slide were entirely mechanical, derived directly from structure of <code>Option</code> and <code>Result</code> types, respectively.</p>
+<div class="fragment">
+<p>In fact, one might suggest that a program could generate them for us.</p>
+</div>
+<div class="fragment">
+<p>So lets do that</p>
+<p>(working from the hypothesis that its easier to transcribe a type definition into a macro invocation...)</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">use</span> weight_derive::impl_weight_for;
+<span class="pp">impl_weight_for!</span>(<span class="kw">enum</span> <span class="dt">Option</span>&lt;T&gt; <span class="op">{</span> <span class="cn">Some</span>(T), <span class="cn">None</span> <span class="op">}</span>);</code></pre></div>
+</div>
+<div class="fragment">
+<p>expands to (after some human adjustment of whitespace):</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">impl</span>&lt;T&gt; Weight <span class="kw">for</span> <span class="dt">Option</span>&lt;T&gt; <span class="kw">where</span> T: Weight, <span class="op">{</span>
+    <span class="kw">fn</span> weight (&amp;<span class="kw">self</span>) -&gt; <span class="dt">isize</span> <span class="op">{</span> <span class="kw">match</span> *<span class="kw">self</span> <span class="op">{</span>
+        <span class="cn">Some</span>(<span class="kw">ref</span> x_0) =&gt; <span class="dv">0</span> + x_0.weight(), <span class="cn">None</span> =&gt; <span class="dv">0</span>, <span class="op">}</span> <span class="op">}</span> <span class="op">}</span></code></pre></div>
+</div>
+<div class="fragment">
+<p>(Okay, less readable than previous slide. But who cares, its a macro!)</p>
+</div>
+</section><section id="what-does-the-macro-implementation-look-like" class="slide level2">
+<h2>What does the macro <em>implementation</em> look like?</h2>
+<p>You don't want to see it.</p>
+</section><section class="slide level2">
+
+<p>Since you asked</p>
+<div style="margin: 0 auto;">
+<div style="float: left; width: 50%">
+<div class="sourceCode"><pre class="sourceCode rust halfsize"><code class="sourceCode rust"><span class="at">#![</span>feature<span class="at">(</span>proc_macro<span class="at">)]</span>
+<span class="kw">extern</span> <span class="kw">crate</span> proc_macro;
+<span class="kw">extern</span> <span class="kw">crate</span> syn;
+<span class="at">#[</span>macro_use<span class="at">]</span> <span class="kw">extern</span> <span class="kw">crate</span> quote;
+
+<span class="kw">use</span> proc_macro::TokenStream;
+
+<span class="at">#[</span>proc_macro_derive<span class="at">(</span>Weight<span class="at">)]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> weight(input: TokenStream) -&gt; TokenStream <span class="op">{</span>
+    <span class="kw">let</span> s = input.to_string();
+    <span class="kw">let</span> ast = syn::parse_derive_input(&amp;s).unwrap();
+    <span class="kw">let</span> gen = impl_weight(&amp;ast);
+    gen.parse().unwrap()
+<span class="op">}</span>
+
+<span class="at">#[</span>proc_macro<span class="at">]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> impl_weight_for(input: TokenStream) -&gt; TokenStream <span class="op">{</span>
+    <span class="kw">let</span> s = input.to_string();
+    <span class="kw">let</span> ast = syn::parse_derive_input(&amp;s).unwrap();
+    <span class="kw">let</span> gen = impl_weight(&amp;ast);
+    gen.parse().unwrap()
+<span class="op">}</span>
+
+<span class="kw">fn</span> impl_weight(ast: &amp;syn::DeriveInput) -&gt; quote::Tokens <span class="op">{</span>
+    <span class="kw">let</span> name = &amp;ast.ident;
+    <span class="kw">let</span> weight_body = <span class="kw">match</span> ast.body <span class="op">{</span>
+        syn::Body::Struct(<span class="kw">ref</span> variant_data) =&gt;
+            generate_match_for_cases(
+                ::std::iter::once((&amp;ast.ident, variant_data))),
+        syn::Body::Enum(<span class="kw">ref</span> variants) =&gt;
+            generate_match_for_cases(
+                variants.iter().map(|v| &amp;v.ident)
+                    .zip(variants.iter().map(|v| &amp;v.data)))
+    <span class="op">}</span>;
+    <span class="kw">let</span> (impl_params, ty_args, where_clause) = ast.generics.split_for_impl();
+    <span class="kw">let</span> <span class="kw">mut</span> added_bounds: quote::Tokens = <span class="pp">quote!</span> <span class="op">{</span> <span class="op">}</span>;
+    <span class="kw">for</span> bound <span class="kw">in</span> ast.generics.ty_params.iter()
+        .map(|ty_param| &amp;ty_param.ident )
+        .map(|ident| <span class="pp">quote!</span> <span class="op">{</span> #ident: Weight, <span class="op">}</span>)
+    <span class="op">{</span>
+        added_bounds = <span class="pp">quote!</span> <span class="op">{</span> #added_bounds #bound <span class="op">}</span>;
+    <span class="op">}</span>
+    <span class="kw">return</span> <span class="pp">quote!</span> <span class="op">{</span>
+        <span class="kw">impl</span> #impl_params Weight <span class="kw">for</span> #name #ty_args 
+            <span class="kw">where</span> #where_clause #added_bounds <span class="op">{</span>
+                <span class="kw">fn</span> weight(&amp;<span class="kw">self</span>) -&gt; <span class="dt">isize</span> <span class="op">{</span> #weight_body <span class="op">}</span>
+        <span class="op">}</span>
+    <span class="op">}</span>;
+<span class="op">}</span></code></pre></div>
+</div>
+<div style="float: left; width: 50%">
+<div class="sourceCode"><pre class="sourceCode rust halfsize"><code class="sourceCode rust"><span class="kw">fn</span> generate_match_for_cases&lt;<span class="ot">&#39;a</span>, I&gt;(iter: I) -&gt; quote::Tokens
+    <span class="kw">where</span> I: <span class="bu">Iterator</span>&lt;Item=(&amp;<span class="ot">&#39;a</span> syn::Ident, &amp;<span class="ot">&#39;a</span> syn::VariantData)&gt;
+<span class="op">{</span>
+    <span class="kw">let</span> <span class="kw">mut</span> arms = <span class="pp">quote!</span> <span class="op">{</span> <span class="op">}</span>;
+    <span class="kw">for</span> (variant_ident, variant_data) <span class="kw">in</span> iter <span class="op">{</span>
+        <span class="kw">let</span> (field_names, code) = generate_variant_code(variant_data);
+        <span class="kw">let</span> arm = <span class="kw">match</span> *variant_data <span class="op">{</span>
+            syn::VariantData::Unit =&gt;
+                <span class="pp">quote!</span> <span class="op">{</span> #variant_ident =&gt; #code <span class="op">}</span>,
+            syn::VariantData::Struct(..) =&gt;
+                <span class="pp">quote!</span> <span class="op">{</span> #variant_ident <span class="op">{</span> #(<span class="kw">ref</span> #field_names),* <span class="op">}</span> =&gt; #code <span class="op">}</span>,
+            syn::VariantData::Tuple(..) =&gt;
+                <span class="pp">quote!</span> <span class="op">{</span> #variant_ident(#(<span class="kw">ref</span> #field_names),*) =&gt; #code <span class="op">}</span>,
+        <span class="op">}</span>;
+        arms = <span class="pp">quote!</span> <span class="op">{</span> #arms #arm, <span class="op">}</span>
+    <span class="op">}</span>
+    <span class="kw">return</span> <span class="pp">quote!</span> <span class="op">{</span> <span class="kw">match</span> *<span class="kw">self</span> <span class="op">{</span> #arms <span class="op">}</span> <span class="op">}</span>;
+<span class="op">}</span>
+
+<span class="kw">fn</span> generate_variant_code(vd: &amp;syn::VariantData) -&gt; (<span class="dt">Vec</span>&lt;quote::Tokens&gt;, quote::Tokens)
+<span class="op">{</span>
+    <span class="kw">let</span> bind_names: <span class="dt">Vec</span>&lt;_&gt; = <span class="kw">match</span> *vd <span class="op">{</span>
+        syn::VariantData::Unit =&gt; <span class="pp">vec!</span><span class="op">[]</span>,
+        syn::VariantData::Struct(<span class="kw">ref</span> fields) =&gt; fields.iter()
+            .map(|f|f.ident.as_ref().unwrap()) <span class="co">// reuse names for struct fields</span>
+            .map(|i| <span class="pp">quote!</span><span class="op">{</span> #i <span class="op">}</span>)
+            .collect(),
+        syn::VariantData::Tuple(<span class="kw">ref</span> fields) =&gt; fields.iter()
+            .enumerate() <span class="co">// make fresh names for tuple fields</span>
+            .map(|(num, _)| <span class="op">{</span> quote::Ident::new(<span class="pp">format!</span>(<span class="st">&quot;x_{}&quot;</span>, num)) <span class="op">}</span>)
+            .map(|i| <span class="pp">quote!</span><span class="op">{</span> #i <span class="op">}</span>)
+            .collect(),
+    <span class="op">}</span>;
+    <span class="kw">let</span> code = generate_sum_of_var_weights(&amp;bind_names);
+    (bind_names, code)
+<span class="op">}</span>
+
+<span class="kw">fn</span> generate_sum_of_var_weights(names: &amp;<span class="op">[</span>quote::Tokens<span class="op">]</span>) -&gt; quote::Tokens <span class="op">{</span>
+    <span class="kw">let</span> <span class="kw">mut</span> body = <span class="pp">quote!</span> <span class="op">{</span> <span class="dv">0</span> <span class="op">}</span>;
+    <span class="kw">for</span> field_access <span class="kw">in</span> names <span class="op">{</span>
+        body = <span class="pp">quote!</span> <span class="op">{</span> #body + #field_access .weight() <span class="op">}</span>;
+    <span class="op">}</span>
+    <span class="kw">return</span> body;
+<span class="op">}</span></code></pre></div>
+</div>
+</div>
+<div class="fragment">
+<div style="float: right">
+<p>(Told you so!)</p>
+</div>
+</div>
+</section><section id="sad-news" class="slide level2">
+<h2>Sad News</h2>
+<p>Procedural macros like <code>impl_weight_for!</code> are not yet available in the Rust stable channel...</p>
+<div class="fragment">
+<p>... <em>except</em> for one special case: <code>#[derive]</code>!</p>
+</div>
+</section><section id="stable-custom-derive" class="slide level2">
+<h2>Stable custom #[derive]</h2>
+<!--
+`#[derive(Macro)] item_defn` looks up a procedural macro definition
+(carrying an attribute of form `#[proc_macro_derive(Macro)]`) and then
+feeds the AST for `item_defn` into that macro.
+-->
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>derive<span class="at">(</span>Weight<span class="at">)]</span> <span class="kw">struct</span> FrenchToast;</code></pre></div>
+<p>yields:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">impl</span> Weight <span class="kw">for</span> FrenchToast <span class="kw">where</span> <span class="op">{</span>
+    <span class="kw">fn</span> weight (&amp;<span class="kw">self</span>) -&gt; <span class="dt">isize</span> <span class="op">{</span> <span class="kw">match</span> *<span class="kw">self</span> <span class="op">{</span> FrenchToast =&gt; <span class="dv">0</span>, <span class="op">}}}</span></code></pre></div>
+<div class="fragment">
+<p>and</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="at">#[</span>derive<span class="at">(</span>Weight<span class="at">)]</span>
+<span class="kw">struct</span> Pancakes <span class="op">{</span>
+    topping: &amp;<span class="ot">&#39;static</span> <span class="dt">str</span>, atop: <span class="dt">Option</span>&lt;<span class="dt">Box</span>&lt;Pancakes&gt;&gt;,
+<span class="op">}</span></code></pre></div>
+<p>yields:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">impl</span> Weight <span class="kw">for</span> Pancakes <span class="kw">where</span> <span class="op">{</span>
+    <span class="kw">fn</span> weight (&amp;<span class="kw">self</span>) -&gt; <span class="dt">isize</span> <span class="op">{</span>
+        <span class="kw">match</span> *<span class="kw">self</span> <span class="op">{</span>
+            Pancakes <span class="op">{</span> <span class="kw">ref</span> topping, <span class="kw">ref</span> atop <span class="op">}</span> =&gt; 
+                <span class="dv">0</span> + topping.weight() + atop.weight(),
+        <span class="op">}</span>
+    <span class="op">}</span>
+<span class="op">}</span></code></pre></div>
+</div>
+</section><section id="derive-is-the-important-special-case" class="slide level2">
+<h2><code>derive</code> <em>is</em> the important special case</h2>
+<p>While it <em>is</em> painful to write out the implementations for standard library types like <code>Option</code> and <code>Result</code>, at least the author of a crate providing <code>trait Weight</code> has the option of <em>doing</em> that work.</p>
+<p>But that is useless when it comes to supporting downstream crates of their <em>clients</em>.</p>
+<p>That is why support for <code>derive</code> is so important: It enables crates to to provide a trait and then give clients a zero-cost way to get impl's on their own types.</p>
+</section><section id="serde" class="slide level2">
+<h2>Serde</h2>
+<p>By implementing Serde's <code>Serialize</code> and <code>Deserialize</code> traits (or using <code>derive</code> to do it automatically), data structures acquire the ability to serialize and deserialize themselves.</p>
+<p>The serializaton works with many data formats: JSON, CBOR, YAML, TOML, Pickle (common in Python), BSON (used by MongoDB), URL, et cetera.</p>
+<p>They do this via code generated at compile-time; no need for reflection nor runtime type introspection!</p>
+<p>In many situations Serde serialization performs at same speed as a handwritten serializer.</p>
+</section><section id="other-crates" class="slide level2">
+<h2>Other crates</h2>
+<p><code>derive</code> isn't special-cased around <code>Serde</code>; see also e.g. <code>Deisel</code> crate.</p>
+</section><section id="insight" class="slide level2">
+<h2>Insight</h2>
+<p>&quot;Small&quot; language additions can enable huge library/ecosystem wins</p>
+</section></section>
+<section><section id="the-last-of-the-spirits" class="titleslide slide level1"><h1>The Last of the Spirits <!-- (5 min) --></h1></section><section id="irc-2" class="slide level2">
+<h2>IRC</h2>
+<pre class="irc"><code>* epochsyettocome enters the room
+&lt;pnkscrooge&gt; ... aren&#39;t you going to say something?</code></pre>
+</section><section id="graveyard" class="slide level2" data-transition="fade-out">
+<h2>Graveyard</h2>
+<pre class="irc"><code>* epochsyettocome points</code></pre>
+<figure>
+<img src="img/clu-tomb.png" />
+</figure>
+</section><section id="graveyard-1" class="slide level2" data-transition="fade-out">
+<h2>Graveyard</h2>
+<pre class="irc"><code>* epochsyettocome points</code></pre>
+<figure>
+<img src="img/hypertalk-tomb.png" />
+</figure>
+</section><section id="graveyard-2" class="slide level2" data-transition="fade-out">
+<h2>Graveyard</h2>
+<pre class="irc"><code>* epochsyettocome points</code></pre>
+<figure>
+<img src="img/actionscript-tomb.png" />
+</figure>
+</section><section id="graveyard-3" class="slide level2" data-transition="fade-out">
+<h2>Graveyard</h2>
+<pre class="irc"><code>* epochsyettocome points</code></pre>
+<figure>
+<img src="img/fortress-tomb.png" />
+</figure>
+</section><section id="graveyard-4" class="slide level2" data-transition="fade-out">
+<h2>Graveyard</h2>
+<pre class="irc"><code>* epochsyettocome points</code></pre>
+<div class="fragment">
+<figure>
+<img src="img/rust-tomb-1.png" />
+</figure>
+</div>
+</section><section class="slide level2">
+
+<pre class="irc"><code>&lt;pnkscrooge&gt; I can change, and Rust can too!</code></pre>
+</section><section id="footnote-1" class="slide level2">
+<h2>Footnote</h2>
+<p>I am not <em>actually</em> worried about Rust &quot;dying.&quot;</p>
+<ul>
+<li>&quot;Work of Fiction&quot; yadda yadda yadda</li>
+</ul>
+<div class="fragment">
+<p>Our community is super-charged</p>
+<p>and we have &quot;<a href="https://www.rust-lang.org/en-US/friends.html">Friends</a> in High Places&quot;</p>
+</div>
+</section></section>
+<section><section id="the-end-of-it" class="titleslide slide level1"><h1>The End of It <!-- (15 min) --></h1></section><section id="acccepting-change" class="slide level2">
+<h2>Acccepting Change</h2>
+<pre class="irc"><code>&lt;pnkscrooge&gt; Cratchit, I now see: *life* is change!
+&lt;acrichto&gt; ... again, that&#39;s not my name.</code></pre>
+<p>All recognized that this was a <em>new</em> Scrooge, reformed in his thinking (though not his memory)</p>
+<p>Fundamentally different from the man from a year before</p>
+<div class="fragment">
+<p>One might even call him: a Scrooge for 2018</p>
+</div>
+</section><section id="epilogue" class="slide level2">
+<h2>Epilogue</h2>
+<pre class="irc"><code>&lt;aturon&gt; what has pnkscrooge been ranting about?
+&lt;aturon&gt; we aren&#39;t going to break any code</code></pre>
+</section><section id="whats-today-my-fine-fellow" class="slide level2 left_align">
+<h2>What's today, my fine fellow?</h2>
+<p>Already have:</p>
+<ul>
+<li>nightly/stable split</li>
+<li>rapid release cycle, and</li>
+<li>support for deprecation of outdated API's.</li>
+</ul>
+<p>Allow Rust to evolve over time, while keeping old code working</p>
+<div class="fragment">
+<p>However:</p>
+<ul>
+<li><p>insufficient for some kinds of changes.</p></li>
+<li><p>allowed changes come at their own pace; Rust evolves gradually and each release is &quot;a somewhat ho hum affair.&quot;</p></li>
+</ul>
+</div>
+</section><section id="epochery" class="slide level2">
+<h2>Epochery</h2>
+<h3 id="rfc-2052">(<a href="https://github.com/rust-lang/rfcs/blob/master/text/2052-epochs.md">RFC 2052</a>)</h3>
+<p>Rust project will declare an <em>epoch</em> every two or three years</p>
+<p>Each epoch provides</p>
+<ul>
+<li><p>coherent set of new features and APIs, stabilized since last epoch</p></li>
+<li><p>where tooling, docs and stdlib are updated to mesh with new features</p></li>
+</ul>
+</section><section id="having-compatibility-cake-and-eating-it-too" class="slide level2">
+<h2>Having compatibility cake and eating it too</h2>
+<p>Backwards incompatible changes only available if crate <em>opts into</em> epoch in its <code>Cargo.toml</code>, e.g.</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust">epoch = <span class="st">&quot;2019&quot;</span></code></pre></div>
+<p>Otherwise tools assume 2015 epoch.</p>
+<div class="fragment">
+<p>Rust compilers must support all extant epochs</p>
+<p>Crate graph may involve many epochs at once; must be able to link code and preserve semantics.</p>
+<p>Each epoch can introduce hard error <em>only if</em> preceding epoch issued a <em>deprecation</em> warning for same input.</p>
+</div>
+<div class="fragment">
+<h3 id="epochs-do-not-split-ecosystem-nor-do-they-break-existing-code.">Epochs do not split ecosystem, nor do they break existing code.</h3>
+</div>
+</section><section id="epochs-let-us-consider-new-changes" class="slide level2 left_align">
+<h2>Epochs let us <em>consider</em> new changes</h2>
+<ul>
+<li><p><code>catch</code> (currently implemented as <code>do catch</code>)</p></li>
+<li><p>deduce module hierarchy from filesystem</p></li>
+<li><p><code>dyn Trait</code></p></li>
+<li><p>visibility (<code>crate fn foo</code> instead of <code>pub(crate) fn foo</code>)</p></li>
+</ul>
+<div class="fragment">
+<p>Note: epochs will largely focus on syntactic changes</p>
+<ul>
+<li>syntax change <em>can</em> enable semantic change</li>
+<li>still need to link old and new code together with coherent result</li>
+<li>how you read/write code may change, but mental model should not</li>
+</ul>
+</div>
+</section><section id="impl-future-for-rust" class="slide level2">
+<h2>impl Future for Rust</h2>
+<p>None of this can happen without our awesome community!</p>
+<p>We're encouraging everyone (at <em>every</em> level of knowledge) to get involved during our 2017 <code>impl</code>-period. This is the perfect time to dive in and get some mentorship on a bug.</p>
+</section></section>
+<section><section id="change-1" class="titleslide slide level1"><h1>CHANGE</h1></section><section id="conclusion" class="slide level2">
+<h2>Conclusion</h2>
+<p>Don't be like Scrooge <code>{ epoch = 2015 }</code></p>
+<p>(yes, we know change is hard)</p>
+<div class="fragment">
+<p>Be like Scrooge <code>{ epoch = 2018 }</code></p>
+<p>change can be <em>hard fun</em></p>
+</div>
+<div class="fragment">
+<p>lets get <code>impl</code>'ing! (but first we fest!)</p>
+</div>
+</section></section>
+<section><section id="change-2" class="titleslide slide level1"><h1>CHANGE</h1></section></section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Push each slide change to the browser history
+        history: true,
+        // Vertical centering of slides
+        center: true,
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+              { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
