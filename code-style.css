@@ -34,6 +34,7 @@ pre { text-align: left; }
 /* .sourceCode .rust code { color: black; background-color: #f3fff3; display: block } */
 .sourceCode pre.compile_error { color: black; background-color: #f7e8e8; }
 .sourceCode .compile_error code { color: black; background-color: #f7e8e8; }
+.sourceCode .compile_hidden code { color: black; background-color: white; }
 .sourceCode .compile_error code { background-color: brightwhite; }
 .sourceCode .bash { background-color: #F0F0F0; }
 .sourceCode .javascript { background-color: #FFFFFF; }
