@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Felix Klock (@pnkfelix), Mozilla">
+  <title>Rust: Fearless at all Levels</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/mozilla-sandstone.css" id="theme">
+  <link rel="stylesheet" href="slide-style.css"/>
+  <link rel="stylesheet" href="code-style.css"/>
+  <link rel="stylesheet" href="fonts.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+  <h1 class="title">Rust: Fearless at all Levels</h1>
+  <p class="author">Felix Klock (<code>@pnkfelix</code>), Mozilla</p>
+  <p class="date"><kbd class="key">space</kbd>: next slide; <kbd class="key">esc</kbd>: overview; arrows navigate <!-- <a href="http://pnkfx.org/presentations/TODO"><code>LINK TODO</code></a> --></p>
+</section>
+
+<section><section id="what-is-rust" class="titleslide slide level1 center"><h1>What is Rust?</h1></section><section id="what-is-rust-1" class="slide level2 center">
+<h2>What is Rust?</h2>
+<!--
+
+```rust
+#![allow(dead_code, unused_variables)]
+```
+
+-->
+<h3 id="new-programming-language">New programming language</h3>
+<ul>
+<li class="fragment">(... and ecosystem, and development community)</li>
+</ul>
+<h3 id="emphasizing-control-safety-and-speed">Emphasizing control, safety, and speed</h3>
+<ul>
+<li class="fragment">(... <em>especially</em> when it comes to concurrency)</li>
+</ul>
+<h3 id="low-level-hacking-without-fear-of-segfaults-nor-data-races">Low-level hacking without fear of segfaults nor data races</h3>
+<ul>
+<li class="fragment">or more simply: &quot;Hack without Fear&quot;</li>
+</ul>
+</section></section>
+<section><section id="why-use-rust" class="titleslide slide level1 center"><h1>Why use Rust?</h1></section><section id="safety-and-parallelism" class="slide level2 center">
+<h2>Safety and Parallelism</h2>
+<h3 id="safety">Safety</h3>
+<ul>
+<li><p>No segmentation faults</p></li>
+<li><p>No undefined behavior</p></li>
+<li><p>No data races</p></li>
+</ul>
+<h3 id="multi-paradigm-parallelism">(Multi-paradigm) Parallelism</h3>
+<ul>
+<li><p>msg passing via channels</p></li>
+<li><p>shared state (R/W-capabilities controlled via types)</p></li>
+<li><p>use native threads... or scoped threads... or work-stealing...</p></li>
+</ul>
+</section><section id="lets-talk-performance" class="slide level2">
+<h2>Lets talk performance</h2>
+</section></section>
+<section><section id="demo" class="titleslide slide level1 center"><h1>Demo</h1></section><section id="example-sum-of-even-numbers" class="slide level2">
+<h2>Example: Sum of (even) numbers</h2>
+<p>Add even values in an integer range.</p>
+<p>Rust:</p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> do_partial_sum(start: <span class="dt">i64</span>, to_do: <span class="dt">i64</span>) -&gt; <span class="dt">i64</span> <span class="op">{</span>
+    <span class="kw">let</span> <span class="kw">mut</span> result = <span class="dv">0</span>;
+    <span class="kw">for</span> i <span class="kw">in</span> start..(start + to_do) <span class="op">{</span>
+        <span class="kw">if</span> i % <span class="dv">2</span> == <span class="dv">0</span> <span class="op">{</span> result += i; <span class="op">}</span>
+    <span class="op">}</span>
+    result
+<span class="op">}</span></code></pre></div>
+<p>C++:</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int64_t</span> do_partial_sum(<span class="dt">int64_t</span> start, <span class="dt">int64_t</span> to_do) {
+    <span class="dt">int64_t</span> result = <span class="dv">0</span>;
+    <span class="cf">for</span> (<span class="dt">int64_t</span> i = start; i &lt; start + to_do; i++) {
+        <span class="cf">if</span> (i % <span class="dv">2</span> == <span class="dv">0</span>) { result += i; }
+    }
+    <span class="cf">return</span> result;
+}</code></pre></div>
+<p>(avoiding reduction to closed form solution; we're benchmarking!)</p>
+</section></section>
+<section><section id="parallelism" class="titleslide slide level1 center"><h1>Parallelism</h1></section><section id="parallelism-rust-v0" class="slide level2">
+<h2>Parallelism: Rust (v0)</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2015&amp;gist=0db9d9ab7360ee4427599c3f74465bfe">https://bit.ly/2PH9te8</a></p>
+<div class="sourceCode"><pre class="sourceCode rust compile_hidden"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> threads = <span class="dt">Vec</span>::new();
+result = <span class="dv">0</span>;
+<span class="kw">let</span> <span class="kw">mut</span> start = <span class="dv">0</span>;
+<span class="kw">while</span> start &lt; MAX <span class="op">{</span>
+    <span class="kw">let</span> incr = <span class="kw">if</span> each + val &gt; MAX <span class="op">{</span> MAX - val <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span> each <span class="op">}</span>;
+    threads.push(std::thread::spawn(|| <span class="op">{</span>
+        result += do_partial_sum(start, incr);
+    <span class="op">}</span>));
+    start += sum_per_thread;
+<span class="op">}</span>
+<span class="kw">for</span> t <span class="kw">in</span> threads <span class="op">{</span>
+    t.join().unwrap();
+<span class="op">}</span></code></pre></div>
+</section><section id="parallelism-c" class="slide level2">
+<h2>Parallelism: C++</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int64_t</span> each = (MAX + thread_count - <span class="dv">1</span>) / thread_count;
+result = <span class="dv">0</span>;
+<span class="bu">std::</span>vector&lt;<span class="bu">std::</span>thread&gt; threads;
+<span class="cf">for</span> (<span class="dt">int64_t</span> val = <span class="dv">0</span>; val &lt; MAX; val += each) {
+    <span class="dt">int64_t</span> incr = (each + val &gt; MAX) ? (MAX - val) : each;
+    threads.push_back(<span class="bu">std::</span>thread([&amp;, val, incr] () {
+                result += do_partial_sum(val, incr);
+            }));
+}
+<span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; thread_count; i++) {
+    threads[i].join();
+}</code></pre></div>
+</section><section id="lets-try-our-c-code" class="slide level2" data-transition="fade">
+<h2>Let's try our C++ code</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">threads</th>
+<th>average time</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1000</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Four runs, 1 thread</p>
+<pre class="art"><code>.
+.
+.
+.
+.
+.
+.
+.</code></pre>
+</section><section id="lets-try-our-c-code-1" class="slide level2" data-transition="fade">
+<h2>Let's try our C++ code</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">threads</th>
+<th>average time</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1000</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Four runs, 1 thread</p>
+<pre class="art"><code>sum of evens &lt; 2000000000 result: 999999999000000000
+1.08s
+sum of evens &lt; 2000000000 result: 999999999000000000
+1.08s
+sum of evens &lt; 2000000000 result: 999999999000000000
+1.07s
+sum of evens &lt; 2000000000 result: 999999999000000000
+1.07s</code></pre>
+</section><section id="lets-try-our-c-code-2" class="slide level2" data-transition="fade">
+<h2>Let's try our C++ code</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">threads</th>
+<th>average time</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td>1.075s</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1000</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Four runs, 1 thread</p>
+<pre class="art"><code>sum of evens &lt; 2000000000 result: 999999999000000000
+1.08s
+sum of evens &lt; 2000000000 result: 999999999000000000
+1.08s
+sum of evens &lt; 2000000000 result: 999999999000000000
+1.07s
+sum of evens &lt; 2000000000 result: 999999999000000000
+1.07s</code></pre>
+</section><section id="lets-try-our-c-code-3" class="slide level2" data-transition="fade">
+<h2>Let's try our C++ code</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">threads</th>
+<th>average time</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td>1.075s</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1000</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Four runs, 4 threads</p>
+<pre class="art"><code>.
+.
+.
+.
+.
+.
+.
+.</code></pre>
+</section><section id="lets-try-our-c-code-4" class="slide level2" data-transition="fade">
+<h2>Let's try our C++ code</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">threads</th>
+<th>average time</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td>1.075s</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1000</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Four runs, 4 threads</p>
+<pre class="art"><code>sum of evens &lt; 2000000000 result: 999999999000000000
+0.29s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.29s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.29s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.29s</code></pre>
+</section><section id="lets-try-our-c-code-5" class="slide level2" data-transition="fade">
+<h2>Let's try our C++ code</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">threads</th>
+<th>average time</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td>1.075s</td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td>0.290s</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1000</td>
+<td>(TBD)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Four runs, 4 threads</p>
+<pre class="art"><code>sum of evens &lt; 2000000000 result: 999999999000000000
+0.29s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.29s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.29s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.29s</code></pre>
+</section><section id="lets-try-our-c-code-6" class="slide level2" data-transition="fade">
+<h2>Let's try our C++ code</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">threads</th>
+<th>average time</th>
+<th style="text-align: left;">notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td>1.075s</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td>0.290s</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1000</td>
+<td>(TBD)</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<p>Four runs, 1000 threads</p>
+<pre class="art"><code>.
+.
+.
+.
+.
+.
+.
+.</code></pre>
+</section><section id="lets-try-our-c-code-7" class="slide level2" data-transition="fade">
+<h2>Let's try our C++ code</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">threads</th>
+<th>average time</th>
+<th style="text-align: left;">notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td>1.075s</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td>0.290s</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1000</td>
+<td>(TBD)</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<p>Four runs, 1000 threads</p>
+<pre class="art"><code>sum of evens &lt; 2000000000 result: 999999999000000000
+0.29s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.30s
+sum of evens &lt; 2000000000 result: 999598999001000000
+0.29s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.30s</code></pre>
+</section><section id="lets-try-our-c-code-8" class="slide level2" data-transition="fade">
+<h2>Let's try our C++ code</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">threads</th>
+<th style="text-align: left;">average time</th>
+<th style="text-align: left;">notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;"><del>1.075s</del></td>
+<td style="text-align: left;">(but</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;"><del>0.290s</del></td>
+<td style="text-align: left;">its all</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1000</td>
+<td style="text-align: left;"><del>0.295s</del></td>
+<td style="text-align: left;">bogus!)</td>
+</tr>
+</tbody>
+</table>
+<p>Four runs, 1000 threads</p>
+<pre class="art"><code>sum of evens &lt; 2000000000 result: 999999999000000000
+0.29s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.30s
+sum of evens &lt; 2000000000 result: 999598999001000000
+0.29s                                ---------[uh oh]
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.30s</code></pre>
+</section></section>
+<section><section id="data-race" class="titleslide slide level1 center"><h1>Data Race!</h1></section><section id="data-race-1" class="slide level2">
+<h2>Data Race!</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">            threads.push_back(<span class="bu">std::</span>thread([&amp;, val, incr] () {
+                                        <span class="co">// ~</span>
+                        result += do_partial_sum(val, incr);
+                     <span class="co">// ~~~~~~</span>
+                    }));</code></pre></div>
+</section><section id="revisiting-rust-version" class="slide level2" data-transition="fade">
+<h2>Revisiting Rust version</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2015&amp;gist=0db9d9ab7360ee4427599c3f74465bfe">https://bit.ly/2PH9te8</a></p>
+<div class="sourceCode"><pre class="sourceCode rust compile_hidden"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> threads = <span class="dt">Vec</span>::new();
+result = <span class="dv">0</span>;
+<span class="kw">let</span> <span class="kw">mut</span> start = <span class="dv">0</span>;
+<span class="kw">while</span> start &lt; MAX <span class="op">{</span>
+    <span class="kw">let</span> incr = <span class="kw">if</span> each + val &gt; MAX <span class="op">{</span> MAX - val <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span> each <span class="op">}</span>;
+    threads.push(std::thread::spawn(|| <span class="op">{</span>
+        result += do_partial_sum(start, incr);
+    <span class="op">}</span>));
+    start += sum_per_thread;
+<span class="op">}</span>
+<span class="kw">for</span> t <span class="kw">in</span> threads <span class="op">{</span>
+    t.join().unwrap();
+<span class="op">}</span></code></pre></div>
+</section><section id="revisiting-rust-version-1" class="slide level2" data-transition="fade">
+<h2>Revisiting Rust version</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2015&amp;gist=0db9d9ab7360ee4427599c3f74465bfe">https://bit.ly/2PH9te8</a></p>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> threads = <span class="dt">Vec</span>::new();
+result = <span class="dv">0</span>;
+<span class="kw">let</span> <span class="kw">mut</span> start = <span class="dv">0</span>;
+<span class="kw">while</span> start &lt; MAX <span class="op">{</span>
+    <span class="kw">let</span> incr = <span class="kw">if</span> each + val &gt; MAX <span class="op">{</span> MAX - val <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span> each <span class="op">}</span>;
+    threads.push(std::thread::spawn(|| <span class="op">{</span>
+        result += do_partial_sum(start, incr);
+    <span class="op">}</span>));
+    start += sum_per_thread;
+<span class="op">}</span>
+<span class="kw">for</span> t <span class="kw">in</span> threads <span class="op">{</span>
+    t.join().unwrap();
+<span class="op">}</span></code></pre></div>
+</section><section id="why-no-timings-for-rust-version" class="slide level2">
+<h2>Why no timings for Rust version</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2015&amp;gist=0db9d9ab7360ee4427599c3f74465bfe">https://bit.ly/2PH9te8</a></p>
+<pre><code>error[E0373]: closure may outlive the current function, but it 
+      borrows `result`, which is owned by the current function
+  --&gt; partsum/src/v0.rs:47:37
+   |
+47 |     threads.push(std::thread::spawn(|| {
+   |                                     ^^ may outlive borrowed
+   |                                        value `result`
+48 |         result += do_partial_sum(start, incr);
+   |         ------ `result` is borrowed here
+help: to force the closure to take ownership of `result` (and any
+      other referenced variables), use the `move` keyword</code></pre>
+</section></section>
+<section><section id="the-next-version" class="titleslide slide level1"><h1>The next version</h1></section><section id="version-1" class="slide level2">
+<h2>Version 1</h2>
+<p>(our array indexes start at 0)</p>
+</section><section id="lets-try-doing-exactly-what-the-compiler-suggests" class="slide level2">
+<h2>Lets try doing exactly what the compiler suggests</h2>
+</section><section id="parallelism-rust-v1" class="slide level2">
+<h2>Parallelism: Rust, v1</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2018&amp;gist=c52d299c6a182e1518882bd5cdb60094">https://bit.ly/2OuTOC8</a></p>
+<div class="sourceCode"><pre class="sourceCode rust compile_unknown"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> threads = <span class="dt">Vec</span>::new();
+result = <span class="dv">0</span>;
+<span class="kw">let</span> <span class="kw">mut</span> start = <span class="dv">0</span>;
+<span class="kw">while</span> start &lt; MAX <span class="op">{</span>
+    <span class="kw">let</span> incr = <span class="kw">if</span> each + val &gt; MAX <span class="op">{</span> MAX - val <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span> each <span class="op">}</span>;
+    threads.push(std::thread::spawn(<span class="kw">move</span> || <span class="op">{</span> <span class="co">// &lt;-- `move` is new</span>
+        result += do_partial_sum(start, incr);
+    <span class="op">}</span>));
+    start += sum_per_thread;
+<span class="op">}</span>
+<span class="kw">for</span> t <span class="kw">in</span> threads <span class="op">{</span>
+    t.join().unwrap();
+<span class="op">}</span></code></pre></div>
+</section><section id="it-compiles" class="slide level2">
+<h2>It compiles!</h2>
+</section><section id="lets-try-our-rust-code-v1" class="slide level2" data-transition="fade">
+<h2>Let's try our Rust code (v1)</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2018&amp;gist=c52d299c6a182e1518882bd5cdb60094">https://bit.ly/2OuTOC8</a></p>
+<p>Four runs, 1 thread</p>
+<pre class="art"><code>.
+.
+.
+.
+.
+.
+.
+.</code></pre>
+</section><section id="lets-try-our-rust-code-v1-1" class="slide level2" data-transition="fade">
+<h2>Let's try our Rust code (v1)</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2018&amp;gist=c52d299c6a182e1518882bd5cdb60094">https://bit.ly/2OuTOC8</a></p>
+<p>Four runs, 1 thread</p>
+<pre class="art"><code>result: 0
+0.03s
+result: 0
+0.03s
+result: 0
+0.03s
+result: 0
+0.03s</code></pre>
+</section><section id="once-it-compiles-it-works" class="slide level2">
+<h2>&quot;Once it compiles, it works&quot;</h2>
+<div class="fragment">
+<p>Not this time</p>
+<p>(sorry to disappoint)</p>
+<p>Rust will not prove your code correct</p>
+</div>
+</section><section id="what-went-wrong-in-v1" class="slide level2">
+<h2>What went wrong in v1</h2>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> threads = <span class="dt">Vec</span>::new();
+result = <span class="dv">0</span>;
+<span class="kw">let</span> <span class="kw">mut</span> start = <span class="dv">0</span>;
+<span class="kw">while</span> start &lt; MAX <span class="op">{</span>
+    <span class="kw">let</span> incr = <span class="kw">if</span> each + val &gt; MAX <span class="op">{</span> MAX - val <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span> each <span class="op">}</span>;
+    threads.push(std::thread::spawn(<span class="kw">move</span> || <span class="op">{</span> <span class="co">// &lt;-- `move` is new</span>
+        result += do_partial_sum(start, incr); <span class="co">// &lt;-- `result` copied!</span>
+    <span class="op">}</span>));
+    start += sum_per_thread;
+<span class="op">}</span>
+<span class="kw">for</span> t <span class="kw">in</span> threads <span class="op">{</span>
+    t.join().unwrap();
+<span class="op">}</span></code></pre></div>
+</section></section>
+<section><section id="ownership" class="titleslide slide level1"><h1>Ownership</h1></section><section id="rust-types" class="slide level2">
+<h2>Rust types</h2>
+<h4 id="generic-types-bounded-polymorphism">Generic Types, Bounded Polymorphism</h4>
+<!--
+```rust
+use std::ops::Add;
+```
+-->
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> choose&lt;T&gt;(x: T, y: T) -&gt; T <span class="op">{</span> <span class="kw">return</span> x; <span class="op">}</span>
+
+<span class="kw">fn</span> sum&lt;T: Add&gt;(x: T, y: T) -&gt; T::Output <span class="op">{</span> <span class="kw">return</span> x + y; <span class="op">}</span>
+
+<span class="kw">fn</span> sum3&lt;T&gt;(x: T, y: T, z: T) -&gt; T <span class="kw">where</span> T: Add&lt;Output=T&gt; <span class="op">{</span>
+    <span class="kw">return</span> x + y + z;
+<span class="op">}</span></code></pre></div>
+<div class="fragment">
+<p>Type Constructions</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Move</th>
+<th style="text-align: left;">Copy</th>
+<th style="text-align: left;">Copy if <code>T:Copy</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Vec&lt;T&gt;</code>, <code>String</code>, ...</td>
+<td style="text-align: left;"><code>i32</code>, <code>char</code>, ...</td>
+<td style="text-align: left;"><code>[T; n]</code>, <code>(T1,T2,T3)</code>, ...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section><section id="ownership-is-important" class="slide level2">
+<h2>Ownership is important</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Ownership enables:</th>
+<th style="text-align: left;">which removes:</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">RAII-style destructors</td>
+<td style="text-align: left;">a source of memory leaks (or fd leaks, etc)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">no dangling pointers</td>
+<td style="text-align: left;">many resource management bugs</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">no data races</td>
+<td style="text-align: left;">many multithreading heisenbugs</td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<blockquote>
+<p>Do I need to take ownership here, accepting the associated resource management responsibility? Would temporary access suffice?</p>
+</blockquote>
+</div>
+<div class="fragment">
+<p>Good developers ask this already!</p>
+<p>Rust forces function signatures to encode the answers</p>
+<p>(and they are checked by the compiler)</p>
+</div>
+</section></section>
+<section><section id="sharing-data-ownership-and-references" class="titleslide slide level1 center"><h1>Sharing Data: Ownership and References</h1></section><section id="more-rust-types" class="slide level2">
+<h2>More Rust types</h2>
+<p>References to data</p>
+<ul>
+<li><p><code>&amp;mut T</code>, <code>&amp;T</code></p></li>
+<li><p>(plus library reference types: <code>Box&lt;T&gt;</code>, <code>Cow&lt;T&gt;</code>, <code>Rc&lt;T&gt;</code>, ...)</p></li>
+</ul>
+</section></section>
+<section><section id="version-2" class="titleslide slide level1"><h1>Version 2</h1></section><section id="parallelism-rust-v2" class="slide level2">
+<h2>Parallelism: Rust, v2</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2015&amp;gist=8701828c4a6a6756e265b4f4782b918c">https://bit.ly/2Crmsx1</a></p>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> threads = <span class="dt">Vec</span>::new();
+result = <span class="dv">0</span>;
+<span class="kw">let</span> <span class="kw">mut</span> start = <span class="dv">0</span>;
+<span class="kw">while</span> start &lt; MAX <span class="op">{</span>
+    <span class="kw">let</span> result_ptr = &amp;<span class="kw">mut</span> result; <span class="co">// &lt;-- *borrowing* explictly</span>
+    <span class="kw">let</span> incr = <span class="kw">if</span> each + start &gt; MAX <span class="op">{</span> MAX - start <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span> each <span class="op">}</span>;
+    threads.push(std::thread::spawn(<span class="kw">move</span> || <span class="op">{</span>
+        *result_ptr += do_partial_sum(start, incr);
+    <span class="op">}</span>));
+    start += each;
+<span class="op">}</span>
+<span class="kw">for</span> t <span class="kw">in</span> threads <span class="op">{</span>
+    t.join().unwrap();
+<span class="op">}</span></code></pre></div>
+</section><section id="no-go" class="slide level2">
+<h2>No go</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2015&amp;gist=8701828c4a6a6756e265b4f4782b918c">https://bit.ly/2Crmsx1</a></p>
+<pre><code>error[E0597]: `result` does not live long enough
+  --&gt; partsum/src/v2.rs:46:35
+   |
+46 |             let result_ptr = &amp;mut result;
+   |                                   ^^^^^^ borrowed value does not
+   |                                          live long enough
+...
+59 | }
+   | - borrowed value only lives until here
+   |
+   = note: borrowed value must be valid for the static lifetime...</code></pre>
+</section><section id="borrows-cannot-outlive-their-owners" class="slide level2">
+<h2>Borrows cannot outlive their owners</h2>
+<p>and <code>std::thread::spawn</code> creates a thread that may outlive its parent!</p>
+</section><section id="must-threads-do-this" class="slide level2">
+<h2>Must threads do this?</h2>
+<p>Do all threads terminate at arbitrary times?</p>
+</section><section id="alternative-threading-apis" class="slide level2">
+<h2>Alternative threading APIs</h2>
+</section><section id="cargo-and-crates.io" class="slide level2">
+<h2>Cargo and crates.io</h2>
+</section><section id="rayon" class="slide level2">
+<h2>Rayon</h2>
+<p><a href="https://crates.io/crates/rayon" class="uri">https://crates.io/crates/rayon</a></p>
+</section><section id="crossbeam" class="slide level2">
+<h2>Crossbeam</h2>
+<p><a href="https://crates.io/crates/crossbeam" class="uri">https://crates.io/crates/crossbeam</a></p>
+</section></section>
+<section><section id="version-3" class="titleslide slide level1"><h1>Version 3</h1></section><section id="parallelism-rust-v3" class="slide level2">
+<h2>Parallelism: Rust, v3</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2018&amp;gist=ba7788d83b65787e9f94ba17b8d3fbb1">https://bit.ly/2pZOTe4</a></p>
+<div class="sourceCode"><pre class="sourceCode rust compile_error"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> result = <span class="dv">0</span>;
+crossbeam::thread::scope(|the_scope| <span class="op">{</span> <span class="co">// &lt;-- create scope here</span>
+    <span class="kw">let</span> <span class="kw">mut</span> threads = <span class="dt">Vec</span>::new();
+    <span class="kw">let</span> <span class="kw">mut</span> start = <span class="dv">0</span>;
+    <span class="kw">let</span> incr = <span class="kw">if</span> each + start &gt; MAX <span class="op">{</span> MAX - start <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span> each <span class="op">}</span>;
+    <span class="kw">while</span> start &lt; MAX <span class="op">{</span>
+        <span class="kw">let</span> result_ptr = &amp;<span class="kw">mut</span> result; <span class="co">// &lt;-- (still borrowing explicitly)</span>
+        threads.push(the_scope.spawn(<span class="kw">move</span> || <span class="op">{</span>
+            *result_ptr += do_partial_sum(start, incr);
+        <span class="op">}</span>));
+        start += each;
+    <span class="op">}</span>
+    <span class="kw">for</span> t <span class="kw">in</span> threads <span class="op">{</span>
+        t.join().unwrap();
+    <span class="op">}</span> <span class="co">// now we *know* all threads finish while `result` still on stack</span>
+<span class="op">}</span>);</code></pre></div>
+</section><section id="still-no-go" class="slide level2">
+<h2>Still no go</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2018&amp;gist=ba7788d83b65787e9f94ba17b8d3fbb1">https://bit.ly/2pZOTe4</a></p>
+<pre><code>error[E0499]: cannot borrow `result` as mutable more than once at a
+              time
+  --&gt; src/main.rs:24:30
+   |
+24 |    let result_ptr = &amp;mut result;
+   |                     ^^^^^^^^^^^ mutable borrow starts here in
+   |                                 previous iteration of loop</code></pre>
+</section><section id="why-multiple--reference-types" class="slide level2 center">
+<h2>Why multiple <code>&amp;</code>-reference types?</h2>
+<ul>
+<li><p>Distinguish <em>exclusive</em> access from <em>shared</em> access</p></li>
+<li><p>Enables <strong>safe</strong>, <strong>parallel</strong> API's</p></li>
+</ul>
+<div class="fragment">
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Ownership</td>
+<td style="text-align: left;"><code>T</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Exclusive access</td>
+<td style="text-align: left;"><code>&amp;mut T</code></td>
+<td>(&quot;mutable&quot;)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Shared access</td>
+<td style="text-align: left;"><code>&amp;T</code></td>
+<td>(&quot;read-only&quot;)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section><section id="exclusive-access" class="slide level2">
+<h2>Exclusive access</h2>
+<p>Rust does not allow simultaneous mutable borrows of unsynchronized data</p>
+<p>This is usually ensured via static analysis.</p>
+<p>(But some standard library types enforce this rule via dynamic checks.)</p>
+</section><section id="so-what-can-we-do" class="slide level2">
+<h2>So what can we do?</h2>
+<ul>
+<li>In both C++ and in Rust, you can easily eliminate the data race</li>
+</ul>
+<ul>
+<li class="fragment">common approach: can wrap a mutex around <code>result</code></li>
+<li class="fragment">better: use atomic operation (e.g. compare-and-swap, fetch-and-add)</li>
+<li class="fragment">better still: use separate result receiver for each thread, then add those up at end.</li>
+</ul>
+<ul>
+<li><p>Point is: Rust <em>forces</em> you to resolve this bug</p></li>
+<li><p>C++ allows silent, scheduler dependent failure (which may arise only rarely)</p></li>
+</ul>
+</section></section>
+<section><section id="version-4" class="titleslide slide level1"><h1>Version 4</h1></section><section id="parallelism-rust-v4" class="slide level2">
+<h2>Parallelism: Rust, v4</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2018&amp;gist=f5d794c51fb7858469e346ac7a379198">https://bit.ly/2QXsCsq</a></p>
+<div class="sourceCode"><pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">let</span> <span class="kw">mut</span> threads = <span class="dt">Vec</span>::new();
+result = <span class="dv">0</span>;
+<span class="kw">let</span> <span class="kw">mut</span> start = <span class="dv">0</span>;
+<span class="kw">while</span> start &lt; MAX <span class="op">{</span>
+    <span class="kw">let</span> incr = <span class="kw">if</span> each + start &gt; MAX <span class="op">{</span> MAX - start <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span> each <span class="op">}</span>;
+    threads.push(std::thread::spawn(<span class="kw">move</span> || <span class="op">{</span>
+        <span class="kw">return</span> do_partial_sum(start, incr);
+    <span class="op">}</span>));
+    start += each;
+<span class="op">}</span>
+<span class="kw">for</span> t <span class="kw">in</span> threads <span class="op">{</span>
+    <span class="co">// updates result solely on main thread, after each join.</span>
+    result += t.join().unwrap();
+<span class="op">}</span></code></pre></div>
+</section><section id="in-case-of-pedantry" class="slide level2">
+<h2>In case of pedantry</h2>
+</section><section id="rust-timings" class="slide level2">
+<h2>Rust timings</h2>
+<p>play: <a href="https://play.rust-lang.org/?version=beta&amp;mode=release&amp;edition=2018&amp;gist=f5d794c51fb7858469e346ac7a379198">https://bit.ly/2QXsCsq</a></p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">threads</th>
+<th>average time</th>
+<th style="text-align: left;">notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td>0.820s</td>
+<td style="text-align: left;">Slightly faster</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td>0.220s</td>
+<td style="text-align: left;">than earlier C++ code;</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1000</td>
+<td>0.235s</td>
+<td style="text-align: left;">dunno why</td>
+</tr>
+</tbody>
+</table>
+<p>Four runs, 1000 threads</p>
+<pre class="art"><code>sum of evens &lt; 2000000000 result: 999999999000000000
+0.23s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.23s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.24s
+sum of evens &lt; 2000000000 result: 999999999000000000
+0.24s</code></pre>
+</section></section>
+<section><section id="other-cool-stuff" class="titleslide slide level1"><h1>Other cool stuff</h1></section><section id="other-cool-stuff-1" class="slide level2">
+<h2>Other cool stuff</h2>
+<p>Many things in Rust that leverage or extend ownership and borrowing to get fast, flexible, safe code</p>
+<ul>
+<li class="fragment"><code>Send</code> and <code>Sync</code> traits</li>
+</ul>
+<ul>
+<li class="fragment">Lifetimes</li>
+</ul>
+<ul>
+<li class="fragment">Object-orientation via trait-references</li>
+</ul>
+<ul>
+<li class="fragment">Unboxed closures</li>
+</ul>
+<ul>
+<li class="fragment">FFI interop</li>
+</ul>
+</section><section id="growing-community" class="slide level2">
+<h2>Growing community</h2>
+<p>http://rustconf.com/, https://www.rust-belt-rust.com/ (USA)</p>
+<p>https://rustfest.eu/ (EU)</p>
+<p>Rust Paris: https://www.meetup.com/Rust-Paris/</p>
+</section><section id="rust-as-enabler-of-individuals" class="slide level2 big_text center">
+<h2>Rust as enabler of individuals</h2>
+<h3 id="from-mere-script-programmer">From &quot;mere script programmer&quot;</h3>
+<h3 id="to-lauded-systems-hacker">to &quot;lauded systems hacker&quot;</h3>
+<div class="fragment">
+<blockquote>
+<p>Programming in Rust has made me look at C++ code in a whole new light</p>
+</blockquote>
+<aside class="notes">
+I believe experience with Rust will make you a better C++ programmer
+</aside>
+<!--
+
+## Or if you prefer: {.big_text .center}
+
+Enabling *sharing* systems hacking knowledge with everyone
+
+. . .
+
+> After experiencing Rust, I dread looking at code from prior projects ... I will now see how riddled with races it was
+
+. . .
+
+> Programming in Rust has made me look at C++ code in a whole new light
+
+-->
+</div>
+</section><section id="thanks" class="slide level2">
+<h2>Thanks</h2>
+<div class="no_border logo">
+<img src="img/Rust_programming_language_black_logo.svg" />
+<div>
+
+<table>
+<tbody>
+<tr class="odd">
+<td><code>www.rust-lang.org</code></td>
+<td>Hack Without Fear</td>
+</tr>
+</tbody>
+</table>
+</section></section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+              { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
