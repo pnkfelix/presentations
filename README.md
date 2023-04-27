@@ -1,4 +1,4 @@
-present-rust-codemesh2013
+hilt-2022-stable-mir
 =========================
 
-Source for slideshow presentation of Rust at Codemesh 2013
+Source for abstract for HILT 2022
