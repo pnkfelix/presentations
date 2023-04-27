@@ -7,3 +7,6 @@
 [submodule "rustfest-berlin-2016/reveal.js"]
 	path = rustfest-berlin-2016/reveal.js
 	url = https://github.com/pnkfelix/reveal.js
+[submodule "moz-reveal"]
+	path = moz-reveal
+	url = git@github.com:mozilla/Reveal-Mozilla-Theme.git
